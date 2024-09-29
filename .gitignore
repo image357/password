@@ -1,0 +1,11 @@
+/cmake-build-*/
+/build/
+
+/cinterface/*cinterface.h
+/cinterface/*cinterface.a
+/cinterface/*cinterface.def
+/cinterface/*cinterface.exp
+/cinterface/*cinterface.lib
+/cinterface/*cinterface.dll
+/cinterface/*cinterface.exe
+/cinterface/*cinterface
