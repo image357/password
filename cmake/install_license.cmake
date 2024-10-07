@@ -1,0 +1,13 @@
+file(READ "${CMAKE_SOURCE_DIR}/go.mod" GO_MOD_CONTENT)
+configure_file(
+        "${CMAKE_SOURCE_DIR}/cmake/licenseConfig.in"
+        "DEPENDENCY_LICENSE"
+        NEWLINE_STYLE UNIX
+)
+
+install(
+        FILES
+        "${CMAKE_SOURCE_DIR}/LICENSE"
+        "${CMAKE_BINARY_DIR}/DEPENDENCY_LICENSE"
+        DESTINATION "${CMAKE_INSTALL_LIBDIR}/${CMAKE_PROJECT_NAME}-${CMAKE_PROJECT_VERSION}"
+)

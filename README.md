@@ -1,18 +1,18 @@
 # simple-password-manager
 
-Ever needed to have a simple key-value store with an encryption backend to handle your app passwords?
+Ever needed a simple key-value store with an encryption backend to handle your app passwords?
 
 **Look no further!** This is a simple password manger (library) written in Go.
 You can use it with Go, REST calls and any other language that links with C.
 
-And the best of it all: **it's free** - BSD licenced - just don't sue me if you loose your passwords (no pun intended, ha!)
+And the best of it all: **it's free** - BSD licensed - just don't sue me if you loose your passwords (no pun intended, ha!)
 
 
 ## Setup / Build
 
 ### Go
 
-`go mod tidy` automatically fetches the necessary dependencies when you add the import statement in your code (see also: [Go's module support](https://go.dev/wiki/Modules#how-to-use-modules)):
+`go mod tidy` automatically fetches the necessary dependencies when you add the import statement to your code (see also: [Go's module support](https://go.dev/wiki/Modules#how-to-use-modules)):
 ```golang
 import "github.com/image357/password"
 ```
@@ -23,18 +23,27 @@ go get -u github.com/image357/password/...@latest
 
 ### C/C++
 
-You can use `cmake` to build and install the C interface libraries
+You can use `cmake` to build and install the C interface library:
 ```shell
 mkdir build; cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=/full/path/to/install/dir
+cmake -DCMAKE_INSTALL_PREFIX=/full/path/to/install/dir ..
 cmake --build .
 cmake --install .
+```
+
+Then, simply find the installed package in your `CMakeLists.txt`:
+```cmake
+find_package(password)
+message(STATUS "${password_DLL_FILE}")
+
+add_executable(main main.cpp)
+target_link_libraries(main PRIVATE password::cinterface)
 ```
 
 On Windows you will need MinGW to *build* the library.
 This is because [cgo](https://go.dev/wiki/cgo) doesn't support any other compiler backend yet.
 Once compiled, you can *use* the library with any compiler, though.
-You can also have a look at the [release section](https://github.com/image357/password/releases) to see if there are any pre-build binaries for your platform.
+You can also have a look at the [release section](https://github.com/image357/password/releases) to see if there are any pre-built binaries for your platform.
 
 
 ## Usage
@@ -88,7 +97,7 @@ int main() {
     CPWD__Get("myid", buffer, 256);
     printf("%s\n", buffer);
     
-    // start a multi password service on localhost:8080
+    // start a multi password rest service on localhost:8080
     CPWD__StartMultiService(":8080", "/prefix", "storage_key", callback);
     
     // make logging more verbose
@@ -110,7 +119,7 @@ Warning: do not use this service for production use-cases.
 It doesn't have any access control and the storage key hides in [plain sight](./cmd/exampleservice/main.go)!
 
 ### REST
-When you have your REST server running (see above) you can make calls with, e.g., python
+When you have your REST service running (see above) you can make calls with, e.g., python
 ```python
 import requests
 
@@ -246,7 +255,7 @@ Example JSON for REST request:
 Return: {}
 ```
 
-Delete:
+Clean:
 ```text
 Go:   -> password.Clean()
 C/C++ -> CPWD__Clean()

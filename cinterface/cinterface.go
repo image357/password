@@ -10,9 +10,14 @@ import (
 )
 
 /*
+
+#ifdef __cplusplus
+#define _Bool bool
+#else
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
+#include <stdbool.h>
+#endif
 
 #define CPWD__LevelError  8
 #define CPWD__LevelWarn   4
@@ -51,6 +56,11 @@ func CPWD__Overwrite(id *C.cchar_t, password *C.cchar_t, key *C.cchar_t) int {
 //
 //export CPWD__Get
 func CPWD__Get(id *C.cchar_t, key *C.cchar_t, buffer *C.char, length int) int {
+	if buffer == nil {
+		log.Error("CPWD__Get: buffer is nullptr")
+		return -1
+	}
+
 	password, err := pwd.Get(C.GoString(id), C.GoString(key))
 	if err != nil {
 		log.Error("CPWD__Get: Get failed", "error", err)
@@ -75,6 +85,11 @@ func CPWD__Get(id *C.cchar_t, key *C.cchar_t, buffer *C.char, length int) int {
 //
 //export CPWD__Check
 func CPWD__Check(id *C.cchar_t, password *C.cchar_t, key *C.cchar_t, result *C.bool) int {
+	if result == nil {
+		log.Error("CPWD__Check: result is nullptr")
+		return -1
+	}
+
 	check, err := pwd.Check(C.GoString(id), C.GoString(password), C.GoString(key))
 	if err != nil {
 		log.Error("CPWD__Check: Check failed", "error", err)
@@ -121,6 +136,11 @@ func CPWD__Unset(id *C.cchar_t, password *C.cchar_t, key *C.cchar_t) int {
 //
 //export CPWD__List
 func CPWD__List(buffer *C.char, length int, delim *C.cchar_t) int {
+	if buffer == nil {
+		log.Error("CPWD__List: buffer is nullptr")
+		return -1
+	}
+
 	list, err := pwd.List()
 	if err != nil {
 		log.Error("CPWD__List: List failed", "error", err)
@@ -181,6 +201,11 @@ func CPWD__Clean() int {
 //
 //export CPWD__StartSimpleService
 func CPWD__StartSimpleService(bindAddress *C.cchar_t, prefix *C.cchar_t, key *C.cchar_t, callback C.CPWD__TestAccessFunc) int {
+	if callback == nil {
+		log.Error("CPWD__StartSimpleService: callback is nullptr")
+		return -1
+	}
+
 	err := rest.StartSimpleService(C.GoString(bindAddress), C.GoString(prefix), C.GoString(key),
 		func(token string, ip string, resource string, id string) bool {
 			cToken := C.CString(token)
@@ -211,6 +236,11 @@ func CPWD__StartSimpleService(bindAddress *C.cchar_t, prefix *C.cchar_t, key *C.
 //
 //export CPWD__StartMultiService
 func CPWD__StartMultiService(bindAddress *C.cchar_t, prefix *C.cchar_t, key *C.cchar_t, callback C.CPWD__TestAccessFunc) int {
+	if callback == nil {
+		log.Error("CPWD__StartMultiService: callback is nullptr")
+		return -1
+	}
+
 	err := rest.StartMultiService(C.GoString(bindAddress), C.GoString(prefix), C.GoString(key),
 		func(token string, ip string, resource string, id string) bool {
 			cToken := C.CString(token)
@@ -256,6 +286,11 @@ func CPWD__StopService(timeout int) int {
 //
 //export CPWD__NormalizeId
 func CPWD__NormalizeId(id *C.cchar_t, buffer *C.char, length int) int {
+	if buffer == nil {
+		log.Error("CPWD__NormalizeId: buffer is nullptr")
+		return -1
+	}
+
 	s := pwd.NormalizeId(C.GoString(id))
 
 	cs := C.CString(s)
@@ -276,6 +311,11 @@ func CPWD__NormalizeId(id *C.cchar_t, buffer *C.char, length int) int {
 //
 //export CPWD__GetStorePath
 func CPWD__GetStorePath(buffer *C.char, length int) int {
+	if buffer == nil {
+		log.Error("CPWD__GetStorePath: buffer is nullptr")
+		return -1
+	}
+
 	s := pwd.GetStorePath()
 
 	cs := C.CString(s)
@@ -305,6 +345,11 @@ func CPWD__SetStorePath(path *C.cchar_t) {
 //
 //export CPWD__GetFileEnding
 func CPWD__GetFileEnding(buffer *C.char, length int) int {
+	if buffer == nil {
+		log.Error("CPWD__GetFileEnding: buffer is nullptr")
+		return -1
+	}
+
 	s := pwd.GetFileEnding()
 
 	cs := C.CString(s)
@@ -334,6 +379,11 @@ func CPWD__SetFileEnding(ending *C.cchar_t) {
 //
 //export CPWD__FilePath
 func CPWD__FilePath(id *C.cchar_t, buffer *C.char, length int) int {
+	if buffer == nil {
+		log.Error("CPWD__FilePath: buffer is nullptr")
+		return -1
+	}
+
 	s := pwd.FilePath(C.GoString(id))
 
 	cs := C.CString(s)

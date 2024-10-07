@@ -121,7 +121,7 @@ if err != nil {
 func StopService(timeout int) error
 ```
 
-StopService will block execution and try to gracefully shut down any rest service during the timout period. The service is guaranteed to be closed at the end of the timeout.
+StopService will block execution and try to gracefully shut down any rest service during the timeout period. The service is guaranteed to be closed at the end of the timeout.
 
 <a name="TestAccessFunc"></a>
 ## type [TestAccessFunc](<https://github.com/image357/password/blob/main/rest/simple.go#L27>)

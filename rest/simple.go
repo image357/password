@@ -113,7 +113,7 @@ func StartSimpleService(bindAddress string, prefix string, key string, callback 
 	return nil
 }
 
-// StopService will block execution and try to gracefully shut down any rest service during the timout period.
+// StopService will block execution and try to gracefully shut down any rest service during the timeout period.
 // The service is guaranteed to be closed at the end of the timeout.
 func StopService(timeout int) error {
 	if server == nil {

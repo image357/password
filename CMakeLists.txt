@@ -74,6 +74,8 @@ add_custom_command(
         "${DLL_TESTPATH}"
         COMMAND go mod tidy
         COMMAND go build -buildmode=c-shared -o "${DLL_FILEPATH}" "github.com/image357/password/cinterface"
+        COMMAND go build -o "${CMAKE_BINARY_DIR}/" "github.com/image357/password/cmd/patchheader"
+        COMMAND "${CMAKE_BINARY_DIR}/patchheader" "${GIN_FILEPATH}"
         COMMAND ${CMAKE_COMMAND} -E make_directory "${INC_DIR}"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different "${GIN_FILEPATH}" "${INC_FILEPATH}"
         COMMAND ${CMAKE_COMMAND} -E make_directory "${TEST_BINDIR}"
@@ -125,3 +127,4 @@ add_subdirectory(tests/cinterface EXCLUDE_FROM_ALL)
 set(INSTALL_INCLUDEDIR "${CMAKE_BINARY_DIR}/include")
 set(INSTALL_LIB_TARGET ${LIB_NAME})
 include(cmake/install_targets.cmake)
+include(cmake/install_license.cmake)
