@@ -249,7 +249,7 @@ For full documentation visit https://github.com/image357/password/blob/main/docs
 func CPWD__SetFileEnding(ending *C.cchar_t)
 ```
 
-CPWD\_\_SetFileEnding calls password.SetFileEnding and returns 0 on success, \-1 on error.
+CPWD\_\_SetFileEnding calls password.SetFileEnding.
 
 For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
 
@@ -260,7 +260,7 @@ For full documentation visit https://github.com/image357/password/blob/main/docs
 func CPWD__SetStorePath(path *C.cchar_t)
 ```
 
-CPWD\_\_SetStorePath calls password.SetStorePath and returns 0 on success, \-1 on error.
+CPWD\_\_SetStorePath calls password.SetStorePath.
 
 For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
 

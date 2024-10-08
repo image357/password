@@ -329,7 +329,7 @@ func CPWD__GetStorePath(buffer *C.char, length int) int {
 	return 0
 }
 
-// CPWD__SetStorePath calls password.SetStorePath and returns 0 on success, -1 on error.
+// CPWD__SetStorePath calls password.SetStorePath.
 //
 // For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
 //
@@ -363,7 +363,7 @@ func CPWD__GetFileEnding(buffer *C.char, length int) int {
 	return 0
 }
 
-// CPWD__SetFileEnding calls password.SetFileEnding and returns 0 on success, -1 on error.
+// CPWD__SetFileEnding calls password.SetFileEnding.
 //
 // For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
 //

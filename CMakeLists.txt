@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 include(cmake/read_version.cmake)
 
 # options
+option(WITH_TESTS "Enable cinterface tests" OFF)
 
 # start project
 project(password VERSION ${VERSION})
@@ -56,6 +57,9 @@ if (WIN32)
     set(LIB_FILEPATH "${CMAKE_BINARY_DIR}/${LIB_FILE}")
 endif ()
 
+# prepare include directory
+file(MAKE_DIRECTORY "${INC_DIR}")
+
 # custom go build target
 add_custom_target(
         go_build_cinterface ALL
@@ -94,9 +98,6 @@ if (WIN32)
     )
 endif ()
 
-# prepare include directory
-file(MAKE_DIRECTORY "${INC_DIR}")
-
 # create cmake library from custom target
 add_library(${LIB_NAME} SHARED IMPORTED)
 set_property(
@@ -120,8 +121,13 @@ target_include_directories(
 
 add_dependencies(${LIB_NAME} go_build_cinterface)
 
-add_subdirectory(tests/cinterface EXCLUDE_FROM_ALL)
+# tests
+if (WITH_TESTS)
+    add_subdirectory(tests/cinterface EXCLUDE_FROM_ALL)
+endif ()
 
+# docs
+include(cmake/target_autodoc.cmake)
 
 # install routines
 set(INSTALL_INCLUDEDIR "${CMAKE_BINARY_DIR}/include")
