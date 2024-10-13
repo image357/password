@@ -79,11 +79,11 @@ add_custom_command(
         COMMAND go mod tidy
         COMMAND go build -buildmode=c-shared -o "${DLL_FILEPATH}" "github.com/image357/password/cinterface"
         COMMAND go build -o "${CMAKE_BINARY_DIR}/" "github.com/image357/password/cmd/patchheader"
-        COMMAND "${CMAKE_BINARY_DIR}/patchheader" "${GIN_FILEPATH}"
-        COMMAND ${CMAKE_COMMAND} -E make_directory "${INC_DIR}"
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${GIN_FILEPATH}" "${INC_FILEPATH}"
-        COMMAND ${CMAKE_COMMAND} -E make_directory "${TEST_BINDIR}"
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${DLL_FILEPATH}" "${DLL_TESTPATH}"
+        COMMAND "${CMAKE_COMMAND}" -E make_directory "${INC_DIR}"
+        COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${GIN_FILEPATH}" "${INC_FILEPATH}"
+        COMMAND "${CMAKE_BINARY_DIR}/patchheader" "${INC_FILEPATH}"
+        COMMAND "${CMAKE_COMMAND}" -E make_directory "${TEST_BINDIR}"
+        COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${DLL_FILEPATH}" "${DLL_TESTPATH}"
         DEPENDS ${GO_FILES}
 )
 
@@ -126,8 +126,9 @@ if (WITH_TESTS)
     add_subdirectory(tests/cinterface EXCLUDE_FROM_ALL)
 endif ()
 
-# docs
+# other targets
 include(cmake/target_autodoc.cmake)
+include(cmake/target_license.cmake)
 
 # install routines
 set(INSTALL_INCLUDEDIR "${CMAKE_BINARY_DIR}/include")
