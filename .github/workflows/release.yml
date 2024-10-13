@@ -1,0 +1,99 @@
+# This workflow will build release packages
+
+name: Release
+
+on: workflow_dispatch
+
+jobs:
+
+  ubuntu-x64:
+    runs-on: ubuntu-latest
+    steps:
+    - name: git config
+      run: git config --global core.autocrlf input
+    - uses: actions/checkout@v4
+
+    - name: Setup Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: 'stable'
+        
+    - name: Create folders
+      run: |
+        mkdir '${{github.workspace}}/build'
+        mkdir '${{github.workspace}}/install_prefix'
+        
+    - name: Configure
+      run: |
+        cmake -B '${{github.workspace}}/build' -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX='${{github.workspace}}/install_prefix'
+      
+    - name: Build
+      run: |
+        cmake --build '${{github.workspace}}/build'
+
+    - name: Install
+      run: cmake --install '${{github.workspace}}/build'
+
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: ubuntu-x64
+        path: '${{github.workspace}}/install_prefix'
+
+
+
+  windows:
+    strategy:
+      matrix:
+        include:
+          - { sys: mingw64, env: x86_64 }
+          - { sys: mingw32, env: i686 }
+          - { sys: ucrt64,  env: ucrt-x86_64 }
+          
+    runs-on: windows-latest
+    
+    steps:
+    - name: git config
+      run: git config --global core.autocrlf input
+    - uses: actions/checkout@v4
+    
+    - name: Setup MSYS2 x64
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: ${{matrix.sys}}
+        update: true
+        install: >-
+          mingw-w64-${{matrix.env}}-binutils
+          mingw-w64-${{matrix.env}}-tools
+          mingw-w64-${{matrix.env}}-gcc
+          mingw-w64-${{matrix.env}}-go
+          mingw-w64-${{matrix.env}}-cmake
+          mingw-w64-${{matrix.env}}-ninja
+          
+    - name: Create folders
+      run: |
+        mkdir '${{github.workspace}}/build'
+        mkdir '${{github.workspace}}/install_prefix'
+        
+    - name: Configure
+      run: |
+        cmake -B '${{github.workspace}}/build' -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX='${{github.workspace}}/install_prefix'
+      shell: msys2 {0}
+      
+    - name: Build
+      run: |
+        export GOROOT=/${{matrix.sys}}/lib/go
+        export GOPATH=/${{matrix.sys}}
+        cmake --build '${{github.workspace}}/build'
+      shell: msys2 {0}
+
+    - name: Install
+      run: cmake --install '${{github.workspace}}/build'
+      shell: msys2 {0}
+      
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: windows-${{matrix.env}}
+        path: '${{github.workspace}}/install_prefix'
+        

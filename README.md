@@ -1,3 +1,6 @@
+![Go workflow](https://github.com/image357/password/workflows/Go/badge.svg)
+![CMake workflow](https://github.com/image357/password/workflows/CMake/badge.svg)
+
 # simple-password-manager
 
 Ever needed a simple key-value store with an encryption backend to handle your app passwords?

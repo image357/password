@@ -123,7 +123,7 @@ add_dependencies(${LIB_NAME} go_build_cinterface)
 
 # tests
 if (WITH_TESTS)
-    add_subdirectory(tests/cinterface EXCLUDE_FROM_ALL)
+    add_subdirectory(tests/cinterface)
 endif ()
 
 # other targets

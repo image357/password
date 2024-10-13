@@ -1,0 +1,134 @@
+name: CMake
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: git config
+      run: git config --global core.autocrlf input
+      
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        path: main
+        
+    - name: Checkout googletest
+      uses: actions/checkout@v4
+      with:
+        repository: google/googletest
+        path: googletest
+        
+    - name: Setup Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: 'stable'
+        
+    - name: Create folders
+      run: |
+        mkdir '${{github.workspace}}/googletest/build'
+        mkdir '${{github.workspace}}/googletest/install_prefix'
+        mkdir '${{github.workspace}}/main/build'
+        mkdir '${{github.workspace}}/main/install_prefix'
+        
+    - name: Setup googletest
+      run: |
+        cmake -B '${{github.workspace}}/googletest/build' -S '${{github.workspace}}/googletest' -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX='${{github.workspace}}/googletest/install_prefix'
+        cmake --build '${{github.workspace}}/googletest/build'
+        cmake --install '${{github.workspace}}/googletest/build'
+      
+    - name: Configure
+      run: |
+        cmake -B '${{github.workspace}}/main/build' -S '${{github.workspace}}/main' -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX='${{github.workspace}}/main/install_prefix' -DCMAKE_PREFIX_PATH='${{github.workspace}}/googletest/install_prefix' -DWITH_TESTS=TRUE
+      
+    - name: Build
+      run: |
+        cmake --build '${{github.workspace}}/main/build'
+        cmake --build '${{github.workspace}}/main/build' --target go_build_cinterface
+        cmake --build '${{github.workspace}}/main/build' --target go_licenses
+        cmake --build '${{github.workspace}}/main/build' --target cinterface_test
+        cmake --build '${{github.workspace}}/main/build' --target autodoc
+      
+    - name: Test
+      working-directory: '${{github.workspace}}/main/build/tests/cinterface'
+      run: ./cinterface_test
+
+    - name: Install
+      run: cmake --install '${{github.workspace}}/main/build'
+
+
+      
+  windows:
+    runs-on: windows-latest
+    
+    steps:
+    - name: git config
+      run: git config --global core.autocrlf input
+      
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        path: main
+        
+    - name: Checkout googletest
+      uses: actions/checkout@v4
+      with:
+        repository: google/googletest
+        path: googletest
+        
+    - name: Setup MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        update: true
+        install: >-
+          mingw-w64-x86_64-binutils
+          mingw-w64-x86_64-tools
+          mingw-w64-x86_64-gcc
+          mingw-w64-x86_64-go
+          mingw-w64-x86_64-cmake
+          mingw-w64-x86_64-ninja
+          
+    - name: Create folders
+      run: |
+        mkdir '${{github.workspace}}/googletest/build'
+        mkdir '${{github.workspace}}/googletest/install_prefix'
+        mkdir '${{github.workspace}}/main/build'
+        mkdir '${{github.workspace}}/main/install_prefix'
+        
+    - name: Setup googletest
+      run: |
+        cmake -B '${{github.workspace}}/googletest/build' -S '${{github.workspace}}/googletest' -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX='${{github.workspace}}/googletest/install_prefix'
+        cmake --build '${{github.workspace}}/googletest/build'
+        cmake --install '${{github.workspace}}/googletest/build'
+      shell: msys2 {0}
+      
+    - name: Configure
+      run: |
+        cmake -B '${{github.workspace}}/main/build' -S '${{github.workspace}}/main' -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX='${{github.workspace}}/main/install_prefix' -DCMAKE_PREFIX_PATH='${{github.workspace}}/googletest/install_prefix' -DWITH_TESTS=TRUE
+      shell: msys2 {0}
+      
+    - name: Build
+      run: |
+        export GOROOT=/mingw64/lib/go
+        export GOPATH=/mingw64
+        cmake --build '${{github.workspace}}/main/build'
+        cmake --build '${{github.workspace}}/main/build' --target go_build_cinterface
+        cmake --build '${{github.workspace}}/main/build' --target go_licenses
+        cmake --build '${{github.workspace}}/main/build' --target cinterface_test
+        cmake --build '${{github.workspace}}/main/build' --target autodoc
+      shell: msys2 {0}
+      
+    - name: Test
+      working-directory: '${{github.workspace}}/main/build/tests/cinterface'
+      run: ./cinterface_test
+      shell: msys2 {0}
+
+    - name: Install
+      run: cmake --install '${{github.workspace}}/main/build'
+      shell: msys2 {0}
