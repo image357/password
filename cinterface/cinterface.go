@@ -35,6 +35,16 @@ import "C"
 
 func main() {}
 
+// CPWD__ToggleHashPassword will toggle the global config variable password.HashPassword and return the current state.
+//
+// For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
+//
+//export CPWD__ToggleHashPassword
+func CPWD__ToggleHashPassword() bool {
+	pwd.HashPassword = !pwd.HashPassword
+	return pwd.HashPassword
+}
+
 // CPWD__Overwrite calls password.Overwrite and returns 0 on success, -1 on error.
 //
 // For full documentation visit https://github.com/image357/password/blob/main/docs/password.md

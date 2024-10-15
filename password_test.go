@@ -63,6 +63,8 @@ func TestGet(t *testing.T) {
 	}
 	// init
 	SetStorePath("./tests/workdir/Get")
+	oldHashPassword := HashPassword
+	HashPassword = false
 
 	err := Overwrite("foo", "123", "456")
 	if err != nil {
@@ -70,7 +72,7 @@ func TestGet(t *testing.T) {
 	}
 	err = Set("bar", "", "abc", "def")
 	if err != nil {
-		return
+		t.Fatal(err)
 	}
 	err = Overwrite("foobar/baz", "123", "a2c")
 	if err != nil {
@@ -96,6 +98,7 @@ func TestGet(t *testing.T) {
 	}
 
 	// cleanup
+	HashPassword = oldHashPassword
 	err = os.RemoveAll(GetStorePath())
 	if err != nil {
 		t.Fatal(err)
@@ -129,7 +132,7 @@ func TestCheck(t *testing.T) {
 	}
 	err = Set("bar", "", "abc", "def")
 	if err != nil {
-		return
+		t.Fatal(err)
 	}
 	err = Overwrite("foobar/baz", "123", "a2c")
 	if err != nil {
@@ -234,7 +237,7 @@ func TestUnset(t *testing.T) {
 	}
 	err = Set("bar", "", "abc", "def")
 	if err != nil {
-		return
+		t.Fatal(err)
 	}
 	err = Overwrite("foobar/baz", "foobar", "a2c")
 	if err != nil {

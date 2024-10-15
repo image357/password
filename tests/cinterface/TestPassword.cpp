@@ -11,6 +11,11 @@ void TestPassword::SetUp() {
 
     CPWD__SetStorePath(STORAGE_PATH "/cinterface_password");
     CPWD__SetFileEnding("end");
+
+    // set HashPassword to false
+    while (CPWD__ToggleHashPassword()) {
+        // nothing
+    }
 }
 
 void TestPassword::TearDown() {

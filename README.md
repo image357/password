@@ -97,7 +97,7 @@ int main() {
     
     // get password with id
     char buffer[256];
-    CPWD__Get("myid", buffer, 256);
+    CPWD__Get("myid", "storage_key", buffer, 256);
     printf("%s\n", buffer);
     
     // start a multi password rest service on localhost:8080

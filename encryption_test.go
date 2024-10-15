@@ -35,3 +35,34 @@ func Test_encrypt_decrypt(t *testing.T) {
 		})
 	}
 }
+
+func Test_compareHashedPassword(t *testing.T) {
+	type args struct {
+		password string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    bool
+		wantErr bool
+	}{
+		{"success", args{"foo"}, true, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			hashedPassword, err := getHashedPassword(tt.args.password)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("getHashedPassword() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			got, err := compareHashedPassword(hashedPassword, tt.args.password)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("compareHashedPassword() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("compareHashedPassword() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

@@ -5,10 +5,21 @@ import (
 	"os"
 )
 
+// HashPassword signals if passwords will be stored as hashes.
+var HashPassword bool = false
+
 // Overwrite an existing password or create a new one.
 // key is the encryption secret for storage.
 func Overwrite(id string, password string, key string) error {
 	id = NormalizeId(id)
+
+	if HashPassword {
+		hashedPassword, err := getHashedPassword(password)
+		if err != nil {
+			return err
+		}
+		password = hashedPassword
+	}
 
 	encryptedPassword, err := encrypt(password, id+key)
 	if err != nil {
@@ -49,10 +60,17 @@ func Check(id string, password string, key string) (bool, error) {
 		return false, err
 	}
 
-	if decryptedPassword == password {
-		return true, nil
+	var result bool
+	if HashPassword {
+		result, err = compareHashedPassword(decryptedPassword, password)
+		if err != nil {
+			return false, err
+		}
+	} else {
+		result = decryptedPassword == password
 	}
-	return false, nil
+
+	return result, nil
 }
 
 // Set an existing password-id or create a new one.
