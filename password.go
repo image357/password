@@ -67,7 +67,7 @@ func Check(id string, password string, key string) (bool, error) {
 			return false, err
 		}
 	} else {
-		result = decryptedPassword == password
+		result = comparePassword(decryptedPassword, password)
 	}
 
 	return result, nil

@@ -5,13 +5,14 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"crypto/sha256"
+	"crypto/subtle"
 	"encoding/base64"
 	"fmt"
 	"golang.org/x/crypto/argon2"
 	"unicode/utf8"
 )
 
-var saltLength = 32
+const saltLength = 32
 
 // HashFunc is a function signature.
 // The Hash function will be called for password and secret hashing.
@@ -23,8 +24,11 @@ type HashFunc func(data []byte, salt []byte) [32]byte
 // By default, it is set to a variant of argon2.Key.
 var Hash HashFunc = argon2iHash
 
-func sha256Hash(data []byte, _ []byte) [32]byte {
-	return sha256.Sum256(data)
+func sha256Hash(data []byte, salt []byte) [32]byte {
+	temp := make([]byte, 2*saltLength)
+	temp = append(temp, salt...)
+	temp = append(temp, data...)
+	return sha256.Sum256(temp)
 }
 
 const argon2iMemory uint32 = 32
@@ -53,24 +57,34 @@ func getHashedPassword(password string) (string, error) {
 // The input hashedPassword must be base64 encoded.
 func compareHashedPassword(hashedPassword string, password string) (bool, error) {
 	// decode hashed password
-	data, err := base64.StdEncoding.DecodeString(hashedPassword)
+	data1, err := base64.StdEncoding.DecodeString(hashedPassword)
 	if err != nil {
 		return false, err
 	}
 
 	// extract salt
-	if len(data) < saltLength {
+	if len(data1) < saltLength {
 		return false, fmt.Errorf("hashed password is too short")
 	}
-	salt := data[:saltLength]
+	salt := make([]byte, saltLength)
+	copy(salt, data1[:saltLength])
 
 	// hash other password
 	hash := Hash([]byte(password), salt)
-	data = append(salt, hash[:]...)
-	hashedPassword2 := base64.StdEncoding.EncodeToString(data)
+	data2 := append(salt, hash[:]...)
 
-	var result bool = hashedPassword == hashedPassword2
+	// compare
+	result := subtle.ConstantTimeCompare(data1, data2) == 1
+
 	return result, nil
+}
+
+// comparePassword compares two passwords with constant time
+func comparePassword(password1 string, password2 string) bool {
+	hash1 := sha256.Sum256([]byte(password1))
+	hash2 := sha256.Sum256([]byte(password2))
+
+	return subtle.ConstantTimeCompare(hash1[:], hash2[:]) == 1
 }
 
 // encrypt a given text with AES256 and return a base64 representation.
