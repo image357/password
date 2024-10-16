@@ -1,12 +1,14 @@
 package password
 
 import (
+	"fmt"
 	"io/fs"
 	"os"
 	pathlib "path"
 	"path/filepath"
 	"sort"
 	"strings"
+	"unicode/utf8"
 )
 
 var storePath = pathlib.Clean("./password")
@@ -94,11 +96,17 @@ func store(id string, data string) error {
 // retrieve data from an existing file.
 // id is converted to the corresponding filepath.
 func retrieve(id string) (string, error) {
-	file, err := os.ReadFile(FilePath(id))
+	textBytes, err := os.ReadFile(FilePath(id))
 	if err != nil {
 		return "", err
 	}
-	return string(file), nil
+
+	if !utf8.Valid(textBytes) {
+		return "", fmt.Errorf("invalid utf8 character after file reading")
+	}
+	text := string(textBytes)
+
+	return text, nil
 }
 
 // List all stored password-ids.

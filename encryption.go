@@ -8,6 +8,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"golang.org/x/crypto/argon2"
+	"unicode/utf8"
 )
 
 var saltLength = 32
@@ -151,10 +152,15 @@ func decrypt(ciphertext string, secret string) (string, error) {
 	msg := cipherBytes[gcm.NonceSize():]
 
 	// decrypt
-	text, err := gcm.Open(nil, nonce, msg, nil)
+	textBytes, err := gcm.Open(nil, nonce, msg, nil)
 	if err != nil {
 		return "", err
 	}
 
-	return string(text), nil
+	if !utf8.Valid(textBytes) {
+		return "", fmt.Errorf("invalid utf8 character after decrypt")
+	}
+	text := string(textBytes)
+
+	return text, nil
 }

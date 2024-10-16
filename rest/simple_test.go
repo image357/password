@@ -11,6 +11,7 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"unicode/utf8"
 )
 
 func ExampleStartSimpleService() {
@@ -252,6 +253,9 @@ func TestSimpleRestCalls(t *testing.T) {
 			b, err := io.ReadAll(resp.Body)
 			if err != nil {
 				t.Error(err)
+			}
+			if !utf8.Valid(b) {
+				t.Errorf("invalid utf8 character in response body")
 			}
 
 			result := string(b)
