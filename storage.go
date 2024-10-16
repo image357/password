@@ -8,11 +8,16 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 	"unicode/utf8"
 )
 
 var storePath = pathlib.Clean("./password")
 var fileEnding = "pwd"
+
+var storageTree = make(map[string]*sync.Mutex)
+var storageTreeLockCount = make(map[string]int)
+var storageTreeMutex sync.Mutex
 
 // StorageFileMode controls the file permission set by this package.
 var StorageFileMode os.FileMode = 0600
@@ -62,6 +67,46 @@ func FilePath(id string) string {
 	return filepath.FromSlash(pathlib.Join(storePath, id+"."+fileEnding))
 }
 
+// lockId locks a storage id mutex by first locking the storage tree and increasing lock count.
+func lockId(id string) {
+	id = NormalizeId(id)
+	storageTreeMutex.Lock()
+
+	idMutex, ok := storageTree[id]
+	if !ok {
+		idMutex = &sync.Mutex{}
+		storageTree[id] = idMutex
+	}
+	idMutex.Lock()
+	storageTreeLockCount[id]++
+
+	storageTreeMutex.Unlock()
+}
+
+// unlockId locks a storage id mutex by first locking the storage tree and decreasing lock count.
+// The storage tree is cleaned from id if lock count is zero.
+func unlockId(id string) {
+	id = NormalizeId(id)
+	storageTreeMutex.Lock()
+
+	idMutex, ok := storageTree[id]
+	if !ok {
+		delete(storageTree, id)
+		delete(storageTreeLockCount, id)
+		return
+	}
+
+	idMutex.Unlock()
+	storageTreeLockCount[id]--
+
+	if storageTreeLockCount[id] <= 0 {
+		delete(storageTree, id)
+		delete(storageTreeLockCount, id)
+	}
+
+	storageTreeMutex.Unlock()
+}
+
 // store (create/overwrite) the provided data in a file.
 // id is converted to the corresponding filepath.
 // If necessary, subfolders are created.
@@ -75,20 +120,14 @@ func store(id string, data string) error {
 		}
 	}
 
-	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, StorageFileMode)
+	lockId(id)
+	err := os.WriteFile(filePath, []byte(data), StorageFileMode)
 	if err != nil {
+		_ = os.Remove(filePath)
+		unlockId(id)
 		return err
 	}
-
-	_, err = file.WriteString(data)
-	if err != nil {
-		return err
-	}
-
-	err = file.Close()
-	if err != nil {
-		return err
-	}
+	unlockId(id)
 
 	return nil
 }
@@ -96,7 +135,9 @@ func store(id string, data string) error {
 // retrieve data from an existing file.
 // id is converted to the corresponding filepath.
 func retrieve(id string) (string, error) {
+	lockId(id)
 	textBytes, err := os.ReadFile(FilePath(id))
+	unlockId(id)
 	if err != nil {
 		return "", err
 	}
@@ -145,10 +186,13 @@ func List() ([]string, error) {
 
 // Delete an existing password.
 func Delete(id string) error {
+	lockId(id)
 	err := os.Remove(FilePath(id))
+	unlockId(id)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
