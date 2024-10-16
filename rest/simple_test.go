@@ -22,7 +22,7 @@ func ExampleStartSimpleService() {
 	}
 }
 
-func TestStartSimplePasswordService(t *testing.T) {
+func TestStartSimpleService(t *testing.T) {
 	type args struct {
 		bindAddress string
 		prefix      string

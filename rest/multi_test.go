@@ -22,7 +22,7 @@ func ExampleStartMultiService() {
 	}
 }
 
-func TestStartMultiPasswordService(t *testing.T) {
+func TestStartMultiService(t *testing.T) {
 	type args struct {
 		bindAddress string
 		prefix      string

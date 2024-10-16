@@ -116,16 +116,27 @@ func TestCheck(t *testing.T) {
 		args    args
 		want    bool
 		wantErr bool
+		hashed  bool
 	}{
-		{"from Overwrite", args{"foo", "123", "456"}, true, false},
-		{"from Set create", args{"bar", "abc", "def"}, true, false},
-		{"from Set change true", args{"foobar/baz", "foobar", "a2c"}, true, false},
-		{"from Set change false", args{"foobar/baz", "wrong", "a2c"}, false, false},
-		{"invalid id", args{"foobar", "wrong", "a2c"}, false, true},
+		// no hash
+		{"from Overwrite", args{"foo", "123", "456"}, true, false, false},
+		{"from Set create", args{"bar", "abc", "def"}, true, false, false},
+		{"from Set change true", args{"foobar/baz", "foobar", "a2c"}, true, false, false},
+		{"from Set change false", args{"foobar/baz", "wrong", "a2c"}, false, false, false},
+		{"invalid id", args{"foobar", "wrong", "a2c"}, false, true, false},
+
+		// hashed passwords
+		{"from Overwrite with hash", args{"foo_hash", "123", "456"}, true, false, true},
+		{"from Set create with hash", args{"bar_hash", "abc", "def"}, true, false, true},
+		{"from Set change true with hash", args{"foobar/baz_hash", "foobar", "a2c"}, true, false, true},
+		{"from Set change false with hash", args{"foobar/baz_hash", "wrong", "a2c"}, false, false, true},
+		{"invalid id with hash", args{"foobar_hash", "wrong", "a2c"}, false, true, true},
 	}
 	// init
 	SetStorePath("./tests/workdir/Check")
+	oldHashPassword := HashPassword
 
+	HashPassword = false
 	err := Overwrite("foo", "123", "456")
 	if err != nil {
 		t.Fatal(err)
@@ -143,9 +154,28 @@ func TestCheck(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	HashPassword = true
+	err = Overwrite("foo_hash", "123", "456")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = Set("bar_hash", "", "abc", "def")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = Overwrite("foobar/baz_hash", "123", "a2c")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = Set("foobar/baz_hash", "123", "foobar", "a2c")
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	// tests
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			HashPassword = tt.hashed
 			got, err := Check(tt.args.id, tt.args.password, tt.args.key)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Check() error = %v, wantErr %v", err, tt.wantErr)
@@ -158,6 +188,7 @@ func TestCheck(t *testing.T) {
 	}
 
 	// cleanup
+	HashPassword = oldHashPassword
 	err = os.RemoveAll(GetStorePath())
 	if err != nil {
 		t.Fatal(err)
