@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	pwd "github.com/image357/password"
 	"github.com/image357/password/log"
 	"github.com/image357/password/rest"
 	"log/slog"
@@ -18,6 +19,9 @@ func main() {
 		return
 	}
 	log.Level(slog.LevelDebug)
+
+	// enable recovery
+	pwd.EnableRecovery("recovery_key")
 
 	// start rest service
 	err = rest.StartMultiService(":8080", "/prefix", "storage_key", rest.DebugAccessCallback)
