@@ -25,8 +25,8 @@ type HashFunc func(data []byte, salt []byte) [32]byte
 var Hash HashFunc = argon2iHash
 
 func sha256Hash(data []byte, salt []byte) [32]byte {
-	temp := make([]byte, 0, 8*saltLength)
-	temp = append(temp, salt...)
+	temp := make([]byte, 0, len(data)+len(salt))
+	copy(temp, salt)
 	temp = append(temp, data...)
 	return sha256.Sum256(temp)
 }
