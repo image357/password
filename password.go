@@ -21,12 +21,17 @@ func Overwrite(id string, password string, key string) error {
 		password = hashedPassword
 	}
 
-	encryptedPassword, err := encrypt(password, id+key)
+	data, err := packData(id, password)
 	if err != nil {
 		return err
 	}
 
-	err = store(id, encryptedPassword)
+	encryptedData, err := encrypt(data, key)
+	if err != nil {
+		return err
+	}
+
+	err = store(id, encryptedData)
 	if err != nil {
 		return err
 	}
@@ -39,17 +44,25 @@ func Overwrite(id string, password string, key string) error {
 func Get(id string, key string) (string, error) {
 	id = NormalizeId(id)
 
-	encryptedPassword, err := retrieve(id)
+	encryptedData, err := retrieve(id)
 	if err != nil {
 		return "", err
 	}
 
-	decryptedPassword, err := decrypt(encryptedPassword, id+key)
+	decryptedData, err := decrypt(encryptedData, key)
 	if err != nil {
 		return "", err
 	}
 
-	return decryptedPassword, nil
+	storedId, password, err := unpackData(decryptedData)
+	if err != nil {
+		return "", err
+	}
+	if storedId != id {
+		return "", fmt.Errorf("storage id mismatch")
+	}
+
+	return password, nil
 }
 
 // Check an existing password for equality with the provided password.
