@@ -1,8 +1,6 @@
 package password
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"io/fs"
 	"os"
@@ -67,46 +65,6 @@ func SetFileEnding(e string) {
 func FilePath(id string) string {
 	id = NormalizeId(id)
 	return filepath.FromSlash(pathlib.Join(storePath, id+"."+fileEnding))
-}
-
-// packData encodes a given id and data string to json
-func packData(id string, data string) (string, error) {
-	if !utf8.ValidString(data) {
-		return "", fmt.Errorf("invalid utf8 character in packData")
-	}
-
-	temp := new(bytes.Buffer)
-	enc := json.NewEncoder(temp)
-	enc.SetEscapeHTML(false)
-	enc.SetIndent("", "")
-
-	err := enc.Encode(map[string]string{
-		"id":   id,
-		"data": data,
-	})
-	if err != nil {
-		return "", err
-	}
-
-	return strings.ReplaceAll(temp.String(), "\n", ""), nil
-}
-
-// unpackData decodes a given json string to its id and data representation
-func unpackData(input string) (string, string, error) {
-	if !utf8.ValidString(input) {
-		return "", "", fmt.Errorf("invalid utf8 character in unpackData")
-	}
-
-	dec := json.NewDecoder(strings.NewReader(input))
-	dec.DisallowUnknownFields()
-
-	temp := make(map[string]string)
-	err := dec.Decode(&temp)
-	if err != nil {
-		return "", "", err
-	}
-
-	return temp["id"], temp["data"], nil
 }
 
 // lockId locks a storage id mutex by first locking the storage tree and increasing lock count.

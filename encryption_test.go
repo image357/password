@@ -66,3 +66,39 @@ func Test_compareHashedPassword(t *testing.T) {
 		})
 	}
 }
+
+func Test_packData(t *testing.T) {
+	type args struct {
+		id   string
+		data string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"normal", args{"foo", "bar"}, false},
+		{"no escape", args{"foo<>&", "bar<>&"}, false},
+		{"empty", args{"", ""}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := packData(tt.args.id, tt.args.data)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("packData() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			id, data, err := unpackData(got)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("unpackData() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if id != tt.args.id {
+				t.Errorf("packData() got = %v, want %v", id, tt.args.id)
+			}
+			if data != tt.args.data {
+				t.Errorf("packData() got = %v, want %v", data, tt.args.data)
+			}
+		})
+	}
+}
