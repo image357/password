@@ -2,11 +2,29 @@ package password
 
 import (
 	"fmt"
+	"github.com/image357/password/log"
 	"os"
 )
 
 // HashPassword signals if passwords will be stored as hashes.
 var HashPassword bool = false
+
+// withRecovery signals that a recovery key file must be stored alongside passwords.
+var withRecovery bool = false
+
+var recoveryKey string
+
+// EnableRecovery will enforce recovery key file storage alongside passwords.
+func EnableRecovery(key string) {
+	withRecovery = true
+	recoveryKey = key
+}
+
+// DisableRecovery will stop recovery key file storage alongside passwords.
+func DisableRecovery() {
+	withRecovery = false
+	recoveryKey = ""
+}
 
 // Overwrite an existing password or create a new one.
 // key is the encryption secret for storage.
@@ -34,6 +52,28 @@ func Overwrite(id string, password string, key string) error {
 	err = store(id, encryptedData)
 	if err != nil {
 		return err
+	}
+
+	if withRecovery {
+		recoveryId := id + ".recovery"
+
+		data, err = packData(recoveryId, key)
+		if err != nil {
+			log.Warn("cannot store recovery key")
+			return nil
+		}
+
+		encryptedData, err = encrypt(data, recoveryKey)
+		if err != nil {
+			log.Warn("cannot store recovery key")
+			return nil
+		}
+
+		err = store(recoveryId, encryptedData)
+		if err != nil {
+			log.Warn("cannot store recovery key")
+			return nil
+		}
 	}
 
 	return nil

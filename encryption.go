@@ -1,18 +1,22 @@
 package password
 
 import (
+	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
 	"crypto/sha256"
 	"crypto/subtle"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"golang.org/x/crypto/argon2"
+	"strings"
 	"unicode/utf8"
 )
 
 const saltLength = 32
+const entropyBlockLength = 24
 
 // HashFunc is a function signature.
 // The Hash function will be called for password and secret hashing.
@@ -25,8 +29,8 @@ type HashFunc func(data []byte, salt []byte) [32]byte
 var Hash HashFunc = argon2iHash
 
 func sha256Hash(data []byte, salt []byte) [32]byte {
-	temp := make([]byte, 0, 8*saltLength)
-	temp = append(temp, salt...)
+	temp := make([]byte, 0, len(data)+len(salt))
+	copy(temp, salt)
 	temp = append(temp, data...)
 	return sha256.Sum256(temp)
 }
@@ -79,12 +83,91 @@ func compareHashedPassword(hashedPassword string, password string) (bool, error)
 	return result, nil
 }
 
-// comparePassword compares two passwords with constant time
+// comparePassword compares two passwords with constant time.
 func comparePassword(password1 string, password2 string) bool {
 	hash1 := sha256.Sum256([]byte(password1))
 	hash2 := sha256.Sum256([]byte(password2))
 
 	return subtle.ConstantTimeCompare(hash1[:], hash2[:]) == 1
+}
+
+// packData encodes a given id and data string to json with entropy padding.
+func packData(id string, data string) (string, error) {
+	if !utf8.ValidString(id) {
+		return "", fmt.Errorf("invalid utf8 character in packData")
+	}
+	if !utf8.ValidString(data) {
+		return "", fmt.Errorf("invalid utf8 character in packData")
+	}
+
+	entropyLength := 2*entropyBlockLength - (len(data) % entropyBlockLength)
+
+	entropy := make([]byte, entropyLength)
+	_, err := rand.Read(entropy)
+	if err != nil {
+		return "", err
+	}
+
+	entropyAndData := append(entropy, []byte(data)...)
+
+	temp := new(bytes.Buffer)
+	enc := json.NewEncoder(temp)
+	enc.SetEscapeHTML(false)
+	enc.SetIndent("", "")
+
+	err = enc.Encode(map[string]interface{}{
+		"id":     id,
+		"data":   base64.StdEncoding.EncodeToString(entropyAndData),
+		"length": entropyLength,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return strings.ReplaceAll(temp.String(), "\n", ""), nil
+}
+
+// unpackData decodes a given json string to its id and data representation.
+func unpackData(input string) (string, string, error) {
+	if !utf8.ValidString(input) {
+		return "", "", fmt.Errorf("invalid utf8 character in unpackData")
+	}
+
+	dec := json.NewDecoder(strings.NewReader(input))
+	dec.DisallowUnknownFields()
+
+	temp := make(map[string]interface{})
+	err := dec.Decode(&temp)
+	if err != nil {
+		return "", "", err
+	}
+
+	id, ok := temp["id"].(string)
+	if !ok {
+		return "", "", fmt.Errorf("id field not found in unpackData")
+	}
+
+	mixedData, ok := temp["data"].(string)
+	if !ok {
+		return "", "", fmt.Errorf("data field not found in unpackData")
+	}
+
+	length, ok := temp["length"].(float64)
+	if !ok {
+		return "", "", fmt.Errorf("length field not found in unpackData")
+	}
+
+	entropyAndData, err := base64.StdEncoding.DecodeString(mixedData)
+	if err != nil {
+		return "", "", err
+	}
+
+	if !utf8.Valid(entropyAndData[int(length):]) {
+		return "", "", fmt.Errorf("invalid utf8 character in unpackData")
+	}
+	data := string(entropyAndData[int(length):])
+
+	return id, data, nil
 }
 
 // encrypt a given text with AES256 and return a base64 representation.

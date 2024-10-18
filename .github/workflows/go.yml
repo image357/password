@@ -26,6 +26,8 @@ jobs:
       run: go build -v github.com/image357/password/cmd/exampleservice
     - name: Build patchheader
       run: go build -v github.com/image357/password/cmd/patchheader
+    - name: Build recovery tool
+      run: go build -v github.com/image357/password/cmd/recovery
     - name: Build cinterface
       run: go build -buildmode=c-shared -o ./cinterface/ -v github.com/image357/password/cinterface
     - name: Test password

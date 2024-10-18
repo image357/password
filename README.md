@@ -286,7 +286,7 @@ For more info have a look at the [source code](./encryption.go).
 ### Documentation
 For full documentation see: [docs](./docs/README.md)
 
-There are some additional convenience functions in Go and C/C++ that control storage path and logging.
+There are some additional convenience functions in Go and C/C++ that control storage path, logging and recovery mode.
 Additionally, you can just explore the source code with any godoc compatible IDE.
 
 Check it out!
