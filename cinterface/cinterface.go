@@ -45,6 +45,24 @@ func CPWD__ToggleHashPassword() bool {
 	return pwd.HashPassword
 }
 
+// CPWD__EnableRecovery calls password.EnableRecovery.
+//
+// For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
+//
+//export CPWD__EnableRecovery
+func CPWD__EnableRecovery(key *C.cchar_t) {
+	pwd.EnableRecovery(C.GoString(key))
+}
+
+// CPWD__DisableRecovery calls password.DisableRecovery.
+//
+// For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
+//
+//export CPWD__DisableRecovery
+func CPWD__DisableRecovery() {
+	pwd.DisableRecovery()
+}
+
 // CPWD__Overwrite calls password.Overwrite and returns 0 on success, -1 on error.
 //
 // For full documentation visit https://github.com/image357/password/blob/main/docs/password.md

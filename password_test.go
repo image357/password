@@ -60,16 +60,20 @@ func TestGet(t *testing.T) {
 		{"from Set create", args{"Bar", "def"}, "abc", false},
 		{"from Set change", args{"fooBar/Baz", "a2c"}, "foobar", false},
 		{"invalid id", args{"fooBar", "a2c"}, "", true},
+		{"from Overwrite recovery", args{"Foo.recovery", "recovery_key"}, "456", false},
+		{"invalid recovery id", args{"Bar.recovery", "recovery_key"}, "", true},
 	}
 	// init
 	SetStorePath("./tests/workdir/Get")
 	oldHashPassword := HashPassword
 	HashPassword = false
 
+	EnableRecovery("recovery_key")
 	err := Overwrite("foo", "123", "456")
 	if err != nil {
 		t.Fatal(err)
 	}
+	DisableRecovery()
 	err = Set("bar", "", "abc", "def")
 	if err != nil {
 		t.Fatal(err)
