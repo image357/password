@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/image357/password/log"
 	"os"
+	"strings"
 )
 
 // HashPassword signals if passwords will be stored as hashes.
@@ -13,6 +14,9 @@ var HashPassword bool = false
 var withRecovery bool = false
 
 var recoveryKey string
+
+// RecoveryIdSuffix stores the id and file suffix that identifies recovery key files.
+const RecoveryIdSuffix string = ".recovery"
 
 // EnableRecovery will enforce recovery key file storage alongside passwords.
 func EnableRecovery(key string) {
@@ -54,25 +58,12 @@ func Overwrite(id string, password string, key string) error {
 		return err
 	}
 
-	if withRecovery {
-		recoveryId := id + ".recovery"
-
-		data, err = packData(recoveryId, key)
+	if withRecovery && !strings.HasSuffix(id, RecoveryIdSuffix) {
+		// write recovery key file
+		recoveryId := id + RecoveryIdSuffix
+		err = Overwrite(recoveryId, key, recoveryKey)
 		if err != nil {
-			log.Warn("cannot store recovery key")
-			return nil
-		}
-
-		encryptedData, err = encrypt(data, recoveryKey)
-		if err != nil {
-			log.Warn("cannot store recovery key")
-			return nil
-		}
-
-		err = store(recoveryId, encryptedData)
-		if err != nil {
-			log.Warn("cannot store recovery key")
-			return nil
+			log.Warn("cannot write recovery key file", "id", recoveryId)
 		}
 	}
 

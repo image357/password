@@ -25,9 +25,11 @@ func TestOverwrite(t *testing.T) {
 		{"add subfolder", args{"bar/boo/foo", "789", "abc"}, false},
 		{"create mixed slashes", args{"forward/backward\\foo", "123", "456"}, false},
 		{"overwrite mixed slashes", args{"forward\\backward/foo", "abc", "def"}, false},
+		{"stop recurse on recovery", args{"foo" + RecoveryIdSuffix, "123", "456"}, false},
 	}
 	// init
 	SetStorePath("./tests/workdir/Overwrite")
+	EnableRecovery("recovery_key")
 
 	// tests
 	for _, tt := range tests {
@@ -39,6 +41,7 @@ func TestOverwrite(t *testing.T) {
 	}
 
 	// cleanup
+	DisableRecovery()
 	err := os.RemoveAll(GetStorePath())
 	if err != nil {
 		t.Fatal(err)
@@ -60,8 +63,8 @@ func TestGet(t *testing.T) {
 		{"from Set create", args{"Bar", "def"}, "abc", false},
 		{"from Set change", args{"fooBar/Baz", "a2c"}, "foobar", false},
 		{"invalid id", args{"fooBar", "a2c"}, "", true},
-		{"from Overwrite recovery", args{"Foo.recovery", "recovery_key"}, "456", false},
-		{"invalid recovery id", args{"Bar.recovery", "recovery_key"}, "", true},
+		{"from Overwrite recovery", args{"Foo" + RecoveryIdSuffix, "recovery_key"}, "456", false},
+		{"invalid recovery id", args{"Bar" + RecoveryIdSuffix, "recovery_key"}, "", true},
 	}
 	// init
 	SetStorePath("./tests/workdir/Get")

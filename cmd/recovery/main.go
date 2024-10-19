@@ -38,16 +38,16 @@ func main() {
 
 	fileParts := strings.Split(file, ".")
 	if len(fileParts) < 2 {
-		fmt.Println("Error: non password or recovery key file")
+		fmt.Println("Error: <file> is not a password or recovery key file")
 		os.Exit(1)
 	}
 
-	if fileParts[len(fileParts)-2] == "recovery" && len(fileParts) >= 3 {
+	if fileParts[len(fileParts)-2] == pwd.RecoveryIdSuffix[1:] && len(fileParts) >= 3 {
 		passwordFile = strings.Join(fileParts[:len(fileParts)-2], ".") + "." + fileParts[len(fileParts)-1]
 		recoveryFile = file
 	} else {
 		passwordFile = file
-		recoveryFile = strings.Join(fileParts[:len(fileParts)-1], ".") + ".recovery." + fileParts[len(fileParts)-1]
+		recoveryFile = strings.Join(fileParts[:len(fileParts)-1], ".") + pwd.RecoveryIdSuffix + "." + fileParts[len(fileParts)-1]
 	}
 
 	// brute force to get storePath and id
@@ -70,7 +70,8 @@ func main() {
 		pwd.SetStorePath(storePath)
 		pwd.SetFileEnding(fileEnding)
 
-		storageKey, err = pwd.Get(id+".recovery", recoveryKey)
+		recoveryId := id + pwd.RecoveryIdSuffix
+		storageKey, err = pwd.Get(recoveryId, recoveryKey)
 		if err != nil {
 			continue
 		}

@@ -2,6 +2,7 @@
   <configuration default="false" name="go build recovery" type="GoApplicationRunConfiguration" factoryName="Go Application">
     <module name="password" />
     <working_directory value="$PROJECT_DIR$/cmd/recovery" />
+    <parameters value="../exampleservice/password/myid.pwd recovery_key" />
     <kind value="PACKAGE" />
     <package value="github.com/image357/password/cmd/recovery" />
     <directory value="$PROJECT_DIR$" />
