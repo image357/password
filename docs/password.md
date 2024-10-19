@@ -12,9 +12,11 @@ import "github.com/image357/password"
 - [Variables](<#variables>)
 - [func Check\(id string, password string, key string\) \(bool, error\)](<#Check>)
 - [func Clean\(\) error](<#Clean>)
+- [func DecryptOTP\(cipherBytes \[\]byte, secret \[\]byte\) string](<#DecryptOTP>)
 - [func Delete\(id string\) error](<#Delete>)
 - [func DisableRecovery\(\)](<#DisableRecovery>)
 - [func EnableRecovery\(key string\)](<#EnableRecovery>)
+- [func EncryptOTP\(text string\) \(\[\]byte, \[\]byte\)](<#EncryptOTP>)
 - [func FilePath\(id string\) string](<#FilePath>)
 - [func Get\(id string, key string\) \(string, error\)](<#Get>)
 - [func GetFileEnding\(\) string](<#GetFileEnding>)
@@ -58,7 +60,7 @@ var StorageFileMode os.FileMode = 0600
 ```
 
 <a name="Check"></a>
-## func [Check](<https://github.com/image357/password/blob/main/password.go#L101>)
+## func [Check](<https://github.com/image357/password/blob/main/password.go#L107>)
 
 ```go
 func Check(id string, password string, key string) (bool, error)
@@ -75,6 +77,15 @@ func Clean() error
 
 Clean \(delete\) all stored passwords.
 
+<a name="DecryptOTP"></a>
+## func [DecryptOTP](<https://github.com/image357/password/blob/main/encryption.go#L279>)
+
+```go
+func DecryptOTP(cipherBytes []byte, secret []byte) string
+```
+
+DecryptOTP returns the decrypted message from a One\-Time\-Pad \(OTP\) encryption.
+
 <a name="Delete"></a>
 ## func [Delete](<https://github.com/image357/password/blob/main/storage.go#L188>)
 
@@ -85,7 +96,7 @@ func Delete(id string) error
 Delete an existing password.
 
 <a name="DisableRecovery"></a>
-## func [DisableRecovery](<https://github.com/image357/password/blob/main/password.go#L28>)
+## func [DisableRecovery](<https://github.com/image357/password/blob/main/password.go#L29>)
 
 ```go
 func DisableRecovery()
@@ -94,13 +105,22 @@ func DisableRecovery()
 DisableRecovery will stop recovery key file storage alongside passwords.
 
 <a name="EnableRecovery"></a>
-## func [EnableRecovery](<https://github.com/image357/password/blob/main/password.go#L22>)
+## func [EnableRecovery](<https://github.com/image357/password/blob/main/password.go#L23>)
 
 ```go
 func EnableRecovery(key string)
 ```
 
 EnableRecovery will enforce recovery key file storage alongside passwords.
+
+<a name="EncryptOTP"></a>
+## func [EncryptOTP](<https://github.com/image357/password/blob/main/encryption.go#L266>)
+
+```go
+func EncryptOTP(text string) ([]byte, []byte)
+```
+
+EncryptOTP returns a One\-Time\-Pad \(OTP\) encrypted message and its OTP secret.
 
 <a name="FilePath"></a>
 ## func [FilePath](<https://github.com/image357/password/blob/main/storage.go#L65>)
@@ -112,7 +132,7 @@ func FilePath(id string) string
 FilePath returns the storage filepath of a given password\-id with system\-specific path separators. It accepts system\-unspecific or mixed id separators, i.e. forward\- and backward\-slashes are treated as the same character.
 
 <a name="Get"></a>
-## func [Get](<https://github.com/image357/password/blob/main/password.go#L75>)
+## func [Get](<https://github.com/image357/password/blob/main/password.go#L81>)
 
 ```go
 func Get(id string, key string) (string, error)
@@ -157,7 +177,7 @@ func NormalizeId(path string) string
 NormalizeId transforms path to lower case letters and normalizes the path separator
 
 <a name="Overwrite"></a>
-## func [Overwrite](<https://github.com/image357/password/blob/main/password.go#L35>)
+## func [Overwrite](<https://github.com/image357/password/blob/main/password.go#L41>)
 
 ```go
 func Overwrite(id string, password string, key string) error
@@ -166,7 +186,7 @@ func Overwrite(id string, password string, key string) error
 Overwrite an existing password or create a new one. key is the encryption secret for storage.
 
 <a name="Set"></a>
-## func [Set](<https://github.com/image357/password/blob/main/password.go#L123>)
+## func [Set](<https://github.com/image357/password/blob/main/password.go#L129>)
 
 ```go
 func Set(id string, oldPassword string, newPassword string, key string) error
@@ -193,7 +213,7 @@ func SetStorePath(path string)
 SetStorePath accepts a new storage path with system\-unspecific or mixed path separators.
 
 <a name="Unset"></a>
-## func [Unset](<https://github.com/image357/password/blob/main/password.go#L144>)
+## func [Unset](<https://github.com/image357/password/blob/main/password.go#L150>)
 
 ```go
 func Unset(id string, password string, key string) error

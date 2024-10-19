@@ -90,7 +90,7 @@ if err != nil {
 </details>
 
 <a name="StartSimpleService"></a>
-## func [StartSimpleService](<https://github.com/image357/password/blob/main/rest/simple.go#L93>)
+## func [StartSimpleService](<https://github.com/image357/password/blob/main/rest/simple.go#L99>)
 
 ```go
 func StartSimpleService(bindAddress string, prefix string, key string, callback TestAccessFunc) error
@@ -115,7 +115,7 @@ if err != nil {
 </details>
 
 <a name="StopService"></a>
-## func [StopService](<https://github.com/image357/password/blob/main/rest/simple.go#L118>)
+## func [StopService](<https://github.com/image357/password/blob/main/rest/simple.go#L124>)
 
 ```go
 func StopService(timeout int) error
@@ -124,7 +124,7 @@ func StopService(timeout int) error
 StopService will block execution and try to gracefully shut down any rest service during the timeout period. The service is guaranteed to be closed at the end of the timeout.
 
 <a name="TestAccessFunc"></a>
-## type [TestAccessFunc](<https://github.com/image357/password/blob/main/rest/simple.go#L27>)
+## type [TestAccessFunc](<https://github.com/image357/password/blob/main/rest/simple.go#L33>)
 
 TestAccessFunc is a callback signature. The callback will be called by the rest service for every request to determine access based on the accessToken.
 
