@@ -13,7 +13,8 @@ var HashPassword bool = false
 // withRecovery signals that a recovery key file must be stored alongside passwords.
 var withRecovery bool = false
 
-var recoveryKey string
+var recoveryKeyBytes []byte
+var recoveryKeySecret []byte
 
 // RecoveryIdSuffix stores the id and file suffix that identifies recovery key files.
 const RecoveryIdSuffix string = ".recovery"
@@ -21,13 +22,18 @@ const RecoveryIdSuffix string = ".recovery"
 // EnableRecovery will enforce recovery key file storage alongside passwords.
 func EnableRecovery(key string) {
 	withRecovery = true
-	recoveryKey = key
+	recoveryKeyBytes, recoveryKeySecret = EncryptOTP(key)
 }
 
 // DisableRecovery will stop recovery key file storage alongside passwords.
 func DisableRecovery() {
 	withRecovery = false
-	recoveryKey = ""
+	recoveryKeyBytes, recoveryKeySecret = nil, nil
+}
+
+// getRecoveryKey returns the recovery key that was set by EnableRecovery.
+func getRecoveryKey() string {
+	return DecryptOTP(recoveryKeyBytes, recoveryKeySecret)
 }
 
 // Overwrite an existing password or create a new one.
@@ -61,7 +67,7 @@ func Overwrite(id string, password string, key string) error {
 	if withRecovery && !strings.HasSuffix(id, RecoveryIdSuffix) {
 		// write recovery key file
 		recoveryId := id + RecoveryIdSuffix
-		err = Overwrite(recoveryId, key, recoveryKey)
+		err = Overwrite(recoveryId, key, getRecoveryKey())
 		if err != nil {
 			log.Warn("cannot write recovery key file", "id", recoveryId)
 		}

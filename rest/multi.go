@@ -100,7 +100,7 @@ func multiOverwriteCallback(c *gin.Context) {
 		return
 	}
 
-	err = pwd.Overwrite(data.Id, data.Password, storageKey)
+	err = pwd.Overwrite(data.Id, data.Password, getStorageKey())
 	if err != nil {
 		log.Error("rest: Overwrite failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -130,7 +130,7 @@ func multiGetCallback(c *gin.Context) {
 		return
 	}
 
-	password, err := pwd.Get(data.Id, storageKey)
+	password, err := pwd.Get(data.Id, getStorageKey())
 	if err != nil {
 		log.Error("rest: Get failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -160,7 +160,7 @@ func multiCheckCallback(c *gin.Context) {
 		return
 	}
 
-	result, err := pwd.Check(data.Id, data.Password, storageKey)
+	result, err := pwd.Check(data.Id, data.Password, getStorageKey())
 	if err != nil {
 		log.Error("rest: Check failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -190,7 +190,7 @@ func multiSetCallback(c *gin.Context) {
 		return
 	}
 
-	err = pwd.Set(data.Id, data.OldPassword, data.NewPassword, storageKey)
+	err = pwd.Set(data.Id, data.OldPassword, data.NewPassword, getStorageKey())
 	if err != nil {
 		log.Error("rest: Set failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -220,7 +220,7 @@ func multiUnsetCallback(c *gin.Context) {
 		return
 	}
 
-	err = pwd.Unset(data.Id, data.Password, storageKey)
+	err = pwd.Unset(data.Id, data.Password, getStorageKey())
 	if err != nil {
 		log.Error("rest: Unset failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})

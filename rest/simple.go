@@ -20,7 +20,13 @@ const restStoppedLogMsg = "rest: service stopped"
 const restRunningErrMsg = "rest service already running"
 
 var server *http.Server
-var storageKey string
+var storageKeyBytes []byte
+var storageKeySecret []byte
+
+// getStorageKey returns the storage key that was set StartSimpleService or StartMultiService.
+func getStorageKey() string {
+	return pwd.DecryptOTP(storageKeyBytes, storageKeySecret)
+}
 
 // TestAccessFunc is a callback signature.
 // The callback will be called by the rest service for every request to determine access based on the accessToken.
@@ -72,7 +78,7 @@ func setupEngine(bindAddress string, key string, callback TestAccessFunc) (*gin.
 		Handler: engine,
 	}
 
-	storageKey = key
+	storageKeyBytes, storageKeySecret = pwd.EncryptOTP(key)
 	hasAccess = callback
 
 	return engine, nil
@@ -133,7 +139,7 @@ func StopService(timeout int) error {
 	}
 
 	server = nil
-	storageKey = ""
+	storageKeyBytes, storageKeySecret = nil, nil
 	hasAccess = nil
 
 	log.Info(restStoppedLogMsg)
@@ -160,7 +166,7 @@ func simpleOverwriteCallback(c *gin.Context) {
 		return
 	}
 
-	err = pwd.Overwrite(defaultId, data.Password, storageKey)
+	err = pwd.Overwrite(defaultId, data.Password, getStorageKey())
 	if err != nil {
 		log.Error("rest: Overwrite failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -190,7 +196,7 @@ func simpleGetCallback(c *gin.Context) {
 		return
 	}
 
-	password, err := pwd.Get(defaultId, storageKey)
+	password, err := pwd.Get(defaultId, getStorageKey())
 	if err != nil {
 		log.Error("rest: Get failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -220,7 +226,7 @@ func simpleCheckCallback(c *gin.Context) {
 		return
 	}
 
-	result, err := pwd.Check(defaultId, data.Password, storageKey)
+	result, err := pwd.Check(defaultId, data.Password, getStorageKey())
 	if err != nil {
 		log.Error("rest: Check failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -250,7 +256,7 @@ func simpleSetCallback(c *gin.Context) {
 		return
 	}
 
-	err = pwd.Set(defaultId, data.OldPassword, data.NewPassword, storageKey)
+	err = pwd.Set(defaultId, data.OldPassword, data.NewPassword, getStorageKey())
 	if err != nil {
 		log.Error("rest: Set failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -280,7 +286,7 @@ func simpleUnsetCallback(c *gin.Context) {
 		return
 	}
 
-	err = pwd.Unset(defaultId, data.Password, storageKey)
+	err = pwd.Unset(defaultId, data.Password, getStorageKey())
 	if err != nil {
 		log.Error("rest: Unset failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})

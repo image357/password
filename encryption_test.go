@@ -1,6 +1,8 @@
 package password
 
-import "testing"
+import (
+	"testing"
+)
 
 func Test_encrypt_decrypt(t *testing.T) {
 	type args struct {
@@ -31,6 +33,29 @@ func Test_encrypt_decrypt(t *testing.T) {
 			}
 			if got != tt.want {
 				t.Errorf("encrypt() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_EncryptOTP_DecryptOTP(t *testing.T) {
+	type args struct {
+		text string
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{"first", args{"foo"}},
+		{"second", args{"bar"}},
+		{"third", args{"foobar"}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cipherBytes, secret := EncryptOTP(tt.args.text)
+			text := DecryptOTP(cipherBytes, secret)
+			if text != tt.args.text {
+				t.Errorf("encrypt_decrypt() got = %v, want %v", text, tt.args.text)
 			}
 		})
 	}

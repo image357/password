@@ -261,3 +261,26 @@ func decrypt(ciphertext string, secret string) (string, error) {
 
 	return text, nil
 }
+
+// EncryptOTP returns a One-Time-Pad (OTP) encrypted message and its OTP secret.
+func EncryptOTP(text string) ([]byte, []byte) {
+	secret := make([]byte, len(text))
+	_, _ = rand.Read(secret)
+
+	cipherBytes := make([]byte, len(text))
+	for i := 0; i < len(text); i++ {
+		cipherBytes[i] = secret[i] ^ text[i]
+	}
+
+	return cipherBytes, secret
+}
+
+// DecryptOTP returns the decrypted message from a One-Time-Pad (OTP) encryption.
+func DecryptOTP(cipherBytes []byte, secret []byte) string {
+	textBytes := make([]byte, min(len(cipherBytes), len(secret)))
+	for i := 0; i < len(textBytes); i++ {
+		textBytes[i] = cipherBytes[i] ^ secret[i]
+	}
+
+	return string(textBytes)
+}
