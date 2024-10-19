@@ -8,6 +8,7 @@ import "github.com/image357/password"
 
 ## Index
 
+- [Constants](<#constants>)
 - [Variables](<#variables>)
 - [func Check\(id string, password string, key string\) \(bool, error\)](<#Check>)
 - [func Clean\(\) error](<#Clean>)
@@ -27,6 +28,14 @@ import "github.com/image357/password"
 - [func Unset\(id string, password string, key string\) error](<#Unset>)
 - [type HashFunc](<#HashFunc>)
 
+
+## Constants
+
+<a name="RecoveryIdSuffix"></a>RecoveryIdSuffix stores the id and file suffix that identifies recovery key files.
+
+```go
+const RecoveryIdSuffix string = ".recovery"
+```
 
 ## Variables
 
@@ -49,7 +58,7 @@ var StorageFileMode os.FileMode = 0600
 ```
 
 <a name="Check"></a>
-## func [Check](<https://github.com/image357/password/blob/main/password.go#L110>)
+## func [Check](<https://github.com/image357/password/blob/main/password.go#L101>)
 
 ```go
 func Check(id string, password string, key string) (bool, error)
@@ -76,7 +85,7 @@ func Delete(id string) error
 Delete an existing password.
 
 <a name="DisableRecovery"></a>
-## func [DisableRecovery](<https://github.com/image357/password/blob/main/password.go#L24>)
+## func [DisableRecovery](<https://github.com/image357/password/blob/main/password.go#L28>)
 
 ```go
 func DisableRecovery()
@@ -85,7 +94,7 @@ func DisableRecovery()
 DisableRecovery will stop recovery key file storage alongside passwords.
 
 <a name="EnableRecovery"></a>
-## func [EnableRecovery](<https://github.com/image357/password/blob/main/password.go#L18>)
+## func [EnableRecovery](<https://github.com/image357/password/blob/main/password.go#L22>)
 
 ```go
 func EnableRecovery(key string)
@@ -103,7 +112,7 @@ func FilePath(id string) string
 FilePath returns the storage filepath of a given password\-id with system\-specific path separators. It accepts system\-unspecific or mixed id separators, i.e. forward\- and backward\-slashes are treated as the same character.
 
 <a name="Get"></a>
-## func [Get](<https://github.com/image357/password/blob/main/password.go#L84>)
+## func [Get](<https://github.com/image357/password/blob/main/password.go#L75>)
 
 ```go
 func Get(id string, key string) (string, error)
@@ -148,7 +157,7 @@ func NormalizeId(path string) string
 NormalizeId transforms path to lower case letters and normalizes the path separator
 
 <a name="Overwrite"></a>
-## func [Overwrite](<https://github.com/image357/password/blob/main/password.go#L31>)
+## func [Overwrite](<https://github.com/image357/password/blob/main/password.go#L35>)
 
 ```go
 func Overwrite(id string, password string, key string) error
@@ -157,7 +166,7 @@ func Overwrite(id string, password string, key string) error
 Overwrite an existing password or create a new one. key is the encryption secret for storage.
 
 <a name="Set"></a>
-## func [Set](<https://github.com/image357/password/blob/main/password.go#L132>)
+## func [Set](<https://github.com/image357/password/blob/main/password.go#L123>)
 
 ```go
 func Set(id string, oldPassword string, newPassword string, key string) error
@@ -184,7 +193,7 @@ func SetStorePath(path string)
 SetStorePath accepts a new storage path with system\-unspecific or mixed path separators.
 
 <a name="Unset"></a>
-## func [Unset](<https://github.com/image357/password/blob/main/password.go#L153>)
+## func [Unset](<https://github.com/image357/password/blob/main/password.go#L144>)
 
 ```go
 func Unset(id string, password string, key string) error
