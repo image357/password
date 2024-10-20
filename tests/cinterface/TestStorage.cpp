@@ -42,8 +42,8 @@ TEST_F(TestStorage, StorePath) {
     int ret = CPWD__GetStorePath(buffer, 256);
     ASSERT_EQ(ret, 0);
 
-    const char exptected_string[] = "test";
-    std::filesystem::path expected_path(exptected_string);
+    const char expected_string[] = "test";
+    std::filesystem::path expected_path(expected_string);
     auto absolute_expected_path = std::filesystem::absolute(expected_path).make_preferred();
     ASSERT_EQ(std::filesystem::path(buffer), absolute_expected_path);
 
@@ -52,7 +52,7 @@ TEST_F(TestStorage, StorePath) {
     ASSERT_EQ(ret, -1);
 
     // fail: size
-    ret = CPWD__GetStorePath(buffer, strlen(exptected_string));
+    ret = CPWD__GetStorePath(buffer, strlen(expected_string));
     ASSERT_EQ(ret, -1);
 }
 
@@ -88,8 +88,8 @@ TEST_F(TestStorage, FilePath) {
     auto ret = CPWD__FilePath("myid", buffer, 256);
     ASSERT_EQ(ret, 0);
 
-    const char exptected_string[] = "test/myid.end";
-    std::filesystem::path expected_path(exptected_string);
+    const char expected_string[] = "test/myid.end";
+    std::filesystem::path expected_path(expected_string);
     auto absolute_expected_path = std::filesystem::absolute(expected_path).make_preferred();
     ASSERT_EQ(std::filesystem::path(buffer), absolute_expected_path);
 
@@ -98,6 +98,6 @@ TEST_F(TestStorage, FilePath) {
     ASSERT_EQ(ret, -1);
 
     // fail: size
-    ret = CPWD__FilePath("myid", buffer, strlen(exptected_string));
+    ret = CPWD__FilePath("myid", buffer, strlen(expected_string));
     ASSERT_EQ(ret, -1);
 }
