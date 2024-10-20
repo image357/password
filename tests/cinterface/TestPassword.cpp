@@ -16,6 +16,9 @@ void TestPassword::SetUp() {
     while (CPWD__ToggleHashPassword()) {
         // nothing
     }
+
+    // enable recovery
+    CPWD__EnableRecovery("recovery_key");
 }
 
 void TestPassword::TearDown() {
@@ -24,6 +27,9 @@ void TestPassword::TearDown() {
 
     auto ret_remove = std::filesystem::remove_all(STORAGE_PATH "/cinterface_password");
     EXPECT_EQ(ret_remove, 1);
+
+    // disable recovery
+    CPWD__DisableRecovery();
 
     Test::TearDown();
 }
@@ -34,8 +40,8 @@ TEST_F(TestPassword, Overwrite) {
     ASSERT_EQ(ret_overwrite, 0);
 
     // test
-    char buffer[100];
-    ASSERT_EQ(CPWD__Get("foo", "123", buffer, 100), 0);
+    char buffer[256];
+    ASSERT_EQ(CPWD__Get("foo", "123", buffer, 256), 0);
 }
 
 TEST_F(TestPassword, Get) {
@@ -44,13 +50,13 @@ TEST_F(TestPassword, Get) {
     ASSERT_EQ(ret_overwrite, 0);
 
     // success
-    char buffer[100];
-    auto ret_get = CPWD__Get("get1", "123", buffer, 100);
+    char buffer[256];
+    auto ret_get = CPWD__Get("get1", "123", buffer, 256);
     ASSERT_EQ(ret_get, 0);
     ASSERT_STREQ(buffer, "bar");
 
     // fail
-    ret_get = CPWD__Get("get_invalid", "123", buffer, 100);
+    ret_get = CPWD__Get("get_invalid", "123", buffer, 256);
     ASSERT_EQ(ret_get, -1);
 }
 
@@ -60,7 +66,7 @@ TEST_F(TestPassword, GetBufferSize) {
     ASSERT_EQ(ret_overwrite, 0);
 
     // fail
-    char buffer[100];
+    char buffer[256];
     auto ret_get = CPWD__Get("get2", "123", buffer, 3);
     ASSERT_EQ(ret_get, -1);
 
@@ -76,7 +82,7 @@ TEST_F(TestPassword, GetBufferNull) {
     ASSERT_EQ(ret_overwrite, 0);
 
     // fail
-    auto ret_get = CPWD__Get("get3", "123", nullptr, 100);
+    auto ret_get = CPWD__Get("get3", "123", nullptr, 256);
     ASSERT_EQ(ret_get, -1);
 }
 
@@ -122,22 +128,22 @@ TEST_F(TestPassword, Set) {
     // success: change
     auto ret_set = CPWD__Set("set1", "bar", "foo", "123");
     ASSERT_EQ(ret_set, 0);
-    char buffer[100];
-    auto ret_get = CPWD__Get("set1", "123", buffer, 100);
+    char buffer[256];
+    auto ret_get = CPWD__Get("set1", "123", buffer, 256);
     ASSERT_EQ(ret_get, 0);
     ASSERT_STREQ(buffer, "foo");
 
     // fail: change
     ret_set = CPWD__Set("set1", "bar", "foo", "123");
     ASSERT_EQ(ret_set, -1);
-    ret_get = CPWD__Get("set1", "123", buffer, 100);
+    ret_get = CPWD__Get("set1", "123", buffer, 256);
     ASSERT_EQ(ret_get, 0);
     ASSERT_STREQ(buffer, "foo");
 
     // success: create
     ret_set = CPWD__Set("set2", "irrelevant", "foobar", "123");
     ASSERT_EQ(ret_set, 0);
-    ret_get = CPWD__Get("set2", "123", buffer, 100);
+    ret_get = CPWD__Get("set2", "123", buffer, 256);
     ASSERT_EQ(ret_get, 0);
     ASSERT_STREQ(buffer, "foobar");
 }
@@ -152,8 +158,8 @@ TEST_F(TestPassword, Unset) {
     // success: delete
     auto ret_unset = CPWD__Unset("unset1", "bar", "123");
     ASSERT_EQ(ret_unset, 0);
-    char buffer[100];
-    ASSERT_EQ(CPWD__Get("unset1", "123", buffer, 100), -1);
+    char buffer[256];
+    ASSERT_EQ(CPWD__Get("unset1", "123", buffer, 256), -1);
 
     // fail: invalid
     ret_unset = CPWD__Unset("unset1", "bar", "123");
@@ -189,13 +195,14 @@ TEST_F(TestPassword, ListBufferSize) {
     auto ret_overwrite = CPWD__Overwrite("list3", "bar", "123");
     ASSERT_EQ(ret_overwrite, 0);
 
+    const char expected_string[] = "list3;;;list3.recovery";
     // fail
-    char buffer[100];
-    auto ret_list = CPWD__List(buffer, 5, ";;;");
+    char buffer[256];
+    auto ret_list = CPWD__List(buffer, strlen(expected_string), ";;;");
     ASSERT_EQ(ret_list, -1);
 
     // success
-    ret_list = CPWD__List(buffer, 6, ";;;");
+    ret_list = CPWD__List(buffer, strlen(expected_string)+1, ";;;");
     ASSERT_EQ(ret_list, 0);
 }
 
@@ -217,8 +224,8 @@ TEST_F(TestPassword, Delete) {
     // success
     auto ret_delete = CPWD__Delete("delete1");
     ASSERT_EQ(ret_delete, 0);
-    char buffer[100];
-    ASSERT_EQ(CPWD__Get("delete1", "123", buffer, 100), -1);
+    char buffer[256];
+    ASSERT_EQ(CPWD__Get("delete1", "123", buffer, 256), -1);
 
     // fail
     ret_delete = CPWD__Delete("delete1");
@@ -234,7 +241,7 @@ TEST_F(TestPassword, Clean) {
 
     // success
     auto ret_clean = CPWD__Clean();
-    char buffer[100];
-    ASSERT_EQ(CPWD__Get("clean1", "123", buffer, 100), -1);
-    ASSERT_EQ(CPWD__Get("clean2", "123", buffer, 100), -1);
+    char buffer[256];
+    ASSERT_EQ(CPWD__Get("clean1", "123", buffer, 256), -1);
+    ASSERT_EQ(CPWD__Get("clean2", "123", buffer, 256), -1);
 }
