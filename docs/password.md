@@ -69,7 +69,7 @@ func Check(id string, password string, key string) (bool, error)
 Check an existing password for equality with the provided password. key is the encryption secret for storage.
 
 <a name="Clean"></a>
-## func [Clean](<https://github.com/image357/password/blob/main/storage.go#L200>)
+## func [Clean](<https://github.com/image357/password/blob/main/storage.go#L207>)
 
 ```go
 func Clean() error
@@ -87,7 +87,7 @@ func DecryptOTP(cipherBytes []byte, secret []byte) string
 DecryptOTP returns the decrypted message from a One\-Time\-Pad \(OTP\) encryption.
 
 <a name="Delete"></a>
-## func [Delete](<https://github.com/image357/password/blob/main/storage.go#L188>)
+## func [Delete](<https://github.com/image357/password/blob/main/storage.go#L195>)
 
 ```go
 func Delete(id string) error
@@ -123,7 +123,7 @@ func EncryptOTP(text string) ([]byte, []byte)
 EncryptOTP returns a One\-Time\-Pad \(OTP\) encrypted message and its OTP secret.
 
 <a name="FilePath"></a>
-## func [FilePath](<https://github.com/image357/password/blob/main/storage.go#L65>)
+## func [FilePath](<https://github.com/image357/password/blob/main/storage.go#L72>)
 
 ```go
 func FilePath(id string) string
@@ -141,7 +141,7 @@ func Get(id string, key string) (string, error)
 Get an existing password with id. key is the encryption secret for storage.
 
 <a name="GetFileEnding"></a>
-## func [GetFileEnding](<https://github.com/image357/password/blob/main/storage.go#L54>)
+## func [GetFileEnding](<https://github.com/image357/password/blob/main/storage.go#L61>)
 
 ```go
 func GetFileEnding() string
@@ -150,7 +150,7 @@ func GetFileEnding() string
 GetFileEnding returns the current file ending of storage files.
 
 <a name="GetStorePath"></a>
-## func [GetStorePath](<https://github.com/image357/password/blob/main/storage.go#L43>)
+## func [GetStorePath](<https://github.com/image357/password/blob/main/storage.go#L44>)
 
 ```go
 func GetStorePath() string
@@ -159,7 +159,7 @@ func GetStorePath() string
 GetStorePath returns the current storage path with system\-specific path separators.
 
 <a name="List"></a>
-## func [List](<https://github.com/image357/password/blob/main/storage.go#L154>)
+## func [List](<https://github.com/image357/password/blob/main/storage.go#L161>)
 
 ```go
 func List() ([]string, error)
@@ -168,7 +168,7 @@ func List() ([]string, error)
 List all stored password\-ids.
 
 <a name="NormalizeId"></a>
-## func [NormalizeId](<https://github.com/image357/password/blob/main/storage.go#L34>)
+## func [NormalizeId](<https://github.com/image357/password/blob/main/storage.go#L35>)
 
 ```go
 func NormalizeId(path string) string
@@ -195,7 +195,7 @@ func Set(id string, oldPassword string, newPassword string, key string) error
 Set an existing password\-id or create a new one. oldPassword must match the currently stored password. key is the encryption secret for storage.
 
 <a name="SetFileEnding"></a>
-## func [SetFileEnding](<https://github.com/image357/password/blob/main/storage.go#L59>)
+## func [SetFileEnding](<https://github.com/image357/password/blob/main/storage.go#L66>)
 
 ```go
 func SetFileEnding(e string)
@@ -204,7 +204,7 @@ func SetFileEnding(e string)
 SetFileEnding accepts a new file ending for storage files.
 
 <a name="SetStorePath"></a>
-## func [SetStorePath](<https://github.com/image357/password/blob/main/storage.go#L48>)
+## func [SetStorePath](<https://github.com/image357/password/blob/main/storage.go#L49>)
 
 ```go
 func SetStorePath(path string)

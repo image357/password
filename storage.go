@@ -2,6 +2,7 @@ package password
 
 import (
 	"fmt"
+	"github.com/image357/password/log"
 	"io/fs"
 	"os"
 	pathlib "path"
@@ -46,6 +47,12 @@ func GetStorePath() string {
 
 // SetStorePath accepts a new storage path with system-unspecific or mixed path separators.
 func SetStorePath(path string) {
+	temp, err := filepath.Abs(path)
+	if err != nil {
+		log.Warn("cannot resolve absolute storage path - using relative path", "path", path)
+	} else {
+		path = temp
+	}
 	path = normalizeSeparator(path)
 	storePath = pathlib.Clean(path)
 }

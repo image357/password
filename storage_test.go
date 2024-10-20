@@ -93,7 +93,8 @@ func TestGetStorePath(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			SetStorePath(tt.args.path)
-			if got := GetStorePath(); got != tt.want {
+			expected, _ := filepath.Abs(tt.want)
+			if got := GetStorePath(); got != expected {
 				t.Errorf("GetStorePath() = %v, want %v", got, tt.want)
 			}
 		})
@@ -144,7 +145,8 @@ func TestFilePath(t *testing.T) {
 	SetFileEnding("pwd")
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := FilePath(tt.args.id); got != tt.want {
+			expected, _ := filepath.Abs(tt.want)
+			if got := FilePath(tt.args.id); got != expected {
 				t.Errorf("FilePath() = %v, want %v", got, tt.want)
 			}
 		})
