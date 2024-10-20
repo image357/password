@@ -131,6 +131,7 @@ func TestCheck(t *testing.T) {
 		{"from Set change true", args{"foobar/baz", "foobar", "a2c"}, true, false, false},
 		{"from Set change false", args{"foobar/baz", "wrong", "a2c"}, false, false, false},
 		{"invalid id", args{"foobar", "wrong", "a2c"}, false, true, false},
+		{"from Overwrite recovery", args{"foo" + RecoveryIdSuffix, "456", "recovery_key"}, true, false, false},
 
 		// hashed passwords
 		{"from Overwrite with hash", args{"foo_hash", "123", "456"}, true, false, true},
@@ -138,10 +139,12 @@ func TestCheck(t *testing.T) {
 		{"from Set change true with hash", args{"foobar/baz_hash", "foobar", "a2c"}, true, false, true},
 		{"from Set change false with hash", args{"foobar/baz_hash", "wrong", "a2c"}, false, false, true},
 		{"invalid id with hash", args{"foobar_hash", "wrong", "a2c"}, false, true, true},
+		{"from Overwrite with hash recovery", args{"foo_hash" + RecoveryIdSuffix, "456", "recovery_key"}, true, false, true},
 	}
 	// init
 	SetStorePath("./tests/workdir/Check")
 	oldHashPassword := HashPassword
+	EnableRecovery("recovery_key")
 
 	HashPassword = false
 	err := Overwrite("foo", "123", "456")
@@ -195,6 +198,7 @@ func TestCheck(t *testing.T) {
 	}
 
 	// cleanup
+	DisableRecovery()
 	HashPassword = oldHashPassword
 	err = os.RemoveAll(GetStorePath())
 	if err != nil {

@@ -41,7 +41,7 @@ func getRecoveryKey() string {
 func Overwrite(id string, password string, key string) error {
 	id = NormalizeId(id)
 
-	if HashPassword {
+	if HashPassword && !(withRecovery && strings.HasSuffix(id, RecoveryIdSuffix)) {
 		hashedPassword, err := getHashedPassword(password)
 		if err != nil {
 			return err
@@ -111,7 +111,7 @@ func Check(id string, password string, key string) (bool, error) {
 	}
 
 	var result bool
-	if HashPassword {
+	if HashPassword && !(withRecovery && strings.HasSuffix(id, RecoveryIdSuffix)) {
 		result, err = compareHashedPassword(decryptedPassword, password)
 		if err != nil {
 			return false, err
