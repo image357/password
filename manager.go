@@ -24,38 +24,38 @@ type Manager struct {
 
 // NewManager creates a new passwordManager instance and applies basic initialization.
 func NewManager() *Manager {
-	pm := new(Manager)
+	m := new(Manager)
 
-	pm.HashPassword = false
-	pm.withRecovery = false
-	pm.storageBackend = newFileStorage()
+	m.HashPassword = false
+	m.withRecovery = false
+	m.storageBackend = newFileStorage()
 
-	return pm
+	return m
 }
 
 // EnableRecovery will enforce recovery key file storage alongside passwords.
-func (pm *Manager) EnableRecovery(key string) {
-	pm.withRecovery = true
-	pm.recoveryKeyBytes, pm.recoveryKeySecret = EncryptOTP(key)
+func (m *Manager) EnableRecovery(key string) {
+	m.withRecovery = true
+	m.recoveryKeyBytes, m.recoveryKeySecret = EncryptOTP(key)
 }
 
 // DisableRecovery will stop recovery key file storage alongside passwords.
-func (pm *Manager) DisableRecovery() {
-	pm.withRecovery = false
-	pm.recoveryKeyBytes, pm.recoveryKeySecret = nil, nil
+func (m *Manager) DisableRecovery() {
+	m.withRecovery = false
+	m.recoveryKeyBytes, m.recoveryKeySecret = nil, nil
 }
 
 // getRecoveryKey returns the recovery key that was set by EnableRecovery.
-func (pm *Manager) getRecoveryKey() string {
-	return DecryptOTP(pm.recoveryKeyBytes, pm.recoveryKeySecret)
+func (m *Manager) getRecoveryKey() string {
+	return DecryptOTP(m.recoveryKeyBytes, m.recoveryKeySecret)
 }
 
 // Overwrite an existing password or create a new one.
 // key is the encryption secret for storage.
-func (pm *Manager) Overwrite(id string, password string, key string) error {
+func (m *Manager) Overwrite(id string, password string, key string) error {
 	id = NormalizeId(id)
 
-	if pm.HashPassword && !(pm.withRecovery && strings.HasSuffix(id, RecoveryIdSuffix)) {
+	if m.HashPassword && !(m.withRecovery && strings.HasSuffix(id, RecoveryIdSuffix)) {
 		hashedPassword, err := getHashedPassword(password)
 		if err != nil {
 			return err
@@ -73,15 +73,15 @@ func (pm *Manager) Overwrite(id string, password string, key string) error {
 		return err
 	}
 
-	err = pm.storageBackend.Store(id, encryptedData)
+	err = m.storageBackend.Store(id, encryptedData)
 	if err != nil {
 		return err
 	}
 
-	if pm.withRecovery && !strings.HasSuffix(id, RecoveryIdSuffix) {
+	if m.withRecovery && !strings.HasSuffix(id, RecoveryIdSuffix) {
 		// write recovery key file
 		recoveryId := id + RecoveryIdSuffix
-		err = pm.Overwrite(recoveryId, key, pm.getRecoveryKey())
+		err = m.Overwrite(recoveryId, key, m.getRecoveryKey())
 		if err != nil {
 			log.Warn("cannot write recovery key file", "id", recoveryId)
 		}
@@ -92,10 +92,10 @@ func (pm *Manager) Overwrite(id string, password string, key string) error {
 
 // Get an existing password with id.
 // key is the encryption secret for storage.
-func (pm *Manager) Get(id string, key string) (string, error) {
+func (m *Manager) Get(id string, key string) (string, error) {
 	id = NormalizeId(id)
 
-	encryptedData, err := pm.storageBackend.Retrieve(id)
+	encryptedData, err := m.storageBackend.Retrieve(id)
 	if err != nil {
 		return "", err
 	}
@@ -118,14 +118,14 @@ func (pm *Manager) Get(id string, key string) (string, error) {
 
 // Check an existing password for equality with the provided password.
 // key is the encryption secret for storage.
-func (pm *Manager) Check(id string, password string, key string) (bool, error) {
-	decryptedPassword, err := pm.Get(id, key)
+func (m *Manager) Check(id string, password string, key string) (bool, error) {
+	decryptedPassword, err := m.Get(id, key)
 	if err != nil {
 		return false, err
 	}
 
 	var result bool
-	if pm.HashPassword && !(pm.withRecovery && strings.HasSuffix(id, RecoveryIdSuffix)) {
+	if m.HashPassword && !(m.withRecovery && strings.HasSuffix(id, RecoveryIdSuffix)) {
 		result, err = compareHashedPassword(decryptedPassword, password)
 		if err != nil {
 			return false, err
@@ -140,14 +140,14 @@ func (pm *Manager) Check(id string, password string, key string) (bool, error) {
 // Set an existing password-id or create a new one.
 // oldPassword must match the currently stored password.
 // key is the encryption secret for storage.
-func (pm *Manager) Set(id string, oldPassword string, newPassword string, key string) error {
-	exists, err := pm.storageBackend.Exists(id)
+func (m *Manager) Set(id string, oldPassword string, newPassword string, key string) error {
+	exists, err := m.storageBackend.Exists(id)
 	if err != nil {
 		return err
 	}
 
 	if exists {
-		correct, err := pm.Check(id, oldPassword, key)
+		correct, err := m.Check(id, oldPassword, key)
 		if err != nil {
 			return err
 		}
@@ -156,7 +156,7 @@ func (pm *Manager) Set(id string, oldPassword string, newPassword string, key st
 		}
 	}
 
-	err = pm.Overwrite(id, newPassword, key)
+	err = m.Overwrite(id, newPassword, key)
 	if err != nil {
 		return err
 	}
@@ -166,8 +166,8 @@ func (pm *Manager) Set(id string, oldPassword string, newPassword string, key st
 // Unset (delete) an existing password.
 // password must match the currently stored password.
 // key is the encryption secret for storage.
-func (pm *Manager) Unset(id string, password string, key string) error {
-	correct, err := pm.Check(id, password, key)
+func (m *Manager) Unset(id string, password string, key string) error {
+	correct, err := m.Check(id, password, key)
 	if err != nil {
 		return err
 	}
@@ -175,5 +175,25 @@ func (pm *Manager) Unset(id string, password string, key string) error {
 		return fmt.Errorf("password is incorrect")
 	}
 
-	return pm.storageBackend.Delete(id)
+	return m.storageBackend.Delete(id)
+}
+
+// Exists tests if a given id already exists in the storage backend.
+func (m *Manager) Exists(id string) (bool, error) {
+	return m.storageBackend.Exists(id)
+}
+
+// List all stored password-ids.
+func (m *Manager) List() ([]string, error) {
+	return m.storageBackend.List()
+}
+
+// Delete an existing password.
+func (m *Manager) Delete(id string) error {
+	return m.storageBackend.Delete(id)
+}
+
+// Clean (delete) all stored passwords.
+func (m *Manager) Clean() error {
+	return m.storageBackend.Clean()
 }

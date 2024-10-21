@@ -71,20 +71,20 @@ func Unset(id string, password string, key string) error {
 
 // Exists tests if a given id already exists in the storage backend.
 func Exists(id string) (bool, error) {
-	return GetDefaultManager().storageBackend.Exists(id)
+	return GetDefaultManager().Exists(id)
 }
 
 // List all stored password-ids.
 func List() ([]string, error) {
-	return GetDefaultManager().storageBackend.List()
+	return GetDefaultManager().List()
 }
 
 // Delete an existing password.
 func Delete(id string) error {
-	return GetDefaultManager().storageBackend.Delete(id)
+	return GetDefaultManager().Delete(id)
 }
 
 // Clean (delete) all stored passwords.
 func Clean() error {
-	return GetDefaultManager().storageBackend.Clean()
+	return GetDefaultManager().Clean()
 }

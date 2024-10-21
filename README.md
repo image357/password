@@ -229,6 +229,21 @@ Example JSON for REST request:
 Return: {}
 ```
 
+Exists:
+```text
+Go:   -> password.Exists(id string)
+C/C++ -> CPWD__Exists(const char *id, bool *result)
+REST: -> (GET) /prefix/exists
+
+Example JSON for REST request:
+{
+    "accessToken": "my_token"
+    "id": "my_id"
+}
+
+Return: {"result": true/false}
+```
+
 List:
 ```text
 Go:   -> password.List()
