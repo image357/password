@@ -39,6 +39,11 @@ type multiUnsetData struct {
 	Password    string `form:"password" json:"password" xml:"password"  binding:"required"`
 }
 
+type multiExistsData struct {
+	AccessToken string `form:"accessToken" json:"accessToken" xml:"accessToken"  binding:"required"`
+	Id          string `form:"id" json:"id" xml:"id"  binding:"required"`
+}
+
 type multiListData struct {
 	AccessToken string `form:"accessToken" json:"accessToken" xml:"accessToken"  binding:"required"`
 }
@@ -66,6 +71,7 @@ func StartMultiService(bindAddress string, prefix string, key string, callback T
 	engine.GET(pathlib.Join("/", pwd.NormalizeId(prefix), "/check"), multiCheckCallback)
 	engine.PUT(pathlib.Join("/", pwd.NormalizeId(prefix), "/set"), multiSetCallback)
 	engine.DELETE(pathlib.Join("/", pwd.NormalizeId(prefix), "/unset"), multiUnsetCallback)
+	engine.GET(pathlib.Join("/", pwd.NormalizeId(prefix), "/exists"), multiExistsCallback)
 	engine.GET(pathlib.Join("/", pwd.NormalizeId(prefix), "/list"), multiListCallback)
 	engine.DELETE(pathlib.Join("/", pwd.NormalizeId(prefix), "/delete"), multiDeleteCallback)
 	engine.DELETE(pathlib.Join("/", pwd.NormalizeId(prefix), "/clean"), multiCleanCallback)
@@ -228,6 +234,36 @@ func multiUnsetCallback(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{})
+}
+
+func multiExistsCallback(c *gin.Context) {
+	logContext(c)
+
+	var data multiExistsData
+	err := c.ShouldBindJSON(&data)
+	if err != nil {
+		log.Warn(processDataLogMsg, "error", err)
+		c.JSON(http.StatusBadRequest, gin.H{})
+		return
+	}
+
+	ip := c.ClientIP()
+	url := c.Request.URL.String()
+	id := pwd.NormalizeId(data.Id)
+	if !hasAccess(data.AccessToken, ip, url, id) {
+		log.Warn(accessDeniedLogMsg, "ip", ip, "resource", url, "id", id, "token", data.AccessToken)
+		c.JSON(http.StatusForbidden, gin.H{})
+		return
+	}
+
+	result, err := pwd.Exists(data.Id)
+	if err != nil {
+		log.Error("rest: Exists failed", "error", err)
+		c.JSON(http.StatusInternalServerError, gin.H{})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"result": result})
 }
 
 func multiListCallback(c *gin.Context) {

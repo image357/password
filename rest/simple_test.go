@@ -205,6 +205,24 @@ func TestSimpleRestCalls(t *testing.T) {
 			`{"password": "456"}`, `{}`, http.StatusBadRequest,
 		},
 
+		// Exists
+		{
+			"Exists success", http.MethodGet, "http://localhost:8080/prefix/exists", true,
+			`{"accessToken": "abc"}`, `{"result":true}`, http.StatusOK,
+		},
+		{
+			"Exists access denied", http.MethodGet, "http://localhost:8080/prefix/exists", false,
+			`{"accessToken": "abc"}`, `{}`, http.StatusForbidden,
+		},
+		{
+			"Exists bad data", http.MethodGet, "http://localhost:8080/prefix/exists", true,
+			`{"accessToken": abc}`, `{}`, http.StatusBadRequest,
+		},
+		{
+			"Exists missing data", http.MethodGet, "http://localhost:8080/prefix/exists", true,
+			`{}`, `{}`, http.StatusBadRequest,
+		},
+
 		// Delete
 		{
 			"Delete success", http.MethodDelete, "http://localhost:8080/prefix/delete", true,

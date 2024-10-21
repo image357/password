@@ -59,6 +59,10 @@ type simpleUnsetData struct {
 	Password    string `form:"password" json:"password" xml:"password"  binding:"required"`
 }
 
+type simpleExistsData struct {
+	AccessToken string `form:"accessToken" json:"accessToken" xml:"accessToken"  binding:"required"`
+}
+
 type simpleDeleteData struct {
 	AccessToken string `form:"accessToken" json:"accessToken" xml:"accessToken"  binding:"required"`
 }
@@ -107,6 +111,7 @@ func StartSimpleService(bindAddress string, prefix string, key string, callback 
 	engine.GET(pathlib.Join("/", pwd.NormalizeId(prefix), "/check"), simpleCheckCallback)
 	engine.PUT(pathlib.Join("/", pwd.NormalizeId(prefix), "/set"), simpleSetCallback)
 	engine.DELETE(pathlib.Join("/", pwd.NormalizeId(prefix), "/unset"), simpleUnsetCallback)
+	engine.GET(pathlib.Join("/", pwd.NormalizeId(prefix), "/exists"), simpleExistsCallback)
 	engine.DELETE(pathlib.Join("/", pwd.NormalizeId(prefix), "/delete"), simpleDeleteCallback)
 
 	go func() {
@@ -294,6 +299,36 @@ func simpleUnsetCallback(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{})
+}
+
+func simpleExistsCallback(c *gin.Context) {
+	logContext(c)
+
+	var data simpleExistsData
+	err := c.ShouldBindJSON(&data)
+	if err != nil {
+		log.Warn(processDataLogMsg, "error", err)
+		c.JSON(http.StatusBadRequest, gin.H{})
+		return
+	}
+
+	ip := c.ClientIP()
+	url := c.Request.URL.String()
+	id := pwd.NormalizeId(defaultId)
+	if !hasAccess(data.AccessToken, ip, url, id) {
+		log.Warn(accessDeniedLogMsg, "ip", ip, "resource", url, "id", id, "token", data.AccessToken)
+		c.JSON(http.StatusForbidden, gin.H{})
+		return
+	}
+
+	result, err := pwd.Exists(defaultId)
+	if err != nil {
+		log.Error("rest: Exists failed", "error", err)
+		c.JSON(http.StatusInternalServerError, gin.H{})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"result": result})
 }
 
 func simpleDeleteCallback(c *gin.Context) {

@@ -213,6 +213,28 @@ func TestMultiRestCalls(t *testing.T) {
 			`{"id": "someId", "password": "456"}`, `{}`, http.StatusBadRequest,
 		},
 
+		// Exists
+		{
+			"Exists success", http.MethodGet, "http://localhost:8080/prefix/exists", true,
+			`{"accessToken": "abc", "id": "someId"}`, `{"result":true}`, http.StatusOK,
+		},
+		{
+			"Exits invalid id", http.MethodGet, "http://localhost:8080/prefix/exists", true,
+			`{"accessToken": "abc", "id": "someId_not_exists"}`, `{"result":false}`, http.StatusOK,
+		},
+		{
+			"Exists access denied", http.MethodGet, "http://localhost:8080/prefix/exists", false,
+			`{"accessToken": "abc", "id": "someId"}`, `{}`, http.StatusForbidden,
+		},
+		{
+			"Exists bad data", http.MethodGet, "http://localhost:8080/prefix/exists", true,
+			`{"accessToken": abc, "id": "someId"}`, `{}`, http.StatusBadRequest,
+		},
+		{
+			"Exists missing data", http.MethodGet, "http://localhost:8080/prefix/exists", true,
+			`{"id": "someId"}`, `{}`, http.StatusBadRequest,
+		},
+
 		// List
 		{
 			"Overwrite create a", http.MethodPut, "http://localhost:8080/prefix/overwrite", true,
