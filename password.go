@@ -20,6 +20,12 @@ func SetDefaultManager(manager *Manager) {
 	Managers["default"] = manager
 }
 
+// RegisterDefaultManager will register the current default password manger under the identifier and set a new default manager.
+func RegisterDefaultManager(identifier string) {
+	Managers[identifier] = GetDefaultManager()
+	SetDefaultManager(NewManager())
+}
+
 // ToggleHashPassword will toggle config variable HashPassword of the default password manager and return the current state.
 func ToggleHashPassword() bool {
 	m := GetDefaultManager()

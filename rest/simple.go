@@ -100,20 +100,32 @@ func logContext(c *gin.Context) {
 // StartSimpleService creates a single password rest service.
 // The service binds to "/prefix/overwrite" (PUT), "/prefix/get" (GET), "/prefix/check" (GET), "/prefix/set" (PUT), "/prefix/unset" (DELETE), "/prefix/delete" (DELETE).
 // The callback of type TestAccessFunc will be called for every request to determine access.
-// Warning: calling this function will reset the default password manager.
+// Warning: calling this function will reset the default password manager and register the current one as "rest manger: bindAddress/prefix".
 func StartSimpleService(bindAddress string, prefix string, key string, callback TestAccessFunc) error {
 	engine, err := setupEngine(bindAddress, key, callback)
 	if err != nil {
 		return err
 	}
 
-	engine.PUT(pathlib.Join("/", pwd.NormalizeId(prefix), "/overwrite"), simpleOverwriteCallback)
-	engine.GET(pathlib.Join("/", pwd.NormalizeId(prefix), "/get"), simpleGetCallback)
-	engine.GET(pathlib.Join("/", pwd.NormalizeId(prefix), "/check"), simpleCheckCallback)
-	engine.PUT(pathlib.Join("/", pwd.NormalizeId(prefix), "/set"), simpleSetCallback)
-	engine.DELETE(pathlib.Join("/", pwd.NormalizeId(prefix), "/unset"), simpleUnsetCallback)
-	engine.GET(pathlib.Join("/", pwd.NormalizeId(prefix), "/exists"), simpleExistsCallback)
-	engine.DELETE(pathlib.Join("/", pwd.NormalizeId(prefix), "/delete"), simpleDeleteCallback)
+	// inject current default manager into callbacks
+	m := pwd.GetDefaultManager()
+	localOverwriteCallback := func(c *gin.Context) { simpleOverwriteCallback(c, m) }
+	localGetCallback := func(c *gin.Context) { simpleGetCallback(c, m) }
+	localCheckCallback := func(c *gin.Context) { simpleCheckCallback(c, m) }
+	localSetCallback := func(c *gin.Context) { simpleSetCallback(c, m) }
+	localUnsetCallback := func(c *gin.Context) { simpleUnsetCallback(c, m) }
+	localExistsCallback := func(c *gin.Context) { simpleExistsCallback(c, m) }
+	localDeleteCallback := func(c *gin.Context) { simpleDeleteCallback(c, m) }
+	pwd.RegisterDefaultManager("rest manager: " + pathlib.Join(bindAddress+"/"+prefix))
+
+	// setup rest endpoints
+	engine.PUT(pathlib.Join("/", pwd.NormalizeId(prefix), "/overwrite"), localOverwriteCallback)
+	engine.GET(pathlib.Join("/", pwd.NormalizeId(prefix), "/get"), localGetCallback)
+	engine.GET(pathlib.Join("/", pwd.NormalizeId(prefix), "/check"), localCheckCallback)
+	engine.PUT(pathlib.Join("/", pwd.NormalizeId(prefix), "/set"), localSetCallback)
+	engine.DELETE(pathlib.Join("/", pwd.NormalizeId(prefix), "/unset"), localUnsetCallback)
+	engine.GET(pathlib.Join("/", pwd.NormalizeId(prefix), "/exists"), localExistsCallback)
+	engine.DELETE(pathlib.Join("/", pwd.NormalizeId(prefix), "/delete"), localDeleteCallback)
 
 	go func() {
 		log.Info(restStartedLogMsg, "addr", bindAddress, "prefix", prefix, "type", "simple")
@@ -152,7 +164,7 @@ func StopService(timeout int) error {
 	return nil
 }
 
-func simpleOverwriteCallback(c *gin.Context) {
+func simpleOverwriteCallback(c *gin.Context, m *pwd.Manager) {
 	logContext(c)
 
 	var data simpleOverwriteData
@@ -172,7 +184,7 @@ func simpleOverwriteCallback(c *gin.Context) {
 		return
 	}
 
-	err = pwd.Overwrite(defaultId, data.Password, getStorageKey())
+	err = m.Overwrite(defaultId, data.Password, getStorageKey())
 	if err != nil {
 		log.Error("rest: Overwrite failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -182,7 +194,7 @@ func simpleOverwriteCallback(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
-func simpleGetCallback(c *gin.Context) {
+func simpleGetCallback(c *gin.Context, m *pwd.Manager) {
 	logContext(c)
 
 	var data simpleGetData
@@ -202,7 +214,7 @@ func simpleGetCallback(c *gin.Context) {
 		return
 	}
 
-	password, err := pwd.Get(defaultId, getStorageKey())
+	password, err := m.Get(defaultId, getStorageKey())
 	if err != nil {
 		log.Error("rest: Get failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -212,7 +224,7 @@ func simpleGetCallback(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"password": password})
 }
 
-func simpleCheckCallback(c *gin.Context) {
+func simpleCheckCallback(c *gin.Context, m *pwd.Manager) {
 	logContext(c)
 
 	var data simpleCheckData
@@ -232,7 +244,7 @@ func simpleCheckCallback(c *gin.Context) {
 		return
 	}
 
-	result, err := pwd.Check(defaultId, data.Password, getStorageKey())
+	result, err := m.Check(defaultId, data.Password, getStorageKey())
 	if err != nil {
 		log.Error("rest: Check failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -242,7 +254,7 @@ func simpleCheckCallback(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"result": result})
 }
 
-func simpleSetCallback(c *gin.Context) {
+func simpleSetCallback(c *gin.Context, m *pwd.Manager) {
 	logContext(c)
 
 	var data simpleSetData
@@ -262,7 +274,7 @@ func simpleSetCallback(c *gin.Context) {
 		return
 	}
 
-	err = pwd.Set(defaultId, data.OldPassword, data.NewPassword, getStorageKey())
+	err = m.Set(defaultId, data.OldPassword, data.NewPassword, getStorageKey())
 	if err != nil {
 		log.Error("rest: Set failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -272,7 +284,7 @@ func simpleSetCallback(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
-func simpleUnsetCallback(c *gin.Context) {
+func simpleUnsetCallback(c *gin.Context, m *pwd.Manager) {
 	logContext(c)
 
 	var data simpleUnsetData
@@ -292,7 +304,7 @@ func simpleUnsetCallback(c *gin.Context) {
 		return
 	}
 
-	err = pwd.Unset(defaultId, data.Password, getStorageKey())
+	err = m.Unset(defaultId, data.Password, getStorageKey())
 	if err != nil {
 		log.Error("rest: Unset failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -302,7 +314,7 @@ func simpleUnsetCallback(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
-func simpleExistsCallback(c *gin.Context) {
+func simpleExistsCallback(c *gin.Context, m *pwd.Manager) {
 	logContext(c)
 
 	var data simpleExistsData
@@ -322,7 +334,7 @@ func simpleExistsCallback(c *gin.Context) {
 		return
 	}
 
-	result, err := pwd.Exists(defaultId)
+	result, err := m.Exists(defaultId)
 	if err != nil {
 		log.Error("rest: Exists failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -332,7 +344,7 @@ func simpleExistsCallback(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"result": result})
 }
 
-func simpleDeleteCallback(c *gin.Context) {
+func simpleDeleteCallback(c *gin.Context, m *pwd.Manager) {
 	logContext(c)
 
 	var data simpleDeleteData
@@ -352,7 +364,7 @@ func simpleDeleteCallback(c *gin.Context) {
 		return
 	}
 
-	err = pwd.Delete(defaultId)
+	err = m.Delete(defaultId)
 	if err != nil {
 		log.Error("rest: Delete failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})

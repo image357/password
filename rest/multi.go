@@ -60,22 +60,36 @@ type multiCleanData struct {
 // StartMultiService creates a multi password rest service.
 // The service binds to "/prefix/overwrite" (PUT), "/prefix/get" (GET), "/prefix/check" (GET), "/prefix/set" (PUT), "/prefix/unset" (DELETE), "/prefix/list" (GET), "/prefix/delete" (DELETE), "/prefix/clean" (DELETE).
 // The callback of type TestAccessFunc will be called for every request to determine access.
-// Warning: calling this function will reset the default password manager.
+// Warning: calling this function will reset the default password manager and register the current one as "rest manger: bindAddress/prefix".
 func StartMultiService(bindAddress string, prefix string, key string, callback TestAccessFunc) error {
 	engine, err := setupEngine(bindAddress, key, callback)
 	if err != nil {
 		return err
 	}
 
-	engine.PUT(pathlib.Join("/", pwd.NormalizeId(prefix), "/overwrite"), multiOverwriteCallback)
-	engine.GET(pathlib.Join("/", pwd.NormalizeId(prefix), "/get"), multiGetCallback)
-	engine.GET(pathlib.Join("/", pwd.NormalizeId(prefix), "/check"), multiCheckCallback)
-	engine.PUT(pathlib.Join("/", pwd.NormalizeId(prefix), "/set"), multiSetCallback)
-	engine.DELETE(pathlib.Join("/", pwd.NormalizeId(prefix), "/unset"), multiUnsetCallback)
-	engine.GET(pathlib.Join("/", pwd.NormalizeId(prefix), "/exists"), multiExistsCallback)
-	engine.GET(pathlib.Join("/", pwd.NormalizeId(prefix), "/list"), multiListCallback)
-	engine.DELETE(pathlib.Join("/", pwd.NormalizeId(prefix), "/delete"), multiDeleteCallback)
-	engine.DELETE(pathlib.Join("/", pwd.NormalizeId(prefix), "/clean"), multiCleanCallback)
+	// inject current default manager into callbacks
+	m := pwd.GetDefaultManager()
+	localOverwriteCallback := func(c *gin.Context) { multiOverwriteCallback(c, m) }
+	localGetCallback := func(c *gin.Context) { multiGetCallback(c, m) }
+	localCheckCallback := func(c *gin.Context) { multiCheckCallback(c, m) }
+	localSetCallback := func(c *gin.Context) { multiSetCallback(c, m) }
+	localUnsetCallback := func(c *gin.Context) { multiUnsetCallback(c, m) }
+	localExistsCallback := func(c *gin.Context) { multiExistsCallback(c, m) }
+	localListCallback := func(c *gin.Context) { multiListCallback(c, m) }
+	localDeleteCallback := func(c *gin.Context) { multiDeleteCallback(c, m) }
+	localCleanCallback := func(c *gin.Context) { multiCleanCallback(c, m) }
+	pwd.RegisterDefaultManager("rest manager: " + pathlib.Join(bindAddress+"/"+prefix))
+
+	// setup rest endpoints
+	engine.PUT(pathlib.Join("/", pwd.NormalizeId(prefix), "/overwrite"), localOverwriteCallback)
+	engine.GET(pathlib.Join("/", pwd.NormalizeId(prefix), "/get"), localGetCallback)
+	engine.GET(pathlib.Join("/", pwd.NormalizeId(prefix), "/check"), localCheckCallback)
+	engine.PUT(pathlib.Join("/", pwd.NormalizeId(prefix), "/set"), localSetCallback)
+	engine.DELETE(pathlib.Join("/", pwd.NormalizeId(prefix), "/unset"), localUnsetCallback)
+	engine.GET(pathlib.Join("/", pwd.NormalizeId(prefix), "/exists"), localExistsCallback)
+	engine.GET(pathlib.Join("/", pwd.NormalizeId(prefix), "/list"), localListCallback)
+	engine.DELETE(pathlib.Join("/", pwd.NormalizeId(prefix), "/delete"), localDeleteCallback)
+	engine.DELETE(pathlib.Join("/", pwd.NormalizeId(prefix), "/clean"), localCleanCallback)
 
 	go func() {
 		log.Info(restStartedLogMsg, "addr", bindAddress, "prefix", prefix, "type", "multi")
@@ -87,7 +101,7 @@ func StartMultiService(bindAddress string, prefix string, key string, callback T
 	return nil
 }
 
-func multiOverwriteCallback(c *gin.Context) {
+func multiOverwriteCallback(c *gin.Context, m *pwd.Manager) {
 	logContext(c)
 
 	var data multiOverwriteData
@@ -107,7 +121,7 @@ func multiOverwriteCallback(c *gin.Context) {
 		return
 	}
 
-	err = pwd.Overwrite(data.Id, data.Password, getStorageKey())
+	err = m.Overwrite(data.Id, data.Password, getStorageKey())
 	if err != nil {
 		log.Error("rest: Overwrite failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -117,7 +131,7 @@ func multiOverwriteCallback(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
-func multiGetCallback(c *gin.Context) {
+func multiGetCallback(c *gin.Context, m *pwd.Manager) {
 	logContext(c)
 
 	var data multiGetData
@@ -137,7 +151,7 @@ func multiGetCallback(c *gin.Context) {
 		return
 	}
 
-	password, err := pwd.Get(data.Id, getStorageKey())
+	password, err := m.Get(data.Id, getStorageKey())
 	if err != nil {
 		log.Error("rest: Get failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -147,7 +161,7 @@ func multiGetCallback(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"password": password})
 }
 
-func multiCheckCallback(c *gin.Context) {
+func multiCheckCallback(c *gin.Context, m *pwd.Manager) {
 	logContext(c)
 
 	var data multiCheckData
@@ -167,7 +181,7 @@ func multiCheckCallback(c *gin.Context) {
 		return
 	}
 
-	result, err := pwd.Check(data.Id, data.Password, getStorageKey())
+	result, err := m.Check(data.Id, data.Password, getStorageKey())
 	if err != nil {
 		log.Error("rest: Check failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -177,7 +191,7 @@ func multiCheckCallback(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"result": result})
 }
 
-func multiSetCallback(c *gin.Context) {
+func multiSetCallback(c *gin.Context, m *pwd.Manager) {
 	logContext(c)
 
 	var data multiSetData
@@ -197,7 +211,7 @@ func multiSetCallback(c *gin.Context) {
 		return
 	}
 
-	err = pwd.Set(data.Id, data.OldPassword, data.NewPassword, getStorageKey())
+	err = m.Set(data.Id, data.OldPassword, data.NewPassword, getStorageKey())
 	if err != nil {
 		log.Error("rest: Set failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -207,7 +221,7 @@ func multiSetCallback(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
-func multiUnsetCallback(c *gin.Context) {
+func multiUnsetCallback(c *gin.Context, m *pwd.Manager) {
 	logContext(c)
 
 	var data multiUnsetData
@@ -227,7 +241,7 @@ func multiUnsetCallback(c *gin.Context) {
 		return
 	}
 
-	err = pwd.Unset(data.Id, data.Password, getStorageKey())
+	err = m.Unset(data.Id, data.Password, getStorageKey())
 	if err != nil {
 		log.Error("rest: Unset failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -237,7 +251,7 @@ func multiUnsetCallback(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
-func multiExistsCallback(c *gin.Context) {
+func multiExistsCallback(c *gin.Context, m *pwd.Manager) {
 	logContext(c)
 
 	var data multiExistsData
@@ -257,7 +271,7 @@ func multiExistsCallback(c *gin.Context) {
 		return
 	}
 
-	result, err := pwd.Exists(data.Id)
+	result, err := m.Exists(data.Id)
 	if err != nil {
 		log.Error("rest: Exists failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -267,7 +281,7 @@ func multiExistsCallback(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"result": result})
 }
 
-func multiListCallback(c *gin.Context) {
+func multiListCallback(c *gin.Context, m *pwd.Manager) {
 	logContext(c)
 
 	var data multiListData
@@ -287,7 +301,7 @@ func multiListCallback(c *gin.Context) {
 		return
 	}
 
-	list, err := pwd.List()
+	list, err := m.List()
 	if err != nil {
 		log.Error("rest: List failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -297,7 +311,7 @@ func multiListCallback(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"ids": list})
 }
 
-func multiDeleteCallback(c *gin.Context) {
+func multiDeleteCallback(c *gin.Context, m *pwd.Manager) {
 	logContext(c)
 
 	var data multiDeleteData
@@ -317,7 +331,7 @@ func multiDeleteCallback(c *gin.Context) {
 		return
 	}
 
-	err = pwd.Delete(data.Id)
+	err = m.Delete(data.Id)
 	if err != nil {
 		log.Error("rest: Delete failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -327,7 +341,7 @@ func multiDeleteCallback(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
-func multiCleanCallback(c *gin.Context) {
+func multiCleanCallback(c *gin.Context, m *pwd.Manager) {
 	logContext(c)
 
 	var data multiCleanData
@@ -347,7 +361,7 @@ func multiCleanCallback(c *gin.Context) {
 		return
 	}
 
-	err = pwd.Clean()
+	err = m.Clean()
 	if err != nil {
 		log.Error("rest: Clean failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
