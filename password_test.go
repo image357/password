@@ -2,6 +2,7 @@ package password
 
 import (
 	"os"
+	"reflect"
 	"testing"
 )
 
@@ -28,7 +29,10 @@ func TestOverwrite(t *testing.T) {
 		{"stop recurse on recovery", args{"foo" + RecoveryIdSuffix, "123", "456"}, false},
 	}
 	// init
-	SetStorePath("./tests/workdir/Overwrite")
+	err := SetStorePath("./tests/workdir/Overwrite")
+	if err != nil {
+		t.Fatal(err)
+	}
 	EnableRecovery("recovery_key")
 
 	// tests
@@ -42,7 +46,11 @@ func TestOverwrite(t *testing.T) {
 
 	// cleanup
 	DisableRecovery()
-	err := os.RemoveAll(GetStorePath())
+	path, err := GetStorePath()
+	if err != nil {
+		t.Error(err)
+	}
+	err = os.RemoveAll(path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -67,12 +75,15 @@ func TestGet(t *testing.T) {
 		{"invalid recovery id", args{"Bar" + RecoveryIdSuffix, "recovery_key"}, "", true},
 	}
 	// init
-	SetStorePath("./tests/workdir/Get")
-	oldHashPassword := HashPassword
-	HashPassword = false
+	err := SetStorePath("./tests/workdir/Get")
+	if err != nil {
+		t.Fatal(err)
+	}
+	oldHashPassword := GetDefaultManager().HashPassword
+	GetDefaultManager().HashPassword = false
 
 	EnableRecovery("recovery_key")
-	err := Overwrite("foo", "123", "456")
+	err = Overwrite("foo", "123", "456")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -105,8 +116,12 @@ func TestGet(t *testing.T) {
 	}
 
 	// cleanup
-	HashPassword = oldHashPassword
-	err = os.RemoveAll(GetStorePath())
+	GetDefaultManager().HashPassword = oldHashPassword
+	path, err := GetStorePath()
+	if err != nil {
+		t.Error(err)
+	}
+	err = os.RemoveAll(path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -142,12 +157,15 @@ func TestCheck(t *testing.T) {
 		{"from Overwrite with hash recovery", args{"foo_hash" + RecoveryIdSuffix, "456", "recovery_key"}, true, false, true},
 	}
 	// init
-	SetStorePath("./tests/workdir/Check")
-	oldHashPassword := HashPassword
+	err := SetStorePath("./tests/workdir/Check")
+	if err != nil {
+		t.Fatal(err)
+	}
+	oldHashPassword := GetDefaultManager().HashPassword
 	EnableRecovery("recovery_key")
 
-	HashPassword = false
-	err := Overwrite("foo", "123", "456")
+	GetDefaultManager().HashPassword = false
+	err = Overwrite("foo", "123", "456")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -164,7 +182,7 @@ func TestCheck(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	HashPassword = true
+	GetDefaultManager().HashPassword = true
 	err = Overwrite("foo_hash", "123", "456")
 	if err != nil {
 		t.Fatal(err)
@@ -185,7 +203,7 @@ func TestCheck(t *testing.T) {
 	// tests
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			HashPassword = tt.hashed
+			GetDefaultManager().HashPassword = tt.hashed
 			got, err := Check(tt.args.id, tt.args.password, tt.args.key)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Check() error = %v, wantErr %v", err, tt.wantErr)
@@ -199,8 +217,12 @@ func TestCheck(t *testing.T) {
 
 	// cleanup
 	DisableRecovery()
-	HashPassword = oldHashPassword
-	err = os.RemoveAll(GetStorePath())
+	GetDefaultManager().HashPassword = oldHashPassword
+	path, err := GetStorePath()
+	if err != nil {
+		t.Error(err)
+	}
+	err = os.RemoveAll(path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -232,7 +254,10 @@ func TestSet(t *testing.T) {
 		{"valid", args{"foo", "789", "abc", "456"}, false},
 	}
 	// init
-	SetStorePath("./tests/workdir/Set")
+	err := SetStorePath("./tests/workdir/Set")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// tests
 	for _, tt := range tests {
@@ -244,7 +269,11 @@ func TestSet(t *testing.T) {
 	}
 
 	// cleanup
-	err := os.RemoveAll(GetStorePath())
+	path, err := GetStorePath()
+	if err != nil {
+		t.Error(err)
+	}
+	err = os.RemoveAll(path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -271,9 +300,12 @@ func TestUnset(t *testing.T) {
 		{"invalid key", args{"invalid2", "123", "abc"}, true},
 	}
 	// init
-	SetStorePath("./tests/workdir/Unset")
+	err := SetStorePath("./tests/workdir/Unset")
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	err := Overwrite("foo", "123", "456")
+	err = Overwrite("foo", "123", "456")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -312,7 +344,241 @@ func TestUnset(t *testing.T) {
 	}
 
 	// cleanup
-	err = os.RemoveAll(GetStorePath())
+	path, err := GetStorePath()
+	if err != nil {
+		t.Error(err)
+	}
+	err = os.RemoveAll(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestExists(t *testing.T) {
+	type args struct {
+		id string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    bool
+		wantErr bool
+	}{
+		{"success exists", args{"foo"}, true, false},
+		{"success not exists", args{"bar"}, false, false},
+	}
+	// init
+	err := SetStorePath("tests/workdir/Exists")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = Overwrite("foo", "123", "456")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// tests
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := Exists(tt.args.id)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Exists() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("Exists() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+
+	// cleanup
+	path, err := GetStorePath()
+	if err != nil {
+		t.Error(err)
+	}
+	err = os.RemoveAll(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestList(t *testing.T) {
+	type args struct {
+		ids []string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []string
+		wantErr bool
+	}{
+		{"single", args{[]string{"filename"}}, []string{"filename"}, false},
+		{"multi", args{[]string{"a", "c", "b"}}, []string{"a", "b", "c"}, false},
+		{"forward slash", args{[]string{"a/foo", "c/bar", "b/baz"}}, []string{"a/foo", "b/baz", "c/bar"}, false},
+		{"backward slash", args{[]string{"a\\foo", "c\\bar", "b\\baz"}}, []string{"a/foo", "b/baz", "c/bar"}, false},
+		{"mixed slash", args{[]string{"a", "c/bar", "b\\baz"}}, []string{"a", "b/baz", "c/bar"}, false},
+	}
+	// init
+	err := SetStorePath("tests/workdir/List")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// tests
+	for _, tt := range tests {
+		for _, id := range tt.args.ids {
+			err := Overwrite(id, "123", "456")
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := List()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("List() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("List() got = %v, want %v", got, tt.want)
+			}
+		})
+		err := Clean()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	// cleanup
+	path, err := GetStorePath()
+	if err != nil {
+		t.Error(err)
+	}
+	err = os.RemoveAll(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestDelete(t *testing.T) {
+	type args struct {
+		id string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"normal", args{"a"}, false},
+		{"forward slash", args{"b/foo"}, false},
+		{"backward slash", args{"c/bar"}, false},
+		{"mixed slash", args{"d/foo\\bar/filename"}, false},
+		{"invalid id", args{"foobar"}, true},
+	}
+	// init
+	err := SetStorePath("tests/workdir/Delete")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = Overwrite("a", "123", "456")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = Overwrite("b/foo", "123", "456")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = Overwrite("c/bar", "123", "456")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = Overwrite("d/foo/bar/filename", "123", "456")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// tests
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := Delete(tt.args.id); (err != nil) != tt.wantErr {
+				t.Errorf("Delete() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+
+	// cleanup
+	path, err := GetStorePath()
+	if err != nil {
+		t.Error(err)
+	}
+	err = os.RemoveAll(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestClean(t *testing.T) {
+	tests := []struct {
+		name    string
+		wantErr bool
+	}{
+		{"normal", false},
+		{"empty", false},
+	}
+	// init
+	err := SetStorePath("tests/workdir/Clean")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = Overwrite("a", "123", "456")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = Overwrite("b/foo", "123", "456")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = Overwrite("c/bar", "123", "456")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = Overwrite("d/foo/bar/filename", "123", "456")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	list, err := List()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(list) != 4 {
+		t.Fatalf("list = %v, want %v", list, []string{"a", "b/foo", "c/bar", "d/foo/bar/filename"})
+	}
+
+	// tests
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := Clean(); (err != nil) != tt.wantErr {
+				t.Errorf("Clean() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			list, err = List()
+			if err != nil {
+				t.Error(err)
+			}
+			if len(list) != 0 {
+				t.Errorf("Clean() list = %v", list)
+			}
+		})
+	}
+
+	// cleanup
+	path, err := GetStorePath()
+	if err != nil {
+		t.Error(err)
+	}
+	err = os.RemoveAll(path)
 	if err != nil {
 		t.Fatal(err)
 	}

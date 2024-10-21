@@ -38,7 +38,10 @@ func TestStartMultiService(t *testing.T) {
 		{"error", args{":8080", "/another", "123", FullAccessCallback}, true},
 	}
 	// init
-	password.SetStorePath("tests/workdir/StartMultiService")
+	err := password.SetStorePath("tests/workdir/StartMultiService")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// tests
 	for _, tt := range tests {
@@ -50,7 +53,11 @@ func TestStartMultiService(t *testing.T) {
 	}
 
 	// cleanup
-	err := os.RemoveAll(password.GetStorePath())
+	path, err := password.GetStorePath()
+	if err != nil {
+		t.Error(err)
+	}
+	err = os.RemoveAll(path)
 	if err != nil {
 		t.Error(err)
 	}
@@ -286,8 +293,11 @@ func TestMultiRestCalls(t *testing.T) {
 	}
 	// init
 	oldLevel := log.Level(slog.LevelDebug)
-	password.SetStorePath("tests/workdir/MultiRestCalls")
-	err := StartMultiService(":8080", "/prefix", "123", DebugAccessCallback)
+	err := password.SetStorePath("tests/workdir/MultiRestCalls")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = StartMultiService(":8080", "/prefix", "123", DebugAccessCallback)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -324,7 +334,7 @@ func TestMultiRestCalls(t *testing.T) {
 
 			result := string(b)
 			if result != tt.want {
-				if !(password.HashPassword && strings.HasSuffix(tt.url, "/get")) {
+				if !(password.GetDefaultManager().HashPassword && strings.HasSuffix(tt.url, "/get")) {
 					t.Errorf("result = %v, want %v", result, tt.want)
 				}
 			}
@@ -337,7 +347,11 @@ func TestMultiRestCalls(t *testing.T) {
 	}
 
 	// cleanup
-	err = os.RemoveAll(password.GetStorePath())
+	path, err := password.GetStorePath()
+	if err != nil {
+		t.Error(err)
+	}
+	err = os.RemoveAll(path)
 	if err != nil {
 		t.Error(err)
 	}

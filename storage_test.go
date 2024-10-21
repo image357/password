@@ -1,9 +1,7 @@
 package password
 
 import (
-	"os"
 	"path/filepath"
-	"reflect"
 	"testing"
 )
 
@@ -92,9 +90,16 @@ func TestGetStorePath(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			SetStorePath(tt.args.path)
+			err := SetStorePath(tt.args.path)
+			if err != nil {
+				t.Fatal(err)
+			}
 			expected, _ := filepath.Abs(tt.want)
-			if got := GetStorePath(); got != expected {
+			got, err := GetStorePath()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got != expected {
 				t.Errorf("GetStorePath() = %v, want %v", got, tt.want)
 			}
 		})
@@ -118,8 +123,15 @@ func TestGetFileEnding(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			SetFileEnding(tt.args.e)
-			if got := GetFileEnding(); got != tt.want {
+			err := SetFileEnding(tt.args.e)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got, err := GetFileEnding()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got != tt.want {
 				t.Errorf("GetFileEnding() = %v, want %v", got, tt.want)
 			}
 		})
@@ -141,174 +153,27 @@ func TestFilePath(t *testing.T) {
 		{"mixed slash", args{"Path/tO\\fIle/filEname"}, filepath.FromSlash("mIxEd/Path/path/to/file/filename.pwd")},
 		{"relative path", args{"Path/../tO/fIle/filEname"}, filepath.FromSlash("mIxEd/Path/to/file/filename.pwd")},
 	}
-	SetStorePath("mIxEd/Path")
-	SetFileEnding("pwd")
+	// init
+	err := SetStorePath("mIxEd/Path")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = SetFileEnding("pwd")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// tests
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			expected, _ := filepath.Abs(tt.want)
-			if got := FilePath(tt.args.id); got != expected {
-				t.Errorf("FilePath() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestList(t *testing.T) {
-	type args struct {
-		ids []string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		want    []string
-		wantErr bool
-	}{
-		{"single", args{[]string{"filename"}}, []string{"filename"}, false},
-		{"multi", args{[]string{"a", "c", "b"}}, []string{"a", "b", "c"}, false},
-		{"forward slash", args{[]string{"a/foo", "c/bar", "b/baz"}}, []string{"a/foo", "b/baz", "c/bar"}, false},
-		{"backward slash", args{[]string{"a\\foo", "c\\bar", "b\\baz"}}, []string{"a/foo", "b/baz", "c/bar"}, false},
-		{"mixed slash", args{[]string{"a", "c/bar", "b\\baz"}}, []string{"a", "b/baz", "c/bar"}, false},
-	}
-	// init
-	SetStorePath("tests/workdir/List")
-
-	// tests
-	for _, tt := range tests {
-		for _, id := range tt.args.ids {
-			err := Overwrite(id, "123", "456")
+			got, err := FilePath(tt.args.id)
 			if err != nil {
 				t.Fatal(err)
 			}
-		}
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := List()
-			if (err != nil) != tt.wantErr {
-				t.Errorf("List() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("List() got = %v, want %v", got, tt.want)
+			if got != expected {
+				t.Errorf("FilePath() = %v, want %v", got, tt.want)
 			}
 		})
-		err := Clean()
-		if err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	// cleanup
-	err := os.RemoveAll(GetStorePath())
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-
-func TestDelete(t *testing.T) {
-	type args struct {
-		id string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		{"normal", args{"a"}, false},
-		{"forward slash", args{"b/foo"}, false},
-		{"backward slash", args{"c/bar"}, false},
-		{"mixed slash", args{"d/foo\\bar/filename"}, false},
-		{"invalid id", args{"foobar"}, true},
-	}
-	// init
-	SetStorePath("tests/workdir/Delete")
-
-	err := Overwrite("a", "123", "456")
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = Overwrite("b/foo", "123", "456")
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = Overwrite("c/bar", "123", "456")
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = Overwrite("d/foo/bar/filename", "123", "456")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// tests
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := Delete(tt.args.id); (err != nil) != tt.wantErr {
-				t.Errorf("Delete() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-
-	// cleanup
-	err = os.RemoveAll(GetStorePath())
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-
-func TestClean(t *testing.T) {
-	tests := []struct {
-		name    string
-		wantErr bool
-	}{
-		{"normal", false},
-		{"empty", false},
-	}
-	// init
-	SetStorePath("tests/workdir/Clean")
-
-	err := Overwrite("a", "123", "456")
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = Overwrite("b/foo", "123", "456")
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = Overwrite("c/bar", "123", "456")
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = Overwrite("d/foo/bar/filename", "123", "456")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	list, err := List()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(list) != 4 {
-		t.Fatalf("list = %v, want %v", list, []string{"a", "b/foo", "c/bar", "d/foo/bar/filename"})
-	}
-
-	// tests
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := Clean(); (err != nil) != tt.wantErr {
-				t.Errorf("Clean() error = %v, wantErr %v", err, tt.wantErr)
-			}
-			list, err = List()
-			if err != nil {
-				t.Error(err)
-			}
-			if len(list) != 0 {
-				t.Errorf("Clean() list = %v", list)
-			}
-		})
-	}
-
-	// cleanup
-	err = os.RemoveAll(GetStorePath())
-	if err != nil {
-		t.Fatal(err)
 	}
 }

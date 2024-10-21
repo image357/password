@@ -41,8 +41,7 @@ func main() {}
 //
 //export CPWD__ToggleHashPassword
 func CPWD__ToggleHashPassword() bool {
-	pwd.HashPassword = !pwd.HashPassword
-	return pwd.HashPassword
+	return pwd.ToggleHashPassword()
 }
 
 // CPWD__EnableRecovery calls password.EnableRecovery.
@@ -153,6 +152,27 @@ func CPWD__Unset(id *C.cchar_t, password *C.cchar_t, key *C.cchar_t) int {
 		log.Error("CPWD__Unset: Unset failed", "error", err)
 		return -1
 	}
+	return 0
+}
+
+// CPWD__Exists calls password.Exists and returns 0 on success, -1 on error.
+//
+// For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
+//
+//export CPWD__Exists
+func CPWD__Exists(id *C.cchar_t, result *C.bool) int {
+	if result == nil {
+		log.Error("CPWD__Exists: result is nullptr")
+		return -1
+	}
+
+	exists, err := pwd.Exists(C.GoString(id))
+	if err != nil {
+		log.Error("CPWD__Exists: Exists failed", "error", err)
+		return -1
+	}
+
+	*result = C.bool(exists)
 	return 0
 }
 
@@ -344,7 +364,11 @@ func CPWD__GetStorePath(buffer *C.char, length int) int {
 		return -1
 	}
 
-	s := pwd.GetStorePath()
+	s, err := pwd.GetStorePath()
+	if err != nil {
+		log.Error("CPWD__GetStorePath: GetStorePath failed", "error", err)
+		return -1
+	}
 
 	cs := C.CString(s)
 	defer C.free(unsafe.Pointer(cs))
@@ -363,7 +387,10 @@ func CPWD__GetStorePath(buffer *C.char, length int) int {
 //
 //export CPWD__SetStorePath
 func CPWD__SetStorePath(path *C.cchar_t) {
-	pwd.SetStorePath(C.GoString(path))
+	err := pwd.SetStorePath(C.GoString(path))
+	if err != nil {
+		log.Error("CPWD__SetStorePath: SetStorePath failed", "error", err)
+	}
 }
 
 // CPWD__GetFileEnding calls password.GetFileEnding and returns 0 on success, -1 on error.
@@ -378,7 +405,11 @@ func CPWD__GetFileEnding(buffer *C.char, length int) int {
 		return -1
 	}
 
-	s := pwd.GetFileEnding()
+	s, err := pwd.GetFileEnding()
+	if err != nil {
+		log.Error("CPWD__GetFileEnding: GetFileEnding failed", "error", err)
+		return -1
+	}
 
 	cs := C.CString(s)
 	defer C.free(unsafe.Pointer(cs))
@@ -397,7 +428,10 @@ func CPWD__GetFileEnding(buffer *C.char, length int) int {
 //
 //export CPWD__SetFileEnding
 func CPWD__SetFileEnding(ending *C.cchar_t) {
-	pwd.SetFileEnding(C.GoString(ending))
+	err := pwd.SetFileEnding(C.GoString(ending))
+	if err != nil {
+		log.Error("CPWD__SetFileEnding: SetFileEnding failed", "error", err)
+	}
 }
 
 // CPWD__FilePath calls password.FilePath and returns 0 on success, -1 on error.
@@ -412,7 +446,11 @@ func CPWD__FilePath(id *C.cchar_t, buffer *C.char, length int) int {
 		return -1
 	}
 
-	s := pwd.FilePath(C.GoString(id))
+	s, err := pwd.FilePath(C.GoString(id))
+	if err != nil {
+		log.Error("CPWD__FilePath: FilePath failed", "error", err)
+		return -1
+	}
 
 	cs := C.CString(s)
 	defer C.free(unsafe.Pointer(cs))
