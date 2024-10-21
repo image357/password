@@ -26,7 +26,7 @@ func RegisterDefaultManager(identifier string) {
 	SetDefaultManager(NewManager())
 }
 
-// ToggleHashPassword will toggle config variable HashPassword of the default password manager and return the current state.
+// ToggleHashPassword will toggle the config variable HashPassword of the default password manager and return the current state.
 func ToggleHashPassword() bool {
 	m := GetDefaultManager()
 	m.HashPassword = !m.HashPassword

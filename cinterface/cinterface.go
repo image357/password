@@ -35,7 +35,34 @@ import "C"
 
 func main() {}
 
-// CPWD__ToggleHashPassword will toggle the global config variable password.HashPassword and return the current state.
+// CPWD__SetDefaultManager calls password.SetDefaultManager.
+// Returns 0 if the identifier has already been registered, -1 if not.
+
+// For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
+//
+//export CPWD__SetDefaultManager
+func CPWD__SetDefaultManager(identifier *C.cchar_t) int {
+	i := C.GoString(identifier)
+	m, ok := pwd.Managers[i]
+	if !ok {
+		delete(pwd.Managers, i)
+		return -1
+	}
+	pwd.SetDefaultManager(m)
+	return 0
+}
+
+// CPWD__RegisterDefaultManager calls password.RegisterDefaultManager.
+//
+// For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
+//
+//export CPWD__RegisterDefaultManager
+func CPWD__RegisterDefaultManager(identifier *C.cchar_t) {
+	i := C.GoString(identifier)
+	pwd.RegisterDefaultManager(i)
+}
+
+// CPWD__ToggleHashPassword calls password.ToggleHashPassword.
 //
 // For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
 //
