@@ -100,6 +100,7 @@ func logContext(c *gin.Context) {
 // StartSimpleService creates a single password rest service.
 // The service binds to "/prefix/overwrite" (PUT), "/prefix/get" (GET), "/prefix/check" (GET), "/prefix/set" (PUT), "/prefix/unset" (DELETE), "/prefix/delete" (DELETE).
 // The callback of type TestAccessFunc will be called for every request to determine access.
+// Warning: calling this function will reset the default password manager.
 func StartSimpleService(bindAddress string, prefix string, key string, callback TestAccessFunc) error {
 	engine, err := setupEngine(bindAddress, key, callback)
 	if err != nil {
