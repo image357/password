@@ -170,6 +170,34 @@ TEST_F(TestPassword, Unset) {
     ASSERT_EQ(ret_unset, -1);
 }
 
+TEST_F(TestPassword, Exists) {
+    // prepare
+    auto ret_overwrite = CPWD__Overwrite("exists1", "foobar", "123");
+    ASSERT_EQ(ret_overwrite, 0);
+
+    // success: true
+    bool result = false;
+    auto ret_exists = CPWD__Exists("exists1", &result);
+    ASSERT_EQ(ret_exists, 0);
+    ASSERT_EQ(result, true);
+
+    // success: false
+    result = true;
+    ret_exists = CPWD__Exists("not_exists", &result);
+    ASSERT_EQ(ret_exists, 0);
+    ASSERT_EQ(result, false);
+}
+
+TEST_F(TestPassword, ExistsResultNull) {
+    // prepare
+    auto ret_overwrite = CPWD__Overwrite("exists2", "foobar", "123");
+    ASSERT_EQ(ret_overwrite, 0);
+
+    // fail
+    auto ret_check = CPWD__Exists("exists2", nullptr);
+    ASSERT_EQ(ret_check, -1);
+}
+
 TEST_F(TestPassword, List) {
     // prepare
     auto ret_overwrite = CPWD__Overwrite("list1", "bar", "123");
@@ -202,7 +230,7 @@ TEST_F(TestPassword, ListBufferSize) {
     ASSERT_EQ(ret_list, -1);
 
     // success
-    ret_list = CPWD__List(buffer, strlen(expected_string)+1, ";;;");
+    ret_list = CPWD__List(buffer, strlen(expected_string) + 1, ";;;");
     ASSERT_EQ(ret_list, 0);
 }
 
