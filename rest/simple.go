@@ -35,7 +35,7 @@ type restService struct {
 }
 
 // services contains the global map of all started REST servers.
-var services map[string]*restService = make(map[string]*restService)
+var services = make(map[string]*restService)
 
 // getStorageKey decrypts the storage key that was set by StartSimpleService or StartMultiService.
 func getStorageKey(service *restService) string {

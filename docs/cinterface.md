@@ -36,7 +36,7 @@ import "github.com/image357/password/cinterface"
 - [func CPWD\_\_SetStorePath\(path \*C.cchar\_t\)](<#CPWD__SetStorePath>)
 - [func CPWD\_\_StartMultiService\(bindAddress \*C.cchar\_t, prefix \*C.cchar\_t, key \*C.cchar\_t, callback C.CPWD\_\_TestAccessFunc\) int](<#CPWD__StartMultiService>)
 - [func CPWD\_\_StartSimpleService\(bindAddress \*C.cchar\_t, prefix \*C.cchar\_t, key \*C.cchar\_t, callback C.CPWD\_\_TestAccessFunc\) int](<#CPWD__StartSimpleService>)
-- [func CPWD\_\_StopService\(timeout int\) int](<#CPWD__StopService>)
+- [func CPWD\_\_StopService\(timeout int, bindAddress \*C.cchar\_t, prefix \*C.cchar\_t\) int](<#CPWD__StopService>)
 - [func CPWD\_\_ToggleHashPassword\(\) bool](<#CPWD__ToggleHashPassword>)
 - [func CPWD\_\_Unset\(id \*C.cchar\_t, password \*C.cchar\_t, key \*C.cchar\_t\) int](<#CPWD__Unset>)
 
@@ -349,7 +349,7 @@ For full documentation visit https://github.com/image357/password/blob/main/docs
 ## func [CPWD\\\_\\\_StopService](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L348>)
 
 ```go
-func CPWD__StopService(timeout int) int
+func CPWD__StopService(timeout int, bindAddress *C.cchar_t, prefix *C.cchar_t) int
 ```
 
 CPWD\_\_StopService calls rest.StopService and returns 0 on success, \-1 on error.

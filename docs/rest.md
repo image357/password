@@ -12,7 +12,7 @@ import "github.com/image357/password/rest"
 - [func FullAccessCallback\(\_ string, \_ string, \_ string, \_ string\) bool](<#FullAccessCallback>)
 - [func StartMultiService\(bindAddress string, prefix string, key string, callback TestAccessFunc\) error](<#StartMultiService>)
 - [func StartSimpleService\(bindAddress string, prefix string, key string, callback TestAccessFunc\) error](<#StartSimpleService>)
-- [func StopService\(timeout int\) error](<#StopService>)
+- [func StopService\(timeout int, bindAddress string, prefix string\) error](<#StopService>)
 - [type TestAccessFunc](<#TestAccessFunc>)
 
 
@@ -65,13 +65,13 @@ if err != nil {
 </details>
 
 <a name="StartMultiService"></a>
-## func [StartMultiService](<https://github.com/image357/password/blob/main/rest/multi.go#L64>)
+## func [StartMultiService](<https://github.com/image357/password/blob/main/rest/multi.go#L63>)
 
 ```go
 func StartMultiService(bindAddress string, prefix string, key string, callback TestAccessFunc) error
 ```
 
-StartMultiService creates a multi password rest service. The service binds to "/prefix/overwrite" \(PUT\), "/prefix/get" \(GET\), "/prefix/check" \(GET\), "/prefix/set" \(PUT\), "/prefix/unset" \(DELETE\), "/prefix/list" \(GET\), "/prefix/delete" \(DELETE\), "/prefix/clean" \(DELETE\). The callback of type TestAccessFunc will be called for every request to determine access. Warning: calling this function will reset the default password manager and register the current one as "rest manger: bindAddress/prefix".
+StartMultiService creates a multi password rest service. The service binds to "/prefix/overwrite" \(PUT\), "/prefix/get" \(GET\), "/prefix/check" \(GET\), "/prefix/set" \(PUT\), "/prefix/unset" \(DELETE\), "/prefix/list" \(GET\), "/prefix/delete" \(DELETE\), "/prefix/clean" \(DELETE\). The callback of type TestAccessFunc will be called for every request to determine access.
 
 <details><summary>Example</summary>
 <p>
@@ -90,13 +90,13 @@ if err != nil {
 </details>
 
 <a name="StartSimpleService"></a>
-## func [StartSimpleService](<https://github.com/image357/password/blob/main/rest/simple.go#L104>)
+## func [StartSimpleService](<https://github.com/image357/password/blob/main/rest/simple.go#L115>)
 
 ```go
 func StartSimpleService(bindAddress string, prefix string, key string, callback TestAccessFunc) error
 ```
 
-StartSimpleService creates a single password rest service. The service binds to "/prefix/overwrite" \(PUT\), "/prefix/get" \(GET\), "/prefix/check" \(GET\), "/prefix/set" \(PUT\), "/prefix/unset" \(DELETE\), "/prefix/delete" \(DELETE\). The callback of type TestAccessFunc will be called for every request to determine access. Warning: calling this function will reset the default password manager and register the current one as "rest manger: bindAddress/prefix".
+StartSimpleService creates a single password rest service. The service binds to "/prefix/overwrite" \(PUT\), "/prefix/get" \(GET\), "/prefix/check" \(GET\), "/prefix/set" \(PUT\), "/prefix/unset" \(DELETE\), "/prefix/delete" \(DELETE\). The callback of type TestAccessFunc will be called for every request to determine access.
 
 <details><summary>Example</summary>
 <p>
@@ -115,16 +115,16 @@ if err != nil {
 </details>
 
 <a name="StopService"></a>
-## func [StopService](<https://github.com/image357/password/blob/main/rest/simple.go#L142>)
+## func [StopService](<https://github.com/image357/password/blob/main/rest/simple.go#L153>)
 
 ```go
-func StopService(timeout int) error
+func StopService(timeout int, bindAddress string, prefix string) error
 ```
 
 StopService will block execution and try to gracefully shut down any rest service during the timeout period. The service is guaranteed to be closed at the end of the timeout.
 
 <a name="TestAccessFunc"></a>
-## type [TestAccessFunc](<https://github.com/image357/password/blob/main/rest/simple.go#L33>)
+## type [TestAccessFunc](<https://github.com/image357/password/blob/main/rest/simple.go#L26>)
 
 TestAccessFunc is a callback signature. The callback will be called by the rest service for every request to determine access based on the accessToken.
 
