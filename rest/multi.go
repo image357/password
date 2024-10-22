@@ -93,7 +93,7 @@ func StartMultiService(bindAddress string, prefix string, key string, callback T
 		log.Info(restStartedLogMsg, "addr", bindAddress, "prefix", prefix, "type", "multi")
 		err := service.server.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Warn(restStoppedLogMsg, "error", err)
+			log.Error(restStoppedLogMsg, "error", err)
 		}
 		delete(services, service.name)
 	}()

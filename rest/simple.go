@@ -141,7 +141,7 @@ func StartSimpleService(bindAddress string, prefix string, key string, callback 
 		log.Info(restStartedLogMsg, "addr", bindAddress, "prefix", prefix, "type", "simple")
 		err := service.server.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Warn(restStoppedLogMsg, "error", err)
+			log.Error(restStoppedLogMsg, "error", err)
 		}
 		delete(services, service.name)
 	}()

@@ -37,7 +37,7 @@ func main() {
 	fmt.Printf("Caught signal %v\n", sig)
 
 	// stop rest service
-	err = rest.StopService(5000)
+	err = rest.StopService(5000, ":8080", "/prefix")
 	if err != nil {
 		fmt.Println(err)
 	}

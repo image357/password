@@ -67,8 +67,14 @@ func main() {
 
 		fileEnding := idParts[len(idParts)-1]
 
-		pwd.SetStorePath(storePath)
-		pwd.SetFileEnding(fileEnding)
+		err = pwd.SetStorePath(storePath)
+		if err != nil {
+			continue
+		}
+		err = pwd.SetFileEnding(fileEnding)
+		if err != nil {
+			continue
+		}
 
 		recoveryId := id + pwd.RecoveryIdSuffix
 		storageKey, err = pwd.Get(recoveryId, recoveryKey)

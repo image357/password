@@ -41,11 +41,11 @@ TEST_F(TestRest, StartSimpleService) {
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
     // stop: success
-    ret = CPWD__StopService(1000);
+    ret = CPWD__StopService(1000, ":8080", "/prefix");
     ASSERT_EQ(ret, 0);
 
     // stop: fail
-    ret = CPWD__StopService(1000);
+    ret = CPWD__StopService(1000, ":8080", "/prefix");
     ASSERT_EQ(ret, -1);
 }
 
@@ -66,10 +66,10 @@ TEST_F(TestRest, StartMultiService) {
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
     // stop: success
-    ret = CPWD__StopService(1000);
+    ret = CPWD__StopService(1000, ":8080", "/prefix");
     ASSERT_EQ(ret, 0);
 
     // stop: fail
-    ret = CPWD__StopService(1000);
+    ret = CPWD__StopService(1000, ":8080", "/prefix");
     ASSERT_EQ(ret, -1);
 }
