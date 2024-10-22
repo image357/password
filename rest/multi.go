@@ -61,22 +61,22 @@ type multiCleanData struct {
 // The service binds to "/prefix/overwrite" (PUT), "/prefix/get" (GET), "/prefix/check" (GET), "/prefix/set" (PUT), "/prefix/unset" (DELETE), "/prefix/list" (GET), "/prefix/delete" (DELETE), "/prefix/clean" (DELETE).
 // The callback of type TestAccessFunc will be called for every request to determine access.
 func StartMultiService(bindAddress string, prefix string, key string, callback TestAccessFunc) error {
-	engine, err := setupEngine(bindAddress, key, callback)
+	engine, service, err := setupService(bindAddress, prefix, key, callback)
 	if err != nil {
 		return err
 	}
 
 	// inject current default manager into callbacks
-	m := pwd.GetDefaultManager()
-	localOverwriteCallback := func(c *gin.Context) { multiOverwriteCallback(c, m) }
-	localGetCallback := func(c *gin.Context) { multiGetCallback(c, m) }
-	localCheckCallback := func(c *gin.Context) { multiCheckCallback(c, m) }
-	localSetCallback := func(c *gin.Context) { multiSetCallback(c, m) }
-	localUnsetCallback := func(c *gin.Context) { multiUnsetCallback(c, m) }
-	localExistsCallback := func(c *gin.Context) { multiExistsCallback(c, m) }
-	localListCallback := func(c *gin.Context) { multiListCallback(c, m) }
-	localDeleteCallback := func(c *gin.Context) { multiDeleteCallback(c, m) }
-	localCleanCallback := func(c *gin.Context) { multiCleanCallback(c, m) }
+	manager := pwd.GetDefaultManager()
+	localOverwriteCallback := func(c *gin.Context) { multiOverwriteCallback(c, manager, service) }
+	localGetCallback := func(c *gin.Context) { multiGetCallback(c, manager, service) }
+	localCheckCallback := func(c *gin.Context) { multiCheckCallback(c, manager, service) }
+	localSetCallback := func(c *gin.Context) { multiSetCallback(c, manager, service) }
+	localUnsetCallback := func(c *gin.Context) { multiUnsetCallback(c, manager, service) }
+	localExistsCallback := func(c *gin.Context) { multiExistsCallback(c, manager, service) }
+	localListCallback := func(c *gin.Context) { multiListCallback(c, manager, service) }
+	localDeleteCallback := func(c *gin.Context) { multiDeleteCallback(c, manager, service) }
+	localCleanCallback := func(c *gin.Context) { multiCleanCallback(c, manager, service) }
 
 	// setup rest endpoints
 	engine.PUT(pathlib.Join("/", pwd.NormalizeId(prefix), "/overwrite"), localOverwriteCallback)
@@ -91,15 +91,16 @@ func StartMultiService(bindAddress string, prefix string, key string, callback T
 
 	go func() {
 		log.Info(restStartedLogMsg, "addr", bindAddress, "prefix", prefix, "type", "multi")
-		err := server.ListenAndServe()
+		err := service.server.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Warn(restStoppedLogMsg, "error", err)
 		}
+		delete(services, service.name)
 	}()
 	return nil
 }
 
-func multiOverwriteCallback(c *gin.Context, m *pwd.Manager) {
+func multiOverwriteCallback(c *gin.Context, m *pwd.Manager, s *restService) {
 	logContext(c)
 
 	var data multiOverwriteData
@@ -113,13 +114,13 @@ func multiOverwriteCallback(c *gin.Context, m *pwd.Manager) {
 	ip := c.ClientIP()
 	url := c.Request.URL.String()
 	id := pwd.NormalizeId(data.Id)
-	if !hasAccess(data.AccessToken, ip, url, id) {
+	if !s.hasAccess(data.AccessToken, ip, url, id) {
 		log.Warn(accessDeniedLogMsg, "ip", ip, "resource", url, "id", id, "token", data.AccessToken)
 		c.JSON(http.StatusForbidden, gin.H{})
 		return
 	}
 
-	err = m.Overwrite(data.Id, data.Password, getStorageKey())
+	err = m.Overwrite(data.Id, data.Password, getStorageKey(s))
 	if err != nil {
 		log.Error("rest: Overwrite failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -129,7 +130,7 @@ func multiOverwriteCallback(c *gin.Context, m *pwd.Manager) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
-func multiGetCallback(c *gin.Context, m *pwd.Manager) {
+func multiGetCallback(c *gin.Context, m *pwd.Manager, s *restService) {
 	logContext(c)
 
 	var data multiGetData
@@ -143,13 +144,13 @@ func multiGetCallback(c *gin.Context, m *pwd.Manager) {
 	ip := c.ClientIP()
 	url := c.Request.URL.String()
 	id := pwd.NormalizeId(data.Id)
-	if !hasAccess(data.AccessToken, ip, url, id) {
+	if !s.hasAccess(data.AccessToken, ip, url, id) {
 		log.Warn(accessDeniedLogMsg, "ip", ip, "resource", url, "id", id, "token", data.AccessToken)
 		c.JSON(http.StatusForbidden, gin.H{})
 		return
 	}
 
-	password, err := m.Get(data.Id, getStorageKey())
+	password, err := m.Get(data.Id, getStorageKey(s))
 	if err != nil {
 		log.Error("rest: Get failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -159,7 +160,7 @@ func multiGetCallback(c *gin.Context, m *pwd.Manager) {
 	c.JSON(http.StatusOK, gin.H{"password": password})
 }
 
-func multiCheckCallback(c *gin.Context, m *pwd.Manager) {
+func multiCheckCallback(c *gin.Context, m *pwd.Manager, s *restService) {
 	logContext(c)
 
 	var data multiCheckData
@@ -173,13 +174,13 @@ func multiCheckCallback(c *gin.Context, m *pwd.Manager) {
 	ip := c.ClientIP()
 	url := c.Request.URL.String()
 	id := pwd.NormalizeId(data.Id)
-	if !hasAccess(data.AccessToken, ip, url, id) {
+	if !s.hasAccess(data.AccessToken, ip, url, id) {
 		log.Warn(accessDeniedLogMsg, "ip", ip, "resource", url, "id", id, "token", data.AccessToken)
 		c.JSON(http.StatusForbidden, gin.H{})
 		return
 	}
 
-	result, err := m.Check(data.Id, data.Password, getStorageKey())
+	result, err := m.Check(data.Id, data.Password, getStorageKey(s))
 	if err != nil {
 		log.Error("rest: Check failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -189,7 +190,7 @@ func multiCheckCallback(c *gin.Context, m *pwd.Manager) {
 	c.JSON(http.StatusOK, gin.H{"result": result})
 }
 
-func multiSetCallback(c *gin.Context, m *pwd.Manager) {
+func multiSetCallback(c *gin.Context, m *pwd.Manager, s *restService) {
 	logContext(c)
 
 	var data multiSetData
@@ -203,13 +204,13 @@ func multiSetCallback(c *gin.Context, m *pwd.Manager) {
 	ip := c.ClientIP()
 	url := c.Request.URL.String()
 	id := pwd.NormalizeId(data.Id)
-	if !hasAccess(data.AccessToken, ip, url, id) {
+	if !s.hasAccess(data.AccessToken, ip, url, id) {
 		log.Warn(accessDeniedLogMsg, "ip", ip, "resource", url, "id", id, "token", data.AccessToken)
 		c.JSON(http.StatusForbidden, gin.H{})
 		return
 	}
 
-	err = m.Set(data.Id, data.OldPassword, data.NewPassword, getStorageKey())
+	err = m.Set(data.Id, data.OldPassword, data.NewPassword, getStorageKey(s))
 	if err != nil {
 		log.Error("rest: Set failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -219,7 +220,7 @@ func multiSetCallback(c *gin.Context, m *pwd.Manager) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
-func multiUnsetCallback(c *gin.Context, m *pwd.Manager) {
+func multiUnsetCallback(c *gin.Context, m *pwd.Manager, s *restService) {
 	logContext(c)
 
 	var data multiUnsetData
@@ -233,13 +234,13 @@ func multiUnsetCallback(c *gin.Context, m *pwd.Manager) {
 	ip := c.ClientIP()
 	url := c.Request.URL.String()
 	id := pwd.NormalizeId(data.Id)
-	if !hasAccess(data.AccessToken, ip, url, id) {
+	if !s.hasAccess(data.AccessToken, ip, url, id) {
 		log.Warn(accessDeniedLogMsg, "ip", ip, "resource", url, "id", id, "token", data.AccessToken)
 		c.JSON(http.StatusForbidden, gin.H{})
 		return
 	}
 
-	err = m.Unset(data.Id, data.Password, getStorageKey())
+	err = m.Unset(data.Id, data.Password, getStorageKey(s))
 	if err != nil {
 		log.Error("rest: Unset failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -249,7 +250,7 @@ func multiUnsetCallback(c *gin.Context, m *pwd.Manager) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
-func multiExistsCallback(c *gin.Context, m *pwd.Manager) {
+func multiExistsCallback(c *gin.Context, m *pwd.Manager, s *restService) {
 	logContext(c)
 
 	var data multiExistsData
@@ -263,7 +264,7 @@ func multiExistsCallback(c *gin.Context, m *pwd.Manager) {
 	ip := c.ClientIP()
 	url := c.Request.URL.String()
 	id := pwd.NormalizeId(data.Id)
-	if !hasAccess(data.AccessToken, ip, url, id) {
+	if !s.hasAccess(data.AccessToken, ip, url, id) {
 		log.Warn(accessDeniedLogMsg, "ip", ip, "resource", url, "id", id, "token", data.AccessToken)
 		c.JSON(http.StatusForbidden, gin.H{})
 		return
@@ -279,7 +280,7 @@ func multiExistsCallback(c *gin.Context, m *pwd.Manager) {
 	c.JSON(http.StatusOK, gin.H{"result": result})
 }
 
-func multiListCallback(c *gin.Context, m *pwd.Manager) {
+func multiListCallback(c *gin.Context, m *pwd.Manager, s *restService) {
 	logContext(c)
 
 	var data multiListData
@@ -293,7 +294,7 @@ func multiListCallback(c *gin.Context, m *pwd.Manager) {
 	ip := c.ClientIP()
 	url := c.Request.URL.String()
 	id := pwd.NormalizeId("")
-	if !hasAccess(data.AccessToken, ip, url, id) {
+	if !s.hasAccess(data.AccessToken, ip, url, id) {
 		log.Warn(accessDeniedLogMsg, "ip", ip, "resource", url, "id", id, "token", data.AccessToken)
 		c.JSON(http.StatusForbidden, gin.H{})
 		return
@@ -309,7 +310,7 @@ func multiListCallback(c *gin.Context, m *pwd.Manager) {
 	c.JSON(http.StatusOK, gin.H{"ids": list})
 }
 
-func multiDeleteCallback(c *gin.Context, m *pwd.Manager) {
+func multiDeleteCallback(c *gin.Context, m *pwd.Manager, s *restService) {
 	logContext(c)
 
 	var data multiDeleteData
@@ -323,7 +324,7 @@ func multiDeleteCallback(c *gin.Context, m *pwd.Manager) {
 	ip := c.ClientIP()
 	url := c.Request.URL.String()
 	id := pwd.NormalizeId(data.Id)
-	if !hasAccess(data.AccessToken, ip, url, id) {
+	if !s.hasAccess(data.AccessToken, ip, url, id) {
 		log.Warn(accessDeniedLogMsg, "ip", ip, "resource", url, "id", id, "token", data.AccessToken)
 		c.JSON(http.StatusForbidden, gin.H{})
 		return
@@ -339,7 +340,7 @@ func multiDeleteCallback(c *gin.Context, m *pwd.Manager) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
-func multiCleanCallback(c *gin.Context, m *pwd.Manager) {
+func multiCleanCallback(c *gin.Context, m *pwd.Manager, s *restService) {
 	logContext(c)
 
 	var data multiCleanData
@@ -353,7 +354,7 @@ func multiCleanCallback(c *gin.Context, m *pwd.Manager) {
 	ip := c.ClientIP()
 	url := c.Request.URL.String()
 	id := pwd.NormalizeId("")
-	if !hasAccess(data.AccessToken, ip, url, id) {
+	if !s.hasAccess(data.AccessToken, ip, url, id) {
 		log.Warn(accessDeniedLogMsg, "ip", ip, "resource", url, "id", id, "token", data.AccessToken)
 		c.JSON(http.StatusForbidden, gin.H{})
 		return

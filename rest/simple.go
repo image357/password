@@ -3,7 +3,6 @@ package rest
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	pwd "github.com/image357/password"
 	"github.com/image357/password/log"
@@ -13,26 +12,35 @@ import (
 )
 
 const defaultId = "default"
+
 const accessDeniedLogMsg = "rest: access denied"
 const processDataLogMsg = "rest: cannot process data"
 const restStartedLogMsg = "rest: service started"
 const restStoppedLogMsg = "rest: service stopped"
-const restRunningErrMsg = "rest service already running"
 
-var server *http.Server
-var storageKeyBytes []byte
-var storageKeySecret []byte
-
-// getStorageKey returns the storage key that was set StartSimpleService or StartMultiService.
-func getStorageKey() string {
-	return pwd.DecryptOTP(storageKeyBytes, storageKeySecret)
-}
+var restRunningErr = errors.New("rest service already running")
+var restStoppedErr = errors.New("rest service already stopped")
 
 // TestAccessFunc is a callback signature.
 // The callback will be called by the rest service for every request to determine access based on the accessToken.
 type TestAccessFunc func(token string, ip string, resource string, id string) bool
 
-var hasAccess TestAccessFunc
+// restService contains all necessary information for external handling of a REST service.
+type restService struct {
+	name             string
+	server           *http.Server
+	storageKeyBytes  []byte
+	storageKeySecret []byte
+	hasAccess        TestAccessFunc
+}
+
+// services contains the global map of all started REST servers.
+var services map[string]*restService = make(map[string]*restService)
+
+// getStorageKey decrypts the storage key that was set by StartSimpleService or StartMultiService.
+func getStorageKey(service *restService) string {
+	return pwd.DecryptOTP(service.storageKeyBytes, service.storageKeySecret)
+}
 
 type simpleOverwriteData struct {
 	AccessToken string `form:"accessToken" json:"accessToken" xml:"accessToken"  binding:"required"`
@@ -67,25 +75,29 @@ type simpleDeleteData struct {
 	AccessToken string `form:"accessToken" json:"accessToken" xml:"accessToken"  binding:"required"`
 }
 
-// setupEngine returns a basic gin.Engine without any endpoint configuration.
-func setupEngine(bindAddress string, key string, callback TestAccessFunc) (*gin.Engine, error) {
-	if server != nil {
-		return nil, fmt.Errorf(restRunningErrMsg)
+// setupService returns a basic gin.Engine without any endpoint configuration.
+func setupService(bindAddress string, prefix string, key string, callback TestAccessFunc) (*gin.Engine, *restService, error) {
+	name := pathlib.Clean(bindAddress + "/" + prefix)
+	_, ok := services[name]
+	if ok {
+		return nil, nil, restRunningErr
 	}
 
 	gin.SetMode(gin.ReleaseMode)
-	engine := gin.New()
-	engine.Use(gin.Recovery())
+	e := gin.New()
+	e.Use(gin.Recovery())
 
-	server = &http.Server{
+	s := new(restService)
+	s.name = name
+	s.server = &http.Server{
 		Addr:    bindAddress,
-		Handler: engine,
+		Handler: e,
 	}
+	s.storageKeyBytes, s.storageKeySecret = pwd.EncryptOTP(key)
+	s.hasAccess = callback
 
-	storageKeyBytes, storageKeySecret = pwd.EncryptOTP(key)
-	hasAccess = callback
-
-	return engine, nil
+	services[name] = s
+	return e, s, nil
 }
 
 // logContext will be called by the rest service for every request.
@@ -101,20 +113,20 @@ func logContext(c *gin.Context) {
 // The service binds to "/prefix/overwrite" (PUT), "/prefix/get" (GET), "/prefix/check" (GET), "/prefix/set" (PUT), "/prefix/unset" (DELETE), "/prefix/delete" (DELETE).
 // The callback of type TestAccessFunc will be called for every request to determine access.
 func StartSimpleService(bindAddress string, prefix string, key string, callback TestAccessFunc) error {
-	engine, err := setupEngine(bindAddress, key, callback)
+	engine, service, err := setupService(bindAddress, prefix, key, callback)
 	if err != nil {
 		return err
 	}
 
-	// inject current default manager into callbacks
-	m := pwd.GetDefaultManager()
-	localOverwriteCallback := func(c *gin.Context) { simpleOverwriteCallback(c, m) }
-	localGetCallback := func(c *gin.Context) { simpleGetCallback(c, m) }
-	localCheckCallback := func(c *gin.Context) { simpleCheckCallback(c, m) }
-	localSetCallback := func(c *gin.Context) { simpleSetCallback(c, m) }
-	localUnsetCallback := func(c *gin.Context) { simpleUnsetCallback(c, m) }
-	localExistsCallback := func(c *gin.Context) { simpleExistsCallback(c, m) }
-	localDeleteCallback := func(c *gin.Context) { simpleDeleteCallback(c, m) }
+	// inject current default manager and service into callbacks
+	manager := pwd.GetDefaultManager()
+	localOverwriteCallback := func(c *gin.Context) { simpleOverwriteCallback(c, manager, service) }
+	localGetCallback := func(c *gin.Context) { simpleGetCallback(c, manager, service) }
+	localCheckCallback := func(c *gin.Context) { simpleCheckCallback(c, manager, service) }
+	localSetCallback := func(c *gin.Context) { simpleSetCallback(c, manager, service) }
+	localUnsetCallback := func(c *gin.Context) { simpleUnsetCallback(c, manager, service) }
+	localExistsCallback := func(c *gin.Context) { simpleExistsCallback(c, manager, service) }
+	localDeleteCallback := func(c *gin.Context) { simpleDeleteCallback(c, manager, service) }
 
 	// setup rest endpoints
 	engine.PUT(pathlib.Join("/", pwd.NormalizeId(prefix), "/overwrite"), localOverwriteCallback)
@@ -127,42 +139,48 @@ func StartSimpleService(bindAddress string, prefix string, key string, callback 
 
 	go func() {
 		log.Info(restStartedLogMsg, "addr", bindAddress, "prefix", prefix, "type", "simple")
-		err := server.ListenAndServe()
+		err := service.server.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Warn(restStoppedLogMsg, "error", err)
 		}
+		delete(services, service.name)
 	}()
 	return nil
 }
 
 // StopService will block execution and try to gracefully shut down any rest service during the timeout period.
 // The service is guaranteed to be closed at the end of the timeout.
-func StopService(timeout int) error {
-	if server == nil {
-		return fmt.Errorf("rest service already stopped")
+func StopService(timeout int, bindAddress string, prefix string) error {
+	name := pathlib.Clean(bindAddress + "/" + prefix)
+	service, ok := services[name]
+	if !ok {
+		delete(services, name)
+		return restStoppedErr
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*time.Duration(timeout))
 	defer cancel()
 
-	err := server.Shutdown(ctx)
+	err := service.server.Shutdown(ctx)
 	if err != nil {
 		log.Warn(restStoppedLogMsg, "error", err)
 	}
-	err = server.Close()
+	err = service.server.Close()
 	if err != nil {
 		log.Warn(restStoppedLogMsg, "error", err)
 	}
 
-	server = nil
-	storageKeyBytes, storageKeySecret = nil, nil
-	hasAccess = nil
+	// cleanup service
+	service.server = nil
+	service.storageKeyBytes, service.storageKeySecret = nil, nil
+	service.hasAccess = nil
+	delete(services, name)
 
 	log.Info(restStoppedLogMsg)
 	return nil
 }
 
-func simpleOverwriteCallback(c *gin.Context, m *pwd.Manager) {
+func simpleOverwriteCallback(c *gin.Context, m *pwd.Manager, s *restService) {
 	logContext(c)
 
 	var data simpleOverwriteData
@@ -176,13 +194,13 @@ func simpleOverwriteCallback(c *gin.Context, m *pwd.Manager) {
 	ip := c.ClientIP()
 	url := c.Request.URL.String()
 	id := pwd.NormalizeId(defaultId)
-	if !hasAccess(data.AccessToken, ip, url, id) {
+	if !s.hasAccess(data.AccessToken, ip, url, id) {
 		log.Warn(accessDeniedLogMsg, "ip", ip, "resource", url, "id", id, "token", data.AccessToken)
 		c.JSON(http.StatusForbidden, gin.H{})
 		return
 	}
 
-	err = m.Overwrite(defaultId, data.Password, getStorageKey())
+	err = m.Overwrite(defaultId, data.Password, getStorageKey(s))
 	if err != nil {
 		log.Error("rest: Overwrite failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -192,7 +210,7 @@ func simpleOverwriteCallback(c *gin.Context, m *pwd.Manager) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
-func simpleGetCallback(c *gin.Context, m *pwd.Manager) {
+func simpleGetCallback(c *gin.Context, m *pwd.Manager, s *restService) {
 	logContext(c)
 
 	var data simpleGetData
@@ -206,13 +224,13 @@ func simpleGetCallback(c *gin.Context, m *pwd.Manager) {
 	ip := c.ClientIP()
 	url := c.Request.URL.String()
 	id := pwd.NormalizeId(defaultId)
-	if !hasAccess(data.AccessToken, ip, url, id) {
+	if !s.hasAccess(data.AccessToken, ip, url, id) {
 		log.Warn(accessDeniedLogMsg, "ip", ip, "resource", url, "id", id, "token", data.AccessToken)
 		c.JSON(http.StatusForbidden, gin.H{})
 		return
 	}
 
-	password, err := m.Get(defaultId, getStorageKey())
+	password, err := m.Get(defaultId, getStorageKey(s))
 	if err != nil {
 		log.Error("rest: Get failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -222,7 +240,7 @@ func simpleGetCallback(c *gin.Context, m *pwd.Manager) {
 	c.JSON(http.StatusOK, gin.H{"password": password})
 }
 
-func simpleCheckCallback(c *gin.Context, m *pwd.Manager) {
+func simpleCheckCallback(c *gin.Context, m *pwd.Manager, s *restService) {
 	logContext(c)
 
 	var data simpleCheckData
@@ -236,13 +254,13 @@ func simpleCheckCallback(c *gin.Context, m *pwd.Manager) {
 	ip := c.ClientIP()
 	url := c.Request.URL.String()
 	id := pwd.NormalizeId(defaultId)
-	if !hasAccess(data.AccessToken, ip, url, id) {
+	if !s.hasAccess(data.AccessToken, ip, url, id) {
 		log.Warn(accessDeniedLogMsg, "ip", ip, "resource", url, "id", id, "token", data.AccessToken)
 		c.JSON(http.StatusForbidden, gin.H{})
 		return
 	}
 
-	result, err := m.Check(defaultId, data.Password, getStorageKey())
+	result, err := m.Check(defaultId, data.Password, getStorageKey(s))
 	if err != nil {
 		log.Error("rest: Check failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -252,7 +270,7 @@ func simpleCheckCallback(c *gin.Context, m *pwd.Manager) {
 	c.JSON(http.StatusOK, gin.H{"result": result})
 }
 
-func simpleSetCallback(c *gin.Context, m *pwd.Manager) {
+func simpleSetCallback(c *gin.Context, m *pwd.Manager, s *restService) {
 	logContext(c)
 
 	var data simpleSetData
@@ -266,13 +284,13 @@ func simpleSetCallback(c *gin.Context, m *pwd.Manager) {
 	ip := c.ClientIP()
 	url := c.Request.URL.String()
 	id := pwd.NormalizeId(defaultId)
-	if !hasAccess(data.AccessToken, ip, url, id) {
+	if !s.hasAccess(data.AccessToken, ip, url, id) {
 		log.Warn(accessDeniedLogMsg, "ip", ip, "resource", url, "id", id, "token", data.AccessToken)
 		c.JSON(http.StatusForbidden, gin.H{})
 		return
 	}
 
-	err = m.Set(defaultId, data.OldPassword, data.NewPassword, getStorageKey())
+	err = m.Set(defaultId, data.OldPassword, data.NewPassword, getStorageKey(s))
 	if err != nil {
 		log.Error("rest: Set failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -282,7 +300,7 @@ func simpleSetCallback(c *gin.Context, m *pwd.Manager) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
-func simpleUnsetCallback(c *gin.Context, m *pwd.Manager) {
+func simpleUnsetCallback(c *gin.Context, m *pwd.Manager, s *restService) {
 	logContext(c)
 
 	var data simpleUnsetData
@@ -296,13 +314,13 @@ func simpleUnsetCallback(c *gin.Context, m *pwd.Manager) {
 	ip := c.ClientIP()
 	url := c.Request.URL.String()
 	id := pwd.NormalizeId(defaultId)
-	if !hasAccess(data.AccessToken, ip, url, id) {
+	if !s.hasAccess(data.AccessToken, ip, url, id) {
 		log.Warn(accessDeniedLogMsg, "ip", ip, "resource", url, "id", id, "token", data.AccessToken)
 		c.JSON(http.StatusForbidden, gin.H{})
 		return
 	}
 
-	err = m.Unset(defaultId, data.Password, getStorageKey())
+	err = m.Unset(defaultId, data.Password, getStorageKey(s))
 	if err != nil {
 		log.Error("rest: Unset failed", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -312,7 +330,7 @@ func simpleUnsetCallback(c *gin.Context, m *pwd.Manager) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
-func simpleExistsCallback(c *gin.Context, m *pwd.Manager) {
+func simpleExistsCallback(c *gin.Context, m *pwd.Manager, s *restService) {
 	logContext(c)
 
 	var data simpleExistsData
@@ -326,7 +344,7 @@ func simpleExistsCallback(c *gin.Context, m *pwd.Manager) {
 	ip := c.ClientIP()
 	url := c.Request.URL.String()
 	id := pwd.NormalizeId(defaultId)
-	if !hasAccess(data.AccessToken, ip, url, id) {
+	if !s.hasAccess(data.AccessToken, ip, url, id) {
 		log.Warn(accessDeniedLogMsg, "ip", ip, "resource", url, "id", id, "token", data.AccessToken)
 		c.JSON(http.StatusForbidden, gin.H{})
 		return
@@ -342,7 +360,7 @@ func simpleExistsCallback(c *gin.Context, m *pwd.Manager) {
 	c.JSON(http.StatusOK, gin.H{"result": result})
 }
 
-func simpleDeleteCallback(c *gin.Context, m *pwd.Manager) {
+func simpleDeleteCallback(c *gin.Context, m *pwd.Manager, s *restService) {
 	logContext(c)
 
 	var data simpleDeleteData
@@ -356,7 +374,7 @@ func simpleDeleteCallback(c *gin.Context, m *pwd.Manager) {
 	ip := c.ClientIP()
 	url := c.Request.URL.String()
 	id := pwd.NormalizeId(defaultId)
-	if !hasAccess(data.AccessToken, ip, url, id) {
+	if !s.hasAccess(data.AccessToken, ip, url, id) {
 		log.Warn(accessDeniedLogMsg, "ip", ip, "resource", url, "id", id, "token", data.AccessToken)
 		c.JSON(http.StatusForbidden, gin.H{})
 		return

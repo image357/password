@@ -345,8 +345,8 @@ func CPWD__StartMultiService(bindAddress *C.cchar_t, prefix *C.cchar_t, key *C.c
 // For full documentation visit https://github.com/image357/password/blob/main/docs/rest.md
 //
 //export CPWD__StopService
-func CPWD__StopService(timeout int) int {
-	err := rest.StopService(timeout)
+func CPWD__StopService(timeout int, bindAddress *C.cchar_t, prefix *C.cchar_t) int {
+	err := rest.StopService(timeout, C.GoString(bindAddress), C.GoString(prefix))
 	if err != nil {
 		log.Error("CPWD__StopService: rest.StopService failed", "error", err)
 		return -1

@@ -34,8 +34,8 @@ func TestStartSimpleService(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		{"start stop", args{":8080", "/prefix/", "123", FullAccessCallback}, false},
-		{"error", args{":8080", "/another", "123", FullAccessCallback}, true},
+		{"start prefix", args{":8080", "/prefix", "123", FullAccessCallback}, false},
+		{"start another", args{":8080", "/another", "123", FullAccessCallback}, false},
 	}
 	// init
 	err := password.SetStorePath("tests/workdir/StartSimpleService")
@@ -46,8 +46,12 @@ func TestStartSimpleService(t *testing.T) {
 	// tests
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := StartSimpleService(tt.args.bindAddress, tt.args.prefix, tt.args.key, tt.args.callback); (err != nil) != tt.wantErr {
+			if err = StartSimpleService(tt.args.bindAddress, tt.args.prefix, tt.args.key, tt.args.callback); (err != nil) != tt.wantErr {
 				t.Errorf("StartSimpleService() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			time.Sleep(time.Second)
+			if err = StopService(1000, tt.args.bindAddress, tt.args.prefix); (err != nil) != tt.wantErr {
+				t.Errorf("StopService() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
@@ -62,14 +66,12 @@ func TestStartSimpleService(t *testing.T) {
 		t.Error(err)
 	}
 
-	time.Sleep(time.Second)
-	err = StopService(1000)
-	if err != nil {
-		t.Error(err)
+	err = StopService(1000, ":8080", "/prefix")
+	if err == nil {
+		t.Errorf("StopService should have failed")
 	}
 
-	time.Sleep(time.Second)
-	err = StopService(1000)
+	err = StopService(1000, ":8080", "/another")
 	if err == nil {
 		t.Errorf("StopService should have failed")
 	}
@@ -311,7 +313,7 @@ func TestSimpleRestCalls(t *testing.T) {
 	}
 
 	time.Sleep(time.Second)
-	err = StopService(1000)
+	err = StopService(1000, ":8080", "/prefix")
 	if err != nil {
 		t.Error(err)
 	}
