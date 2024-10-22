@@ -301,7 +301,6 @@ func TestSimpleRestCalls(t *testing.T) {
 	}
 
 	// cleanup
-	password.SetDefaultManager(password.Managers["rest manager: :8080/prefix"])
 	path, err := password.GetStorePath()
 	if err != nil {
 		t.Error(err)

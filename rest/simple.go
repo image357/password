@@ -100,7 +100,6 @@ func logContext(c *gin.Context) {
 // StartSimpleService creates a single password rest service.
 // The service binds to "/prefix/overwrite" (PUT), "/prefix/get" (GET), "/prefix/check" (GET), "/prefix/set" (PUT), "/prefix/unset" (DELETE), "/prefix/delete" (DELETE).
 // The callback of type TestAccessFunc will be called for every request to determine access.
-// Warning: calling this function will reset the default password manager and register the current one as "rest manger: bindAddress/prefix".
 func StartSimpleService(bindAddress string, prefix string, key string, callback TestAccessFunc) error {
 	engine, err := setupEngine(bindAddress, key, callback)
 	if err != nil {
@@ -116,7 +115,6 @@ func StartSimpleService(bindAddress string, prefix string, key string, callback 
 	localUnsetCallback := func(c *gin.Context) { simpleUnsetCallback(c, m) }
 	localExistsCallback := func(c *gin.Context) { simpleExistsCallback(c, m) }
 	localDeleteCallback := func(c *gin.Context) { simpleDeleteCallback(c, m) }
-	pwd.RegisterDefaultManager("rest manager: " + pathlib.Join(bindAddress+"/"+prefix))
 
 	// setup rest endpoints
 	engine.PUT(pathlib.Join("/", pwd.NormalizeId(prefix), "/overwrite"), localOverwriteCallback)

@@ -60,7 +60,6 @@ type multiCleanData struct {
 // StartMultiService creates a multi password rest service.
 // The service binds to "/prefix/overwrite" (PUT), "/prefix/get" (GET), "/prefix/check" (GET), "/prefix/set" (PUT), "/prefix/unset" (DELETE), "/prefix/list" (GET), "/prefix/delete" (DELETE), "/prefix/clean" (DELETE).
 // The callback of type TestAccessFunc will be called for every request to determine access.
-// Warning: calling this function will reset the default password manager and register the current one as "rest manger: bindAddress/prefix".
 func StartMultiService(bindAddress string, prefix string, key string, callback TestAccessFunc) error {
 	engine, err := setupEngine(bindAddress, key, callback)
 	if err != nil {
@@ -78,7 +77,6 @@ func StartMultiService(bindAddress string, prefix string, key string, callback T
 	localListCallback := func(c *gin.Context) { multiListCallback(c, m) }
 	localDeleteCallback := func(c *gin.Context) { multiDeleteCallback(c, m) }
 	localCleanCallback := func(c *gin.Context) { multiCleanCallback(c, m) }
-	pwd.RegisterDefaultManager("rest manager: " + pathlib.Join(bindAddress+"/"+prefix))
 
 	// setup rest endpoints
 	engine.PUT(pathlib.Join("/", pwd.NormalizeId(prefix), "/overwrite"), localOverwriteCallback)
