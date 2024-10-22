@@ -19,8 +19,8 @@ const storageFileMode os.FileMode = 0600
 // storageDirMode controls the directory permission set by this package.
 const storageDirMode os.FileMode = 0700
 
-// fileStorage is a file based storage backend.
-type fileStorage struct {
+// FileStorage is a file based storage backend.
+type FileStorage struct {
 	// storePath holds the absolute storage path.
 	storePath string
 
@@ -37,8 +37,8 @@ type fileStorage struct {
 	storageTreeMutex sync.Mutex
 }
 
-func newFileStorage() *fileStorage {
-	f := new(fileStorage)
+func NewFileStorage() *FileStorage {
+	f := new(FileStorage)
 
 	f.SetStorePath("./password")
 	f.SetFileEnding("pwd")
@@ -49,12 +49,12 @@ func newFileStorage() *fileStorage {
 }
 
 // GetStorePath returns the current storage path with system-specific path separators.
-func (f *fileStorage) GetStorePath() string {
+func (f *FileStorage) GetStorePath() string {
 	return filepath.FromSlash(f.storePath)
 }
 
 // SetStorePath accepts a new storage path with system-unspecific or mixed path separators.
-func (f *fileStorage) SetStorePath(path string) {
+func (f *FileStorage) SetStorePath(path string) {
 	temp, err := filepath.Abs(path)
 	if err != nil {
 		log.Warn("cannot resolve absolute storage path", "path", path)
@@ -66,24 +66,24 @@ func (f *fileStorage) SetStorePath(path string) {
 }
 
 // GetFileEnding returns the current file ending of storage files.
-func (f *fileStorage) GetFileEnding() string {
+func (f *FileStorage) GetFileEnding() string {
 	return f.fileEnding
 }
 
 // SetFileEnding accepts a new file ending for storage files.
-func (f *fileStorage) SetFileEnding(e string) {
+func (f *FileStorage) SetFileEnding(e string) {
 	f.fileEnding = strings.ToLower(strings.TrimPrefix(e, "."))
 }
 
 // FilePath returns the storage filepath of a given password-id with system-specific path separators.
 // It accepts system-unspecific or mixed id separators, i.e. forward- and backward-slashes are treated as the same character.
-func (f *fileStorage) FilePath(id string) string {
+func (f *FileStorage) FilePath(id string) string {
 	id = NormalizeId(id)
 	return filepath.FromSlash(pathlib.Join(f.storePath, id+"."+f.fileEnding))
 }
 
 // lockId locks a storage id mutex by first locking the storage tree and increasing lock count.
-func (f *fileStorage) lockId(id string) {
+func (f *FileStorage) lockId(id string) {
 	id = NormalizeId(id)
 	f.storageTreeMutex.Lock()
 
@@ -100,7 +100,7 @@ func (f *fileStorage) lockId(id string) {
 
 // unlockId locks a storage id mutex by first locking the storage tree and decreasing lock count.
 // The storage tree is cleaned from id if lock count is zero.
-func (f *fileStorage) unlockId(id string) {
+func (f *FileStorage) unlockId(id string) {
 	id = NormalizeId(id)
 	f.storageTreeMutex.Lock()
 
@@ -125,7 +125,7 @@ func (f *fileStorage) unlockId(id string) {
 // Store (create/overwrite) the provided data in a file.
 // id is converted to the corresponding filepath.
 // If necessary, subfolders are created.
-func (f *fileStorage) Store(id string, data string) error {
+func (f *FileStorage) Store(id string, data string) error {
 	filePath := f.FilePath(id)
 	folderPath, _ := filepath.Split(filePath)
 	if folderPath != "" {
@@ -149,7 +149,7 @@ func (f *fileStorage) Store(id string, data string) error {
 
 // Retrieve data from an existing file.
 // id is converted to the corresponding filepath.
-func (f *fileStorage) Retrieve(id string) (string, error) {
+func (f *FileStorage) Retrieve(id string) (string, error) {
 	f.lockId(id)
 	textBytes, err := os.ReadFile(f.FilePath(id))
 	f.unlockId(id)
@@ -166,7 +166,7 @@ func (f *fileStorage) Retrieve(id string) (string, error) {
 }
 
 // Exists tests if a given id already exists in the storage backend.
-func (f *fileStorage) Exists(id string) (bool, error) {
+func (f *FileStorage) Exists(id string) (bool, error) {
 	_, err := os.Stat(f.FilePath(id))
 	if err == nil {
 		return true, nil
@@ -178,7 +178,7 @@ func (f *fileStorage) Exists(id string) (bool, error) {
 }
 
 // List all stored password-ids.
-func (f *fileStorage) List() ([]string, error) {
+func (f *FileStorage) List() ([]string, error) {
 	list := make([]string, 0, 16)
 	err := filepath.WalkDir(f.GetStorePath(), func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -212,7 +212,7 @@ func (f *fileStorage) List() ([]string, error) {
 }
 
 // Delete an existing password.
-func (f *fileStorage) Delete(id string) error {
+func (f *FileStorage) Delete(id string) error {
 	f.lockId(id)
 	err := os.Remove(f.FilePath(id))
 	f.unlockId(id)
@@ -224,7 +224,7 @@ func (f *fileStorage) Delete(id string) error {
 }
 
 // Clean (delete) all stored passwords.
-func (f *fileStorage) Clean() error {
+func (f *FileStorage) Clean() error {
 	list, err := f.List()
 	if err != nil {
 		return err

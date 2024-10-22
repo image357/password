@@ -36,8 +36,8 @@ func GetStorePath() (string, error) {
 	m := GetDefaultManager()
 
 	switch m.storageBackend.(type) {
-	case *fileStorage:
-		return m.storageBackend.(*fileStorage).GetStorePath(), nil
+	case *FileStorage:
+		return m.storageBackend.(*FileStorage).GetStorePath(), nil
 	}
 
 	return "", unsupportedError
@@ -48,8 +48,8 @@ func SetStorePath(path string) error {
 	m := GetDefaultManager()
 
 	switch m.storageBackend.(type) {
-	case *fileStorage:
-		m.storageBackend.(*fileStorage).SetStorePath(path)
+	case *FileStorage:
+		m.storageBackend.(*FileStorage).SetStorePath(path)
 		return nil
 	}
 
@@ -61,8 +61,8 @@ func GetFileEnding() (string, error) {
 	m := GetDefaultManager()
 
 	switch m.storageBackend.(type) {
-	case *fileStorage:
-		return m.storageBackend.(*fileStorage).GetFileEnding(), nil
+	case *FileStorage:
+		return m.storageBackend.(*FileStorage).GetFileEnding(), nil
 	}
 
 	return "", unsupportedError
@@ -73,8 +73,8 @@ func SetFileEnding(e string) error {
 	m := GetDefaultManager()
 
 	switch m.storageBackend.(type) {
-	case *fileStorage:
-		m.storageBackend.(*fileStorage).SetFileEnding(e)
+	case *FileStorage:
+		m.storageBackend.(*FileStorage).SetFileEnding(e)
 		return nil
 	}
 
@@ -87,8 +87,8 @@ func FilePath(id string) (string, error) {
 	m := GetDefaultManager()
 
 	switch m.storageBackend.(type) {
-	case *fileStorage:
-		return m.storageBackend.(*fileStorage).FilePath(id), nil
+	case *FileStorage:
+		return m.storageBackend.(*FileStorage).FilePath(id), nil
 	}
 
 	return "", unsupportedError

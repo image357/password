@@ -28,7 +28,7 @@ func NewManager() *Manager {
 
 	m.HashPassword = false
 	m.withRecovery = false
-	m.storageBackend = newFileStorage()
+	m.storageBackend = NewFileStorage()
 
 	return m
 }
