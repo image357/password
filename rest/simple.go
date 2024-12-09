@@ -110,7 +110,14 @@ func logContext(c *gin.Context) {
 }
 
 // StartSimpleService creates a single password rest service.
-// The service binds to "/prefix/overwrite" (PUT), "/prefix/get" (GET), "/prefix/check" (GET), "/prefix/set" (PUT), "/prefix/unset" (DELETE), "/prefix/delete" (DELETE).
+// The service binds to
+// "/prefix/overwrite" (PUT),
+// "/prefix/get" (GET),
+// "/prefix/check" (GET),
+// "/prefix/set" (PUT),
+// "/prefix/unset" (DELETE),
+// "/prefix/exists" (GET),
+// "/prefix/delete" (DELETE).
 // The callback of type TestAccessFunc will be called for every request to determine access.
 func StartSimpleService(bindAddress string, prefix string, key string, callback TestAccessFunc) error {
 	engine, service, err := setupService(bindAddress, prefix, key, callback)

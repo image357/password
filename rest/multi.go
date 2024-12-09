@@ -58,7 +58,16 @@ type multiCleanData struct {
 }
 
 // StartMultiService creates a multi password rest service.
-// The service binds to "/prefix/overwrite" (PUT), "/prefix/get" (GET), "/prefix/check" (GET), "/prefix/set" (PUT), "/prefix/unset" (DELETE), "/prefix/list" (GET), "/prefix/delete" (DELETE), "/prefix/clean" (DELETE).
+// The service binds to
+// "/prefix/overwrite" (PUT),
+// "/prefix/get" (GET),
+// "/prefix/check" (GET),
+// "/prefix/set" (PUT),
+// "/prefix/unset" (DELETE),
+// "/prefix/exists" (GET),
+// "/prefix/list" (GET),
+// "/prefix/delete" (DELETE),
+// "/prefix/clean" (DELETE).
 // The callback of type TestAccessFunc will be called for every request to determine access.
 func StartMultiService(bindAddress string, prefix string, key string, callback TestAccessFunc) error {
 	engine, service, err := setupService(bindAddress, prefix, key, callback)
