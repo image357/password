@@ -23,12 +23,12 @@ func normalizeSeparator(id string) string {
 }
 
 // NormalizeId transforms path to lower case letters and normalizes the path separator
-func NormalizeId(path string) string {
-	path = strings.ToLower(path)
-	path = normalizeSeparator(path)
-	path = pathlib.Join("/", path)
-	path = strings.TrimPrefix(path, "/")
-	return pathlib.Clean(path)
+func NormalizeId(id string) string {
+	id = strings.ToLower(id)
+	id = normalizeSeparator(id)
+	id = pathlib.Join("/", id)
+	id = strings.TrimPrefix(id, "/")
+	return pathlib.Clean(id)
 }
 
 // GetStorePath returns the current storage path with system-specific path separators.
