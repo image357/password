@@ -13,6 +13,15 @@ import (
 	"unicode/utf8"
 )
 
+// DefaultStorePath is the default relative storage path of a file storage backend.
+const DefaultStorePath = "./password"
+
+// DefaultFileEnding is the default file ending for password files of a file storage backend.
+const DefaultFileEnding string = "pwd"
+
+// RecoveryIdSuffix stores the id and file suffix that identifies recovery key files.
+const RecoveryIdSuffix string = ".recovery"
+
 // storageFileMode controls the file permission set by this package.
 const storageFileMode os.FileMode = 0600
 
@@ -40,8 +49,8 @@ type FileStorage struct {
 func NewFileStorage() *FileStorage {
 	f := new(FileStorage)
 
-	f.SetStorePath("./password")
-	f.SetFileEnding("pwd")
+	f.SetStorePath(DefaultStorePath)
+	f.SetFileEnding(DefaultFileEnding)
 	f.storageTree = make(map[string]*sync.Mutex)
 	f.storageTreeLockCount = make(map[string]int)
 

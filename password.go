@@ -1,8 +1,5 @@
 package password
 
-// RecoveryIdSuffix stores the id and file suffix that identifies recovery key files.
-const RecoveryIdSuffix string = ".recovery"
-
 // Managers stores a map of string identifiers for all created password managers.
 // The identifier "default" always holds the default manager from GetDefaultManager.
 // It can be set via SetDefaultManager. Do not manipulate directly.
