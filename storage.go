@@ -18,8 +18,8 @@ type Storage interface {
 }
 
 // normalizeSeparator replaces all backward-slash ("\\") with forward-slash ("/") characters
-func normalizeSeparator(id string) string {
-	return strings.ReplaceAll(id, "\\", "/")
+func normalizeSeparator(s string) string {
+	return strings.ReplaceAll(s, "\\", "/")
 }
 
 // NormalizeId transforms path to lower case letters and normalizes the path separator
