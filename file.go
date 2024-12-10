@@ -19,9 +19,6 @@ const DefaultStorePath = "./password"
 // DefaultFileEnding is the default file ending for password files of a file storage backend.
 const DefaultFileEnding string = "pwd"
 
-// RecoveryIdSuffix stores the id and file suffix that identifies recovery key files.
-const RecoveryIdSuffix string = ".recovery"
-
 // storageFileMode controls the file permission set by this package.
 const storageFileMode os.FileMode = 0600
 

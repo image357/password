@@ -6,6 +6,9 @@ import (
 	"strings"
 )
 
+// RecoveryIdSuffix stores the id and file suffix that identifies recovery key files.
+const RecoveryIdSuffix string = ".recovery"
+
 type Manager struct {
 	// HashPassword signals if passwords will be stored as hashes.
 	HashPassword bool
