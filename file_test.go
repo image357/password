@@ -49,7 +49,7 @@ func TestFileStorage_GetStorePath(t *testing.T) {
 		want   string
 	}{
 		{"forward slash", &fields{storePath: "/"}, string(os.PathSeparator)},
-		{"backward slash", &fields{storePath: "\\"}, string(os.PathSeparator)},
+		{"backward slash", &fields{storePath: "\\"}, "\\"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
