@@ -118,7 +118,7 @@ func TestGetFileEnding(t *testing.T) {
 		{"normal", args{"pwd"}, "pwd"},
 		{"mixed caps", args{"PwD"}, "pwd"},
 		{"dot prefix", args{".pwd"}, "pwd"},
-		{"double prefix", args{"..pwd"}, ".pwd"},
+		{"double prefix", args{"..pwd"}, "pwd"},
 		{"mixed dot", args{".pwd.old"}, "pwd.old"},
 	}
 	for _, tt := range tests {

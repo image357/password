@@ -107,3 +107,34 @@ func TestFileStorage_SetStorePath(t *testing.T) {
 		})
 	}
 }
+
+func TestFileStorage_GetFileEnding(t *testing.T) {
+	type fields struct {
+		fileEnding string
+	}
+	tests := []struct {
+		name   string
+		fields *fields
+		want   string
+	}{
+		{"lower case", &fields{fileEnding: "foobar"}, "foobar"},
+		{"upper case", &fields{fileEnding: "FOOBAR"}, "FOOBAR"},
+		{"mixed case", &fields{fileEnding: "FooBar"}, "FooBar"},
+		{"prefix", &fields{fileEnding: ".foobar"}, ".foobar"},
+		{"double prefix", &fields{fileEnding: "..foobar"}, "..foobar"},
+		{"suffix", &fields{fileEnding: "foobar."}, "foobar."},
+		{"double suffix", &fields{fileEnding: "foobar.."}, "foobar.."},
+		{"prefix and suffix", &fields{fileEnding: ".foobar."}, ".foobar."},
+		{"mixed dot", &fields{fileEnding: "foo.bar"}, "foo.bar"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			f := &FileStorage{
+				fileEnding: tt.fields.fileEnding,
+			}
+			if got := f.GetFileEnding(); got != tt.want {
+				t.Errorf("GetFileEnding() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

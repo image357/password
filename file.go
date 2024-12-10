@@ -78,7 +78,7 @@ func (f *FileStorage) GetFileEnding() string {
 
 // SetFileEnding accepts a new file ending for storage files.
 func (f *FileStorage) SetFileEnding(e string) {
-	f.fileEnding = strings.ToLower(strings.TrimPrefix(e, "."))
+	f.fileEnding = strings.ToLower(strings.Trim(e, "."))
 }
 
 // FilePath returns the storage filepath of a given password-id with system-specific path separators.
