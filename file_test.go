@@ -102,7 +102,7 @@ func TestFileStorage_SetStorePath(t *testing.T) {
 			got := f.storePath
 
 			if got != expected {
-				t.Errorf("storePath = %v, want %v", got, tt.want)
+				t.Errorf("f.storePath = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -134,6 +134,37 @@ func TestFileStorage_GetFileEnding(t *testing.T) {
 			}
 			if got := f.GetFileEnding(); got != tt.want {
 				t.Errorf("GetFileEnding() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFileStorage_SetFileEnding(t *testing.T) {
+	type args struct {
+		e string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{"lower case", args{e: "foobar"}, "foobar"},
+		{"upper case", args{e: "FOOBAR"}, "foobar"},
+		{"mixed case", args{e: "FooBar"}, "foobar"},
+		{"prefix", args{e: ".foobar"}, "foobar"},
+		{"double prefix", args{e: "..foobar"}, "foobar"},
+		{"suffix", args{e: "foobar."}, "foobar"},
+		{"double suffix", args{e: "foobar.."}, "foobar"},
+		{"prefix and suffix", args{e: ".foobar."}, "foobar"},
+		{"mixed dot", args{e: "foo.bar"}, "foo.bar"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			f := NewFileStorage()
+			f.SetFileEnding(tt.args.e)
+
+			if got := f.fileEnding; got != tt.want {
+				t.Errorf("f.fileEnding = %v, want %v", got, tt.want)
 			}
 		})
 	}
