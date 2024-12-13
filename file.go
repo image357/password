@@ -91,40 +91,50 @@ func (f *FileStorage) FilePath(id string) string {
 // lockId locks a storage id mutex by first locking the storage tree and increasing lock count.
 func (f *FileStorage) lockId(id string) {
 	id = NormalizeId(id)
-	f.storageTreeMutex.Lock()
 
+	// get mutex with side effects (create if necessary)
+	f.storageTreeMutex.Lock()
 	idMutex, ok := f.storageTree[id]
 	if !ok {
 		idMutex = &sync.Mutex{}
 		f.storageTree[id] = idMutex
 	}
-	idMutex.Lock()
 	f.storageTreeLockCount[id]++
-
 	f.storageTreeMutex.Unlock()
+
+	// lock mutex
+	idMutex.Lock()
 }
 
 // unlockId locks a storage id mutex by first locking the storage tree and decreasing lock count.
 // The storage tree is cleaned from id if lock count is zero.
 func (f *FileStorage) unlockId(id string) {
 	id = NormalizeId(id)
-	f.storageTreeMutex.Lock()
 
+	// try get mutex without side effects
+	f.storageTreeMutex.Lock()
 	idMutex, ok := f.storageTree[id]
 	if !ok {
 		delete(f.storageTree, id)
 		delete(f.storageTreeLockCount, id)
+	}
+	f.storageTreeMutex.Unlock()
+
+	if !ok {
+		// abort on missing mutex
 		return
+	} else {
+		// unlock mutex
+		idMutex.Unlock()
 	}
 
-	idMutex.Unlock()
+	// cleanup if last lock
+	f.storageTreeMutex.Lock()
 	f.storageTreeLockCount[id]--
-
 	if f.storageTreeLockCount[id] <= 0 {
 		delete(f.storageTree, id)
 		delete(f.storageTreeLockCount, id)
 	}
-
 	f.storageTreeMutex.Unlock()
 }
 
