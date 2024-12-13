@@ -119,3 +119,33 @@ func TestSetStorePath(t *testing.T) {
 		})
 	}
 }
+
+func TestGetFileEnding(t *testing.T) {
+	tests := []struct {
+		name    string
+		backend Storage
+		want    string
+		wantErr bool
+	}{
+		{"pass", &FileStorage{fileEnding: "foobar"}, "foobar", false},
+		{"fail", nil, "", true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			RegisterDefaultManager("old")
+			currentManager := GetDefaultManager()
+			currentManager.storageBackend = tt.backend
+
+			got, err := GetFileEnding()
+
+			SetDefaultManager(Managers["old"])
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetFileEnding() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("GetFileEnding() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
