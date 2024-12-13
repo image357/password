@@ -220,11 +220,12 @@ func TestFileStorage_lockId(t *testing.T) {
 			// first lock
 			f.lockId(tt.args.id)
 
+			// tests
 			success := f.storageTreeMutex.TryLock()
 			if !success {
 				t.Fatalf("storageTreeMutex.TryLock() = %v", success)
 			}
-			//f.storageTreeMutex.Unlock()
+			f.storageTreeMutex.Unlock()
 
 			if lenStorageTree := len(f.storageTree); lenStorageTree != 1 {
 				t.Fatalf("len(f.storageTree) = %v, want %v", lenStorageTree, 1)
@@ -241,6 +242,75 @@ func TestFileStorage_lockId(t *testing.T) {
 			success = f.storageTree[NormalizeId(tt.args.id)].TryLock()
 			if success {
 				t.Fatalf("storageTree[NormalizeId(id)].TryLock() = %v", success)
+			}
+		})
+	}
+}
+
+func TestFileStorage_unlockId(t *testing.T) {
+	type args struct {
+		id string
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{"pass", args{"some/id"}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			f := NewFileStorage()
+
+			// initial tests
+			success := f.storageTreeMutex.TryLock()
+			if !success {
+				t.Fatalf("storageTreeMutex.TryLock() = %v", success)
+			}
+			f.storageTreeMutex.Unlock()
+
+			if lenStorageTree := len(f.storageTree); lenStorageTree != 0 {
+				t.Fatalf("len(f.storageTree) = %v, want %v", lenStorageTree, 0)
+			}
+
+			if lenStorageTreeLockCount := len(f.storageTreeLockCount); lenStorageTreeLockCount != 0 {
+				t.Fatalf("len(f.storageTreeLockCount) = %v, want %v", lenStorageTreeLockCount, 0)
+			}
+
+			// unlock without previous lock
+			f.unlockId(tt.args.id)
+
+			// first unlock tests
+			success = f.storageTreeMutex.TryLock()
+			if !success {
+				t.Fatalf("storageTreeMutex.TryLock() = %v", success)
+			}
+			f.storageTreeMutex.Unlock()
+
+			if lenStorageTree := len(f.storageTree); lenStorageTree != 0 {
+				t.Fatalf("len(f.storageTree) = %v, want %v", lenStorageTree, 0)
+			}
+
+			if lenStorageTreeLockCount := len(f.storageTreeLockCount); lenStorageTreeLockCount != 0 {
+				t.Fatalf("len(f.storageTreeLockCount) = %v, want %v", lenStorageTreeLockCount, 0)
+			}
+
+			// lock then unlock
+			f.lockId(tt.args.id)
+			f.unlockId(tt.args.id)
+
+			// second unlock tests
+			success = f.storageTreeMutex.TryLock()
+			if !success {
+				t.Fatalf("storageTreeMutex.TryLock() = %v", success)
+			}
+			f.storageTreeMutex.Unlock()
+
+			if lenStorageTree := len(f.storageTree); lenStorageTree != 0 {
+				t.Fatalf("len(f.storageTree) = %v, want %v", lenStorageTree, 0)
+			}
+
+			if lenStorageTreeLockCount := len(f.storageTreeLockCount); lenStorageTreeLockCount != 0 {
+				t.Fatalf("len(f.storageTreeLockCount) = %v, want %v", lenStorageTreeLockCount, 0)
 			}
 		})
 	}
