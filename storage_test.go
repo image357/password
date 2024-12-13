@@ -31,7 +31,7 @@ func Test_normalizeSeparator(t *testing.T) {
 	}
 }
 
-func Test_normalizePath(t *testing.T) {
+func Test_NormalizeId(t *testing.T) {
 	type args struct {
 		path string
 	}
