@@ -74,14 +74,47 @@ func TestGetStorePath(t *testing.T) {
 			RegisterDefaultManager("old")
 			currentManager := GetDefaultManager()
 			currentManager.storageBackend = tt.backend
+
 			got, err := GetStorePath()
+
 			SetDefaultManager(Managers["old"])
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetStorePath() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
 				t.Errorf("GetStorePath() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestSetStorePath(t *testing.T) {
+	type args struct {
+		path string
+	}
+	tests := []struct {
+		name    string
+		backend Storage
+		args    args
+		wantErr bool
+	}{
+		{"pass", NewFileStorage(), args{"some/path"}, false},
+		{"fail", nil, args{"some/path"}, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			RegisterDefaultManager("old")
+			currentManager := GetDefaultManager()
+			currentManager.storageBackend = tt.backend
+
+			err := SetStorePath(tt.args.path)
+
+			SetDefaultManager(Managers["old"])
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("SetStorePath() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
