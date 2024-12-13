@@ -202,3 +202,46 @@ func TestFileStorage_FilePath(t *testing.T) {
 		})
 	}
 }
+
+func TestFileStorage_lockId(t *testing.T) {
+	type args struct {
+		id string
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{"pass", args{"some/id"}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			f := NewFileStorage()
+
+			// first lock
+			f.lockId(tt.args.id)
+
+			success := f.storageTreeMutex.TryLock()
+			if !success {
+				t.Fatalf("storageTreeMutex.TryLock() = %v", success)
+			}
+			//f.storageTreeMutex.Unlock()
+
+			if lenStorageTree := len(f.storageTree); lenStorageTree != 1 {
+				t.Fatalf("len(f.storageTree) = %v, want %v", lenStorageTree, 1)
+			}
+
+			if lenStorageTreeLockCount := len(f.storageTreeLockCount); lenStorageTreeLockCount != 1 {
+				t.Fatalf("len(f.storageTreeLockCount) = %v, want %v", lenStorageTreeLockCount, 1)
+			}
+
+			if numLocks := f.storageTreeLockCount[NormalizeId(tt.args.id)]; numLocks != 1 {
+				t.Fatalf("storageTreeLockCount[NormalizeId(id)] = %v, want %v", numLocks, 1)
+			}
+
+			success = f.storageTree[NormalizeId(tt.args.id)].TryLock()
+			if success {
+				t.Fatalf("storageTree[NormalizeId(id)].TryLock() = %v", success)
+			}
+		})
+	}
+}
