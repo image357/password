@@ -169,3 +169,36 @@ func TestFileStorage_SetFileEnding(t *testing.T) {
 		})
 	}
 }
+
+func TestFileStorage_FilePath(t *testing.T) {
+	type fields struct {
+		storePath  string
+		fileEnding string
+	}
+	type args struct {
+		id string
+	}
+	tests := []struct {
+		name   string
+		fields *fields
+		args   args
+		want   string
+	}{
+		{"normal", &fields{storePath: "mIxEd/Path", fileEnding: "pwd"}, args{"Filename"}, filepath.FromSlash("mIxEd/Path/filename.pwd")},
+		{"forward slash", &fields{storePath: "mIxEd/Path", fileEnding: "pwd"}, args{"Path/tO/fIle/filEname"}, filepath.FromSlash("mIxEd/Path/path/to/file/filename.pwd")},
+		{"backward slash", &fields{storePath: "mIxEd/Path", fileEnding: "pwd"}, args{"Path\\tO\\fIle\\filEname"}, filepath.FromSlash("mIxEd/Path/path/to/file/filename.pwd")},
+		{"mixed slash", &fields{storePath: "mIxEd/Path", fileEnding: "pwd"}, args{"Path/tO\\fIle/filEname"}, filepath.FromSlash("mIxEd/Path/path/to/file/filename.pwd")},
+		{"relative path", &fields{storePath: "mIxEd/Path", fileEnding: "pwd"}, args{"Path/../tO/fIle/filEname"}, filepath.FromSlash("mIxEd/Path/to/file/filename.pwd")},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			f := &FileStorage{
+				storePath:  tt.fields.storePath,
+				fileEnding: tt.fields.fileEnding,
+			}
+			if got := f.FilePath(tt.args.id); got != tt.want {
+				t.Errorf("FilePath() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
