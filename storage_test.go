@@ -180,3 +180,38 @@ func TestSetFileEnding(t *testing.T) {
 		})
 	}
 }
+
+func TestFilePath(t *testing.T) {
+	type args struct {
+		id string
+	}
+	tests := []struct {
+		name    string
+		backend Storage
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{"pass", &FileStorage{storePath: "some/path", fileEnding: "ending"}, args{"some/id"}, filepath.FromSlash("some/path/some/id.ending"), false},
+		{"fail", nil, args{"some/id"}, filepath.FromSlash(""), true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			RegisterDefaultManager("old")
+			currentManager := GetDefaultManager()
+			currentManager.storageBackend = tt.backend
+
+			got, err := FilePath(tt.args.id)
+
+			SetDefaultManager(Managers["old"])
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("FilePath() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("FilePath() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
