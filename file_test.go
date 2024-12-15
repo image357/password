@@ -511,3 +511,41 @@ func TestFileStorage_List(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestFileStorage_Delete(t *testing.T) {
+	type args struct {
+		id string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"some id", args{"some/id"}, false},
+		{"missing id", args{"missing/id"}, true},
+	}
+	// init
+	f := NewFileStorage()
+	f.SetStorePath("tests/workdir/FileStorage_List")
+
+	err := f.Store("some/id", "some data")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// tests
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := f.Delete(tt.args.id); (err != nil) != tt.wantErr {
+				t.Errorf("Delete() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+
+	// cleanup
+	path := f.GetStorePath()
+	err = os.RemoveAll(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
