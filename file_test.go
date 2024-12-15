@@ -459,3 +459,55 @@ func TestFileStorage_Exists(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestFileStorage_List(t *testing.T) {
+	type args struct {
+		ids []string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []string
+		wantErr bool
+	}{
+		{"single", args{[]string{"filename"}}, []string{"filename"}, false},
+		{"multi", args{[]string{"a", "c", "b"}}, []string{"a", "b", "c"}, false},
+		{"forward slash", args{[]string{"a/foo", "c/bar", "b/baz"}}, []string{"a/foo", "b/baz", "c/bar"}, false},
+		{"backward slash", args{[]string{"a\\foo", "c\\bar", "b\\baz"}}, []string{"a/foo", "b/baz", "c/bar"}, false},
+		{"mixed slash", args{[]string{"a", "c/bar", "b\\baz"}}, []string{"a", "b/baz", "c/bar"}, false},
+	}
+	// init
+	f := NewFileStorage()
+	f.SetStorePath("tests/workdir/FileStorage_List")
+
+	// tests
+	for _, tt := range tests {
+		for _, id := range tt.args.ids {
+			err := f.Store(id, "123")
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := f.List()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("List() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("List() got = %v, want %v", got, tt.want)
+			}
+		})
+		err := f.Clean()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	// cleanup
+	path := f.GetStorePath()
+	err := os.RemoveAll(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
