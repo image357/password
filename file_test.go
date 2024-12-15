@@ -315,3 +315,47 @@ func TestFileStorage_unlockId(t *testing.T) {
 		})
 	}
 }
+
+func TestFileStorage_Store(t *testing.T) {
+	type args struct {
+		id   string
+		data string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"create", args{"some/id", "some data"}, false},
+		{"overwrite", args{"some/id", "another data"}, false},
+		{"create another", args{"another/id", "another data"}, false},
+	}
+	// init
+	f := NewFileStorage()
+	f.SetStorePath("tests/workdir/FileStorage_Store")
+
+	// tests
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := f.Store(tt.args.id, tt.args.data); (err != nil) != tt.wantErr {
+				t.Errorf("Store() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			bytes, err := os.ReadFile(f.FilePath(tt.args.id))
+			if (err != nil) != tt.wantErr {
+				t.Errorf("os.ReadFile() error = %v", err)
+			}
+
+			if string(bytes) != tt.args.data {
+				t.Errorf("os.ReadFile() = %v, want %v", string(bytes), tt.args.data)
+			}
+		})
+	}
+
+	// cleanup
+	path := f.GetStorePath()
+	err := os.RemoveAll(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
