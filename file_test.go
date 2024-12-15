@@ -409,3 +409,53 @@ func TestFileStorage_Retrieve(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestFileStorage_Exists(t *testing.T) {
+	type args struct {
+		id string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    bool
+		wantErr bool
+	}{
+		{"some id", args{"some/id"}, true, false},
+		{"another id", args{"another/id"}, true, false},
+		{"missing id", args{"missing/id"}, false, false},
+	}
+	// init
+	f := NewFileStorage()
+	f.SetStorePath("tests/workdir/FileStorage_Exists")
+
+	err := f.Store("some/id", "some data")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = f.Store("another/id", "some data")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// tests
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := f.Exists(tt.args.id)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Exists() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("Exists() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+
+	// cleanup
+	path := f.GetStorePath()
+	err = os.RemoveAll(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
