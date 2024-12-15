@@ -65,13 +65,13 @@ if err != nil {
 </details>
 
 <a name="StartMultiService"></a>
-## func [StartMultiService](<https://github.com/image357/password/blob/main/rest/multi.go#L63>)
+## func [StartMultiService](<https://github.com/image357/password/blob/main/rest/multi.go#L72>)
 
 ```go
 func StartMultiService(bindAddress string, prefix string, key string, callback TestAccessFunc) error
 ```
 
-StartMultiService creates a multi password rest service. The service binds to "/prefix/overwrite" \(PUT\), "/prefix/get" \(GET\), "/prefix/check" \(GET\), "/prefix/set" \(PUT\), "/prefix/unset" \(DELETE\), "/prefix/list" \(GET\), "/prefix/delete" \(DELETE\), "/prefix/clean" \(DELETE\). The callback of type TestAccessFunc will be called for every request to determine access.
+StartMultiService creates a multi password rest service. The service binds to "/prefix/overwrite" \(PUT\), "/prefix/get" \(GET\), "/prefix/check" \(GET\), "/prefix/set" \(PUT\), "/prefix/unset" \(DELETE\), "/prefix/exists" \(GET\), "/prefix/list" \(GET\), "/prefix/delete" \(DELETE\), "/prefix/clean" \(DELETE\). The callback of type TestAccessFunc will be called for every request to determine access.
 
 <details><summary>Example</summary>
 <p>
@@ -90,13 +90,13 @@ if err != nil {
 </details>
 
 <a name="StartSimpleService"></a>
-## func [StartSimpleService](<https://github.com/image357/password/blob/main/rest/simple.go#L115>)
+## func [StartSimpleService](<https://github.com/image357/password/blob/main/rest/simple.go#L122>)
 
 ```go
 func StartSimpleService(bindAddress string, prefix string, key string, callback TestAccessFunc) error
 ```
 
-StartSimpleService creates a single password rest service. The service binds to "/prefix/overwrite" \(PUT\), "/prefix/get" \(GET\), "/prefix/check" \(GET\), "/prefix/set" \(PUT\), "/prefix/unset" \(DELETE\), "/prefix/delete" \(DELETE\). The callback of type TestAccessFunc will be called for every request to determine access.
+StartSimpleService creates a single password rest service. The service binds to "/prefix/overwrite" \(PUT\), "/prefix/get" \(GET\), "/prefix/check" \(GET\), "/prefix/set" \(PUT\), "/prefix/unset" \(DELETE\), "/prefix/exists" \(GET\), "/prefix/delete" \(DELETE\). The callback of type TestAccessFunc will be called for every request to determine access.
 
 <details><summary>Example</summary>
 <p>
@@ -115,7 +115,7 @@ if err != nil {
 </details>
 
 <a name="StopService"></a>
-## func [StopService](<https://github.com/image357/password/blob/main/rest/simple.go#L153>)
+## func [StopService](<https://github.com/image357/password/blob/main/rest/simple.go#L160>)
 
 ```go
 func StopService(timeout int, bindAddress string, prefix string) error
