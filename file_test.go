@@ -549,3 +549,49 @@ func TestFileStorage_Delete(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestFileStorage_Clean(t *testing.T) {
+	tests := []struct {
+		name    string
+		wantErr bool
+	}{
+		{"normal", false},
+		{"empty", false},
+	}
+	// init
+	f := NewFileStorage()
+	f.SetStorePath("tests/workdir/FileStorage_List")
+
+	err := f.Store("some/id", "some data")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = f.Store("another_id", "another data")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// tests
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := f.Clean(); (err != nil) != tt.wantErr {
+				t.Errorf("Clean() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			list, err := f.List()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(list) != 0 {
+				t.Errorf("Clean() list = %v, want empty", list)
+			}
+		})
+	}
+
+	// cleanup
+	path := f.GetStorePath()
+	err = os.RemoveAll(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
