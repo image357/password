@@ -19,6 +19,7 @@ import (
 const saltLength = 32
 const entropyBlockLength = 24
 const paddingBlockLength = 16
+const timeFormat = "2006-01-02T15:04:05-07:00"
 
 // HashFunc is a function signature.
 // The Hash function will be called for password and secret hashing.
@@ -120,7 +121,7 @@ func packData(id string, data string) (string, error) {
 		"data":      data,
 		"padding":   strings.Repeat(" ", paddingLength),
 		"entropy":   base64.StdEncoding.EncodeToString(entropy),
-		"timestamp": time.Now().Format(time.RFC3339),
+		"timestamp": time.Now().Format(timeFormat),
 	})
 	if err != nil {
 		return "", err

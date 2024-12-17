@@ -2,7 +2,6 @@ package password
 
 import (
 	"testing"
-	"time"
 )
 
 func Test_encrypt_decrypt(t *testing.T) {
@@ -119,9 +118,9 @@ func Test_packData(t *testing.T) {
 				return
 			}
 
-			fixedLen := len(got) - len(tt.args.id) - len(time.RFC3339) - 93
-			if fixedLen != tt.wantLen {
-				t.Errorf("len(packData() - ...) got = %v, want %v", fixedLen, tt.wantLen)
+			paddingAndDataLen := len(got) - len(tt.args.id) - len(timeFormat) - 93
+			if paddingAndDataLen != tt.wantLen {
+				t.Errorf("len(packData() - ...) got = %v, want %v", paddingAndDataLen, tt.wantLen)
 			}
 
 			id, data, err := unpackData(got)
