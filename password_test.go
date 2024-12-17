@@ -134,3 +134,94 @@ func TestEnableRecovery(t *testing.T) {
 		})
 	}
 }
+
+func TestPassword_PublicAPI(t *testing.T) {
+	tests := []struct {
+		name string
+	}{
+		{"success"},
+	}
+	// init
+	err := SetStorePath("tests/workdir/Password_PublicAPI")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// tests
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := Overwrite("foo", "123", "456")
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			err = Overwrite("bar", "123", "456")
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			err = Overwrite("foobar", "123", "456")
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			_, err = Get("foo", "456")
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			_, err = Check("foo", "123", "456")
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			err = Set("foo", "123", "789", "456")
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			err = Unset("foo", "789", "456")
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			_, err = Exists("bar")
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			_, err = List()
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			err = Delete("bar")
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			err = Clean()
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			list, err := List()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(list) != 0 {
+				t.Fatalf("List() = %v, want empty", list)
+			}
+		})
+	}
+
+	// cleanup
+	path, err := GetStorePath()
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = os.RemoveAll(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
