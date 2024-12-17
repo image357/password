@@ -112,7 +112,7 @@ func Clean() error
 Clean \(delete\) all stored passwords.
 
 <a name="DecryptOTP"></a>
-## func [DecryptOTP](<https://github.com/image357/password/blob/main/encryption.go#L281>)
+## func [DecryptOTP](<https://github.com/image357/password/blob/main/encryption.go#L282>)
 
 ```go
 func DecryptOTP(cipherBytes []byte, secret []byte) string
@@ -148,7 +148,7 @@ func EnableRecovery(key string)
 EnableRecovery will enforce recovery key file storage alongside passwords.
 
 <a name="EncryptOTP"></a>
-## func [EncryptOTP](<https://github.com/image357/password/blob/main/encryption.go#L268>)
+## func [EncryptOTP](<https://github.com/image357/password/blob/main/encryption.go#L269>)
 
 ```go
 func EncryptOTP(text string) ([]byte, []byte)
@@ -411,7 +411,7 @@ func (f *FileStorage) Store(id string, data string) error
 Store \(create/overwrite\) the provided data in a file. id is converted to the corresponding filepath. If necessary, subfolders are created.
 
 <a name="HashFunc"></a>
-## type [HashFunc](<https://github.com/image357/password/blob/main/encryption.go#L25>)
+## type [HashFunc](<https://github.com/image357/password/blob/main/encryption.go#L26>)
 
 HashFunc is a function signature. The Hash function will be called for password and secret hashing.
 
