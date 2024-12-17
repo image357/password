@@ -465,3 +465,66 @@ func TestManager_Exists(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestManager_List(t *testing.T) {
+	type args struct {
+		ids []string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []string
+		wantErr bool
+	}{
+		{"single", args{[]string{"filename"}}, []string{"filename"}, false},
+		{"multi", args{[]string{"a", "c", "b"}}, []string{"a", "b", "c"}, false},
+		{"forward slash", args{[]string{"a/foo", "c/bar", "b/baz"}}, []string{"a/foo", "b/baz", "c/bar"}, false},
+		{"backward slash", args{[]string{"a\\foo", "c\\bar", "b\\baz"}}, []string{"a/foo", "b/baz", "c/bar"}, false},
+		{"mixed slash", args{[]string{"a", "c/bar", "b\\baz"}}, []string{"a", "b/baz", "c/bar"}, false},
+	}
+	// init
+	m := NewManager()
+	m.storageBackend.(*FileStorage).SetStorePath("./tests/workdir/Manager_List")
+
+	// tests
+	for _, tt := range tests {
+		// test init
+		for _, id := range tt.args.ids {
+			err := m.Overwrite(id, "123", "456")
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+		// test
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := m.List()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("List() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("List() got = %v, want %v", got, tt.want)
+			}
+		})
+		// test cleanup
+		err := m.Clean()
+		if err != nil {
+			t.Fatal(err)
+		}
+		list, err := m.List()
+		if (err != nil) != tt.wantErr {
+			t.Errorf("List() error = %v, wantErr %v", err, tt.wantErr)
+			return
+		}
+		if len(list) != 0 {
+			t.Fatalf("List() got = %v, want empty slice", list)
+		}
+	}
+
+	// cleanup
+	path := m.storageBackend.(*FileStorage).GetStorePath()
+	err := os.RemoveAll(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+}

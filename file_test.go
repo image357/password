@@ -482,12 +482,14 @@ func TestFileStorage_List(t *testing.T) {
 
 	// tests
 	for _, tt := range tests {
+		// init test
 		for _, id := range tt.args.ids {
 			err := f.Store(id, "123")
 			if err != nil {
 				t.Fatal(err)
 			}
 		}
+		// test
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := f.List()
 			if (err != nil) != tt.wantErr {
@@ -498,9 +500,18 @@ func TestFileStorage_List(t *testing.T) {
 				t.Errorf("List() got = %v, want %v", got, tt.want)
 			}
 		})
+		// cleanup test
 		err := f.Clean()
 		if err != nil {
 			t.Fatal(err)
+		}
+		list, err := f.List()
+		if (err != nil) != tt.wantErr {
+			t.Errorf("List() error = %v, wantErr %v", err, tt.wantErr)
+			return
+		}
+		if len(list) != 0 {
+			t.Fatalf("List() got = %v, want empty slice", list)
 		}
 	}
 

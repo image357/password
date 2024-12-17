@@ -110,63 +110,6 @@ func TestToggleHashPassword(t *testing.T) {
 	}
 }
 
-func TestList(t *testing.T) {
-	type args struct {
-		ids []string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		want    []string
-		wantErr bool
-	}{
-		{"single", args{[]string{"filename"}}, []string{"filename"}, false},
-		{"multi", args{[]string{"a", "c", "b"}}, []string{"a", "b", "c"}, false},
-		{"forward slash", args{[]string{"a/foo", "c/bar", "b/baz"}}, []string{"a/foo", "b/baz", "c/bar"}, false},
-		{"backward slash", args{[]string{"a\\foo", "c\\bar", "b\\baz"}}, []string{"a/foo", "b/baz", "c/bar"}, false},
-		{"mixed slash", args{[]string{"a", "c/bar", "b\\baz"}}, []string{"a", "b/baz", "c/bar"}, false},
-	}
-	// init
-	err := SetStorePath("tests/workdir/List")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// tests
-	for _, tt := range tests {
-		for _, id := range tt.args.ids {
-			err := Overwrite(id, "123", "456")
-			if err != nil {
-				t.Fatal(err)
-			}
-		}
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := List()
-			if (err != nil) != tt.wantErr {
-				t.Errorf("List() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("List() got = %v, want %v", got, tt.want)
-			}
-		})
-		err := Clean()
-		if err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	// cleanup
-	path, err := GetStorePath()
-	if err != nil {
-		t.Error(err)
-	}
-	err = os.RemoveAll(path)
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-
 func TestDelete(t *testing.T) {
 	type args struct {
 		id string
