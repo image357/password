@@ -33,7 +33,7 @@ func TestManager_EnableRecovery(t *testing.T) {
 		name string
 		args args
 	}{
-		{"enable recovery", args{"123456"}},
+		{"enable", args{"123456"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -65,7 +65,7 @@ func TestManager_DisableRecovery(t *testing.T) {
 	tests := []struct {
 		name string
 	}{
-		{"disable recovery"},
+		{"disable"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -82,6 +82,24 @@ func TestManager_DisableRecovery(t *testing.T) {
 			}
 			if len(m.recoveryKeySecret) != 0 {
 				t.Errorf("wrong recovery secret length = %v", len(m.recoveryKeySecret))
+			}
+		})
+	}
+}
+
+func TestManager_getRecoveryKey(t *testing.T) {
+	tests := []struct {
+		name string
+		want string
+	}{
+		{"get", "123456"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := NewManager()
+			m.EnableRecovery(tt.want)
+			if got := m.getRecoveryKey(); got != tt.want {
+				t.Errorf("getRecoveryKey() = %v, want %v", got, tt.want)
 			}
 		})
 	}
