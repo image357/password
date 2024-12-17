@@ -109,3 +109,28 @@ func TestToggleHashPassword(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestEnableRecovery(t *testing.T) {
+	type args struct {
+		key string
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{"success", args{"123456"}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			EnableRecovery(tt.args.key)
+			m := GetDefaultManager()
+			if !m.withRecovery {
+				t.Errorf("GetDefaultManager().withRecovery = false, want true")
+			}
+			DisableRecovery()
+			if m.withRecovery {
+				t.Errorf("GetDefaultManager().withRecovery = true, want false")
+			}
+		})
+	}
+}
