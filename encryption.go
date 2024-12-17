@@ -17,6 +17,7 @@ import (
 
 const saltLength = 32
 const entropyBlockLength = 24
+const paddingBlockLength = 16
 
 // HashFunc is a function signature.
 // The Hash function will be called for password and secret hashing.
@@ -100,15 +101,13 @@ func packData(id string, data string) (string, error) {
 		return "", fmt.Errorf("invalid utf8 character in packData")
 	}
 
-	entropyLength := 2*entropyBlockLength - (len(data) % entropyBlockLength)
+	paddingLength := paddingBlockLength - (len(data) % paddingBlockLength) + 1
 
-	entropy := make([]byte, entropyLength)
+	entropy := make([]byte, entropyBlockLength)
 	_, err := rand.Read(entropy)
 	if err != nil {
 		return "", err
 	}
-
-	entropyAndData := append(entropy, []byte(data)...)
 
 	temp := new(bytes.Buffer)
 	enc := json.NewEncoder(temp)
@@ -116,9 +115,10 @@ func packData(id string, data string) (string, error) {
 	enc.SetIndent("", "")
 
 	err = enc.Encode(map[string]interface{}{
-		"id":     id,
-		"data":   base64.StdEncoding.EncodeToString(entropyAndData),
-		"length": entropyLength,
+		"id":      id,
+		"data":    data,
+		"padding": strings.Repeat(" ", paddingLength),
+		"entropy": base64.StdEncoding.EncodeToString(entropy),
 	})
 	if err != nil {
 		return "", err
@@ -147,25 +147,20 @@ func unpackData(input string) (string, string, error) {
 		return "", "", fmt.Errorf("id field not found in unpackData")
 	}
 
-	mixedData, ok := temp["data"].(string)
+	data, ok := temp["data"].(string)
 	if !ok {
 		return "", "", fmt.Errorf("data field not found in unpackData")
 	}
 
-	length, ok := temp["length"].(float64)
+	_, ok = temp["padding"].(string)
 	if !ok {
-		return "", "", fmt.Errorf("length field not found in unpackData")
+		return "", "", fmt.Errorf("padding field not found in unpackData")
 	}
 
-	entropyAndData, err := base64.StdEncoding.DecodeString(mixedData)
-	if err != nil {
-		return "", "", err
+	_, ok = temp["entropy"].(string)
+	if !ok {
+		return "", "", fmt.Errorf("entropy field not found in unpackData")
 	}
-
-	if !utf8.Valid(entropyAndData[int(length):]) {
-		return "", "", fmt.Errorf("invalid utf8 character in unpackData")
-	}
-	data := string(entropyAndData[int(length):])
 
 	return id, data, nil
 }

@@ -100,11 +100,15 @@ func Test_packData(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
+		wantLen int
 		wantErr bool
 	}{
-		{"normal", args{"foo", "bar"}, false},
-		{"no escape", args{"foo<>&", "bar<>&"}, false},
-		{"empty", args{"", ""}, false},
+		{"normal", args{"foo", "bar"}, 94, false},
+		{"no escape", args{"foo<>&", "bar<>&"}, 94, false},
+		{"empty", args{"", ""}, 94, false},
+		{"short", args{"", "123456789012345"}, 94, false},
+		{"long", args{"", "1234567890123456"}, 110, false},
+		{"also long", args{"", "12345678901234567"}, 110, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -113,6 +117,10 @@ func Test_packData(t *testing.T) {
 				t.Errorf("packData() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+			if (len(got) - len(tt.args.id)) != tt.wantLen {
+				t.Errorf("len(packData()) got = %v, want %v", len(got), tt.wantLen+len(tt.args.id))
+			}
+
 			id, data, err := unpackData(got)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("unpackData() error = %v, wantErr %v", err, tt.wantErr)
