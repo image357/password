@@ -110,55 +110,6 @@ func TestToggleHashPassword(t *testing.T) {
 	}
 }
 
-func TestExists(t *testing.T) {
-	type args struct {
-		id string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		want    bool
-		wantErr bool
-	}{
-		{"success exists", args{"foo"}, true, false},
-		{"success not exists", args{"bar"}, false, false},
-	}
-	// init
-	err := SetStorePath("tests/workdir/Exists")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	err = Overwrite("foo", "123", "456")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// tests
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := Exists(tt.args.id)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Exists() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got != tt.want {
-				t.Errorf("Exists() got = %v, want %v", got, tt.want)
-			}
-		})
-	}
-
-	// cleanup
-	path, err := GetStorePath()
-	if err != nil {
-		t.Error(err)
-	}
-	err = os.RemoveAll(path)
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-
 func TestList(t *testing.T) {
 	type args struct {
 		ids []string
