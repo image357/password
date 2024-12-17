@@ -581,3 +581,64 @@ func TestManager_Delete(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestManager_Clean(t *testing.T) {
+	tests := []struct {
+		name    string
+		wantErr bool
+	}{
+		{"normal", false},
+		{"empty", false},
+	}
+	// init
+	m := NewManager()
+	m.storageBackend.(*FileStorage).SetStorePath("./tests/workdir/Manager_Clean")
+
+	err := m.Overwrite("a", "123", "456")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = m.Overwrite("b/foo", "123", "456")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = m.Overwrite("c/bar", "123", "456")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = m.Overwrite("d/foo/bar/filename", "123", "456")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	list, err := m.List()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(list) != 4 {
+		t.Fatalf("list = %v, want %v", list, []string{"a", "b/foo", "c/bar", "d/foo/bar/filename"})
+	}
+
+	// tests
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := m.Clean(); (err != nil) != tt.wantErr {
+				t.Errorf("Clean() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			list, err = m.List()
+			if err != nil {
+				t.Error(err)
+			}
+			if len(list) != 0 {
+				t.Errorf("Clean() list = %v", list)
+			}
+		})
+	}
+
+	// cleanup
+	path := m.storageBackend.(*FileStorage).GetStorePath()
+	err = os.RemoveAll(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
