@@ -33,7 +33,7 @@ func TestManager_EnableRecovery(t *testing.T) {
 		name string
 		args args
 	}{
-		{"enable_recovery", args{"123456"}},
+		{"enable recovery", args{"123456"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -45,6 +45,7 @@ func TestManager_EnableRecovery(t *testing.T) {
 				t.Fatalf("NewManager() should not have any recovery secret")
 			}
 
+			m.withRecovery = false
 			m.EnableRecovery(tt.args.key)
 
 			if !m.withRecovery {
@@ -54,6 +55,32 @@ func TestManager_EnableRecovery(t *testing.T) {
 				t.Errorf("wrong recovery key length = %v", len(m.recoveryKeyBytes))
 			}
 			if len(m.recoveryKeySecret) == 0 {
+				t.Errorf("wrong recovery secret length = %v", len(m.recoveryKeySecret))
+			}
+		})
+	}
+}
+
+func TestManager_DisableRecovery(t *testing.T) {
+	tests := []struct {
+		name string
+	}{
+		{"disable recovery"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := NewManager()
+
+			m.withRecovery = true
+			m.DisableRecovery()
+
+			if m.withRecovery {
+				t.Fatalf("manager should not have recovery enabled")
+			}
+			if len(m.recoveryKeyBytes) != 0 {
+				t.Errorf("wrong recovery key length = %v", len(m.recoveryKeyBytes))
+			}
+			if len(m.recoveryKeySecret) != 0 {
 				t.Errorf("wrong recovery secret length = %v", len(m.recoveryKeySecret))
 			}
 		})
