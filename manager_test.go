@@ -130,7 +130,7 @@ func TestManager_Overwrite(t *testing.T) {
 	}
 	// init
 	m := NewManager()
-	m.storageBackend.(*FileStorage).SetStorePath("./tests/workdir/Overwrite")
+	m.storageBackend.(*FileStorage).SetStorePath("./tests/workdir/Manager_Overwrite")
 	m.EnableRecovery("recovery_key")
 
 	// tests
@@ -170,7 +170,7 @@ func TestManager_Get(t *testing.T) {
 	}
 	// init
 	m := NewManager()
-	m.storageBackend.(*FileStorage).SetStorePath("./tests/workdir/Get")
+	m.storageBackend.(*FileStorage).SetStorePath("./tests/workdir/Manager_Get")
 
 	m.EnableRecovery("recovery_key")
 	err := m.Overwrite("foo", "123", "456")
@@ -244,7 +244,7 @@ func TestManager_Check(t *testing.T) {
 	}
 	// init
 	m := NewManager()
-	m.storageBackend.(*FileStorage).SetStorePath("./tests/workdir/Get")
+	m.storageBackend.(*FileStorage).SetStorePath("./tests/workdir/Manager_Check")
 	m.EnableRecovery("recovery_key")
 
 	m.HashPassword = false
@@ -301,6 +301,52 @@ func TestManager_Check(t *testing.T) {
 	// cleanup
 	path := m.storageBackend.(*FileStorage).GetStorePath()
 	err = os.RemoveAll(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestManager_Set(t *testing.T) {
+	type args struct {
+		id          string
+		oldPassword string
+		newPassword string
+		key         string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"create", args{"foo", "", "123", "456"}, false},
+		{"change", args{"foo", "123", "789", "456"}, false},
+		{"create folder", args{"foo/bar", "", "123", "456"}, false},
+		{"change folder", args{"foo/bar", "123", "789", "456"}, false},
+		{"create subfolder", args{"bar/baz/foo", "", "456", "abc"}, false},
+		{"change subfolder", args{"bar/baz/foo", "456", "789", "abc"}, false},
+		{"add subfolder", args{"bar/boo/foo", "", "789", "abc"}, false},
+		{"create mixed slashes", args{"forward/backward\\foo", "", "123", "456"}, false},
+		{"change mixed slashes", args{"forward\\backward/foo", "123", "789", "456"}, false},
+		{"invalid password", args{"foo", "780", "789", "456"}, true},
+		{"invalid key", args{"foo", "789", "780", "def"}, true},
+		{"valid", args{"foo", "789", "abc", "456"}, false},
+	}
+	// init
+	m := NewManager()
+	m.storageBackend.(*FileStorage).SetStorePath("./tests/workdir/Manager_Set")
+
+	// tests
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := m.Set(tt.args.id, tt.args.oldPassword, tt.args.newPassword, tt.args.key); (err != nil) != tt.wantErr {
+				t.Errorf("Set() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+
+	// cleanup
+	path := m.storageBackend.(*FileStorage).GetStorePath()
+	err := os.RemoveAll(path)
 	if err != nil {
 		t.Fatal(err)
 	}
