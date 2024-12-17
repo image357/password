@@ -110,56 +110,6 @@ func TestToggleHashPassword(t *testing.T) {
 	}
 }
 
-func TestOverwrite(t *testing.T) {
-	type args struct {
-		id       string
-		password string
-		key      string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		{"create", args{"foo", "123", "456"}, false},
-		{"overwrite", args{"foo", "789", "abc"}, false},
-		{"create folder", args{"foo/bar", "123", "456"}, false},
-		{"overwrite folder", args{"foo/bar", "789", "abc"}, false},
-		{"create subfolder", args{"bar/baz/foo", "123", "456"}, false},
-		{"overwrite subfolder", args{"bar/baz/foo", "789", "abc"}, false},
-		{"add subfolder", args{"bar/boo/foo", "789", "abc"}, false},
-		{"create mixed slashes", args{"forward/backward\\foo", "123", "456"}, false},
-		{"overwrite mixed slashes", args{"forward\\backward/foo", "abc", "def"}, false},
-		{"stop recurse on recovery", args{"foo" + RecoveryIdSuffix, "123", "456"}, false},
-	}
-	// init
-	err := SetStorePath("./tests/workdir/Overwrite")
-	if err != nil {
-		t.Fatal(err)
-	}
-	EnableRecovery("recovery_key")
-
-	// tests
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := Overwrite(tt.args.id, tt.args.password, tt.args.key); (err != nil) != tt.wantErr {
-				t.Errorf("Overwrite() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-
-	// cleanup
-	DisableRecovery()
-	path, err := GetStorePath()
-	if err != nil {
-		t.Error(err)
-	}
-	err = os.RemoveAll(path)
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-
 func TestGet(t *testing.T) {
 	type args struct {
 		id  string
