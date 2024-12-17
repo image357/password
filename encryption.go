@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"golang.org/x/crypto/argon2"
 	"strings"
+	"time"
 	"unicode/utf8"
 )
 
@@ -92,7 +93,7 @@ func comparePassword(password1 string, password2 string) bool {
 	return subtle.ConstantTimeCompare(hash1[:], hash2[:]) == 1
 }
 
-// packData encodes a given id and data string to json with entropy padding.
+// packData encodes a given id and data string to json with entropy, padding and additional metadata.
 func packData(id string, data string) (string, error) {
 	if !utf8.ValidString(id) {
 		return "", fmt.Errorf("invalid utf8 character in packData")
@@ -115,10 +116,11 @@ func packData(id string, data string) (string, error) {
 	enc.SetIndent("", "")
 
 	err = enc.Encode(map[string]interface{}{
-		"id":      id,
-		"data":    data,
-		"padding": strings.Repeat(" ", paddingLength),
-		"entropy": base64.StdEncoding.EncodeToString(entropy),
+		"id":        id,
+		"data":      data,
+		"padding":   strings.Repeat(" ", paddingLength),
+		"entropy":   base64.StdEncoding.EncodeToString(entropy),
+		"timestamp": time.Now().Format(time.RFC3339),
 	})
 	if err != nil {
 		return "", err
@@ -160,6 +162,11 @@ func unpackData(input string) (string, string, error) {
 	_, ok = temp["entropy"].(string)
 	if !ok {
 		return "", "", fmt.Errorf("entropy field not found in unpackData")
+	}
+
+	_, ok = temp["timestamp"].(string)
+	if !ok {
+		return "", "", fmt.Errorf("timestamp field not found in unpackData")
 	}
 
 	return id, data, nil
