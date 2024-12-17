@@ -212,3 +212,96 @@ func TestManager_Get(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestManager_Check(t *testing.T) {
+	type args struct {
+		id       string
+		password string
+		key      string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    bool
+		wantErr bool
+		hashed  bool
+	}{
+		// no hash
+		{"from Overwrite", args{"foo", "123", "456"}, true, false, false},
+		{"from Set create", args{"bar", "abc", "def"}, true, false, false},
+		{"from Set change true", args{"foobar/baz", "foobar", "a2c"}, true, false, false},
+		{"from Set change false", args{"foobar/baz", "wrong", "a2c"}, false, false, false},
+		{"invalid id", args{"foobar", "wrong", "a2c"}, false, true, false},
+		{"from Overwrite recovery", args{"foo" + RecoveryIdSuffix, "456", "recovery_key"}, true, false, false},
+
+		// hashed passwords
+		{"from Overwrite with hash", args{"foo_hash", "123", "456"}, true, false, true},
+		{"from Set create with hash", args{"bar_hash", "abc", "def"}, true, false, true},
+		{"from Set change true with hash", args{"foobar/baz_hash", "foobar", "a2c"}, true, false, true},
+		{"from Set change false with hash", args{"foobar/baz_hash", "wrong", "a2c"}, false, false, true},
+		{"invalid id with hash", args{"foobar_hash", "wrong", "a2c"}, false, true, true},
+		{"from Overwrite with hash recovery", args{"foo_hash" + RecoveryIdSuffix, "456", "recovery_key"}, true, false, true},
+	}
+	// init
+	m := NewManager()
+	m.storageBackend.(*FileStorage).SetStorePath("./tests/workdir/Get")
+	m.EnableRecovery("recovery_key")
+
+	m.HashPassword = false
+	err := m.Overwrite("foo", "123", "456")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = m.Set("bar", "", "abc", "def")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = m.Overwrite("foobar/baz", "123", "a2c")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = m.Set("foobar/baz", "123", "foobar", "a2c")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	m.HashPassword = true
+	err = m.Overwrite("foo_hash", "123", "456")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = m.Set("bar_hash", "", "abc", "def")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = m.Overwrite("foobar/baz_hash", "123", "a2c")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = m.Set("foobar/baz_hash", "123", "foobar", "a2c")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// tests
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m.HashPassword = tt.hashed
+			got, err := m.Check(tt.args.id, tt.args.password, tt.args.key)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Check() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("Check() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+
+	// cleanup
+	path := m.storageBackend.(*FileStorage).GetStorePath()
+	err = os.RemoveAll(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
