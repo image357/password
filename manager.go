@@ -66,12 +66,12 @@ func (m *Manager) Overwrite(id string, password string, key string) error {
 		password = hashedPassword
 	}
 
-	data, err := packData(id, password)
+	packedData, err := packData(id, password)
 	if err != nil {
 		return err
 	}
 
-	encryptedData, err := encrypt(data, key)
+	encryptedData, err := encrypt(packedData, key)
 	if err != nil {
 		return err
 	}
@@ -103,12 +103,12 @@ func (m *Manager) Get(id string, key string) (string, error) {
 		return "", err
 	}
 
-	decryptedData, err := decrypt(encryptedData, key)
+	packedData, err := decrypt(encryptedData, key)
 	if err != nil {
 		return "", err
 	}
 
-	storedId, password, err := unpackData(decryptedData)
+	storedId, password, err := unpackData(packedData)
 	if err != nil {
 		return "", err
 	}
