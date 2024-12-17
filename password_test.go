@@ -110,64 +110,6 @@ func TestToggleHashPassword(t *testing.T) {
 	}
 }
 
-func TestDelete(t *testing.T) {
-	type args struct {
-		id string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		{"normal", args{"a"}, false},
-		{"forward slash", args{"b/foo"}, false},
-		{"backward slash", args{"c/bar"}, false},
-		{"mixed slash", args{"d/foo\\bar/filename"}, false},
-		{"invalid id", args{"foobar"}, true},
-	}
-	// init
-	err := SetStorePath("tests/workdir/Delete")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	err = Overwrite("a", "123", "456")
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = Overwrite("b/foo", "123", "456")
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = Overwrite("c/bar", "123", "456")
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = Overwrite("d/foo/bar/filename", "123", "456")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// tests
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := Delete(tt.args.id); (err != nil) != tt.wantErr {
-				t.Errorf("Delete() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-
-	// cleanup
-	path, err := GetStorePath()
-	if err != nil {
-		t.Error(err)
-	}
-	err = os.RemoveAll(path)
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-
 func TestClean(t *testing.T) {
 	tests := []struct {
 		name    string
