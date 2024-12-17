@@ -14,11 +14,11 @@ func TestNewFileStorage(t *testing.T) {
 		want *FileStorage
 	}{
 		{"create", &FileStorage{
-			DefaultStorePath,
-			DefaultFileEnding,
-			map[string]*sync.Mutex{},
-			map[string]int{},
-			sync.Mutex{},
+			storePath:            DefaultStorePath,
+			fileEnding:           DefaultFileEnding,
+			storageTree:          map[string]*sync.Mutex{},
+			storageTreeLockCount: map[string]int{},
+			storageTreeMutex:     sync.Mutex{},
 		},
 		},
 	}
