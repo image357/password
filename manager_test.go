@@ -351,3 +351,73 @@ func TestManager_Set(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestManager_Unset(t *testing.T) {
+	type args struct {
+		id       string
+		password string
+		key      string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"from Overwrite", args{"foo", "123", "456"}, false},
+		{"from Set create", args{"bar", "abc", "def"}, false},
+		{"subfolder", args{"foobar/baz", "foobar", "a2c"}, false},
+		{"mixed slashes 1", args{"forward/backward\\foo1", "123", "456"}, false},
+		{"mixed slashes 2", args{"forward\\backward/foo2", "123", "456"}, false},
+		{"invalid id", args{"foobar", "wrong", "a2c"}, true},
+		{"invalid password", args{"invalid1", "abc", "456"}, true},
+		{"invalid key", args{"invalid2", "123", "abc"}, true},
+	}
+	// init
+	m := NewManager()
+	m.storageBackend.(*FileStorage).SetStorePath("./tests/workdir/Manager_Unset")
+
+	err := m.Overwrite("foo", "123", "456")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = m.Set("bar", "", "abc", "def")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = m.Overwrite("foobar/baz", "foobar", "a2c")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = m.Overwrite("forward/backward/foo1", "123", "456")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = m.Overwrite("forward/backward/foo2", "123", "456")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = m.Overwrite("invalid1", "123", "456")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = m.Overwrite("invalid2", "123", "456")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// tests
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := m.Unset(tt.args.id, tt.args.password, tt.args.key); (err != nil) != tt.wantErr {
+				t.Errorf("Unset() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+
+	// cleanup
+	path := m.storageBackend.(*FileStorage).GetStorePath()
+	err = os.RemoveAll(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
