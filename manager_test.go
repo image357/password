@@ -149,3 +149,66 @@ func TestManager_Overwrite(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestManager_Get(t *testing.T) {
+	type args struct {
+		id  string
+		key string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{"from Overwrite", args{"Foo", "456"}, "123", false},
+		{"from Set create", args{"Bar", "def"}, "abc", false},
+		{"from Set change", args{"fooBar/Baz", "a2c"}, "foobar", false},
+		{"invalid id", args{"fooBar", "a2c"}, "", true},
+		{"from Overwrite recovery", args{"Foo" + RecoveryIdSuffix, "recovery_key"}, "456", false},
+		{"invalid recovery id", args{"Bar" + RecoveryIdSuffix, "recovery_key"}, "", true},
+	}
+	// init
+	m := NewManager()
+	m.storageBackend.(*FileStorage).SetStorePath("./tests/workdir/Get")
+
+	m.EnableRecovery("recovery_key")
+	err := m.Overwrite("foo", "123", "456")
+	if err != nil {
+		t.Fatal(err)
+	}
+	m.DisableRecovery()
+	err = m.Set("bar", "", "abc", "def")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = m.Overwrite("foobar/baz", "123", "a2c")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = m.Set("foobar/baz", "123", "foobar", "a2c")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// tests
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := m.Get(tt.args.id, tt.args.key)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Get() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("Get() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+
+	// cleanup
+	path := m.storageBackend.(*FileStorage).GetStorePath()
+	err = os.RemoveAll(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
