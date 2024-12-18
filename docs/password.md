@@ -350,7 +350,7 @@ func NewFileStorage() *FileStorage
 NewFileStorage returns a default initialized storage backend for persistent files.
 
 <a name="FileStorage.Clean"></a>
-### func \(\*FileStorage\) [Clean](<https://github.com/image357/password/blob/main/file.go#L244>)
+### func \(\*FileStorage\) [Clean](<https://github.com/image357/password/blob/main/file.go#L246>)
 
 ```go
 func (f *FileStorage) Clean() error
@@ -359,7 +359,7 @@ func (f *FileStorage) Clean() error
 Clean \(delete\) all stored passwords.
 
 <a name="FileStorage.Delete"></a>
-### func \(\*FileStorage\) [Delete](<https://github.com/image357/password/blob/main/file.go#L232>)
+### func \(\*FileStorage\) [Delete](<https://github.com/image357/password/blob/main/file.go#L233>)
 
 ```go
 func (f *FileStorage) Delete(id string) error
@@ -368,7 +368,7 @@ func (f *FileStorage) Delete(id string) error
 Delete an existing password.
 
 <a name="FileStorage.Exists"></a>
-### func \(\*FileStorage\) [Exists](<https://github.com/image357/password/blob/main/file.go#L186>)
+### func \(\*FileStorage\) [Exists](<https://github.com/image357/password/blob/main/file.go#L187>)
 
 ```go
 func (f *FileStorage) Exists(id string) (bool, error)
@@ -404,7 +404,7 @@ func (f *FileStorage) GetStorePath() string
 GetStorePath returns the current storage path with system\-specific path separators.
 
 <a name="FileStorage.List"></a>
-### func \(\*FileStorage\) [List](<https://github.com/image357/password/blob/main/file.go#L198>)
+### func \(\*FileStorage\) [List](<https://github.com/image357/password/blob/main/file.go#L199>)
 
 ```go
 func (f *FileStorage) List() ([]string, error)
@@ -504,7 +504,7 @@ func (m *Manager) Check(id string, password string, key string) (bool, error)
 Check an existing password for equality with the provided password. key is the encryption secret for storage.
 
 <a name="Manager.Clean"></a>
-### func \(\*Manager\) [Clean](<https://github.com/image357/password/blob/main/manager.go#L200>)
+### func \(\*Manager\) [Clean](<https://github.com/image357/password/blob/main/manager.go#L208>)
 
 ```go
 func (m *Manager) Clean() error
@@ -513,7 +513,7 @@ func (m *Manager) Clean() error
 Clean \(delete\) all stored passwords.
 
 <a name="Manager.Delete"></a>
-### func \(\*Manager\) [Delete](<https://github.com/image357/password/blob/main/manager.go#L195>)
+### func \(\*Manager\) [Delete](<https://github.com/image357/password/blob/main/manager.go#L202>)
 
 ```go
 func (m *Manager) Delete(id string) error
@@ -540,7 +540,7 @@ func (m *Manager) EnableRecovery(key string)
 EnableRecovery will enforce recovery key file storage alongside passwords.
 
 <a name="Manager.Exists"></a>
-### func \(\*Manager\) [Exists](<https://github.com/image357/password/blob/main/manager.go#L185>)
+### func \(\*Manager\) [Exists](<https://github.com/image357/password/blob/main/manager.go#L191>)
 
 ```go
 func (m *Manager) Exists(id string) (bool, error)
@@ -558,7 +558,7 @@ func (m *Manager) Get(id string, key string) (string, error)
 Get an existing password with id. key is the encryption secret for storage.
 
 <a name="Manager.List"></a>
-### func \(\*Manager\) [List](<https://github.com/image357/password/blob/main/manager.go#L190>)
+### func \(\*Manager\) [List](<https://github.com/image357/password/blob/main/manager.go#L197>)
 
 ```go
 func (m *Manager) List() ([]string, error)
@@ -576,7 +576,7 @@ func (m *Manager) Overwrite(id string, password string, key string) error
 Overwrite an existing password or create a new one. key is the encryption secret for storage.
 
 <a name="Manager.Set"></a>
-### func \(\*Manager\) [Set](<https://github.com/image357/password/blob/main/manager.go#L146>)
+### func \(\*Manager\) [Set](<https://github.com/image357/password/blob/main/manager.go#L148>)
 
 ```go
 func (m *Manager) Set(id string, oldPassword string, newPassword string, key string) error
@@ -585,7 +585,7 @@ func (m *Manager) Set(id string, oldPassword string, newPassword string, key str
 Set an existing password\-id or create a new one. oldPassword must match the currently stored password. key is the encryption secret for storage.
 
 <a name="Manager.Unset"></a>
-### func \(\*Manager\) [Unset](<https://github.com/image357/password/blob/main/manager.go#L172>)
+### func \(\*Manager\) [Unset](<https://github.com/image357/password/blob/main/manager.go#L176>)
 
 ```go
 func (m *Manager) Unset(id string, password string, key string) error
