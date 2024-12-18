@@ -153,13 +153,13 @@ func (f *FileStorage) Store(id string, data string) error {
 	}
 
 	f.lockId(id)
+	defer f.unlockId(id)
+
 	err := os.WriteFile(filePath, []byte(data), storageFileMode)
 	if err != nil {
 		_ = os.Remove(filePath)
-		f.unlockId(id)
 		return err
 	}
-	f.unlockId(id)
 
 	return nil
 }
@@ -168,8 +168,9 @@ func (f *FileStorage) Store(id string, data string) error {
 // id is converted to the corresponding filepath.
 func (f *FileStorage) Retrieve(id string) (string, error) {
 	f.lockId(id)
+	defer f.unlockId(id)
+
 	textBytes, err := os.ReadFile(f.FilePath(id))
-	f.unlockId(id)
 	if err != nil {
 		return "", err
 	}
@@ -231,8 +232,9 @@ func (f *FileStorage) List() ([]string, error) {
 // Delete an existing password.
 func (f *FileStorage) Delete(id string) error {
 	f.lockId(id)
+	defer f.unlockId(id)
+
 	err := os.Remove(f.FilePath(id))
-	f.unlockId(id)
 	if err != nil {
 		return err
 	}
