@@ -23,3 +23,13 @@ recovery /full/path/to/myid.recovery.pwd RECOVERY_KEY
 You can always implement your own recovery- or multi-key protocol on top of the current API by simply encrypting the storage key.
 However, this mechanism is in particular useful in combination with the available rest services, since you cannot alter the usage scheme of the storage key within the service.
 For instance, the [exampleservice](../cmd/exampleservice) will write recovery key files by default.
+
+If you know the storage key you can also use the encryption helper tools:
+```shell
+go install https://github.com/image357/password/cmd/encrypt@latest
+go install https://github.com/image357/password/cmd/decrypt@latest
+
+encrypt <file> <key>
+decrypt <file> <key>
+```
+This will print the encrypted/decrypted contents to stdout.
