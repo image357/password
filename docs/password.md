@@ -12,10 +12,12 @@ import "github.com/image357/password"
 - [Variables](<#variables>)
 - [func Check\(id string, password string, key string\) \(bool, error\)](<#Check>)
 - [func Clean\(\) error](<#Clean>)
+- [func Decrypt\(ciphertext string, secret string\) \(string, error\)](<#Decrypt>)
 - [func DecryptOTP\(cipherBytes \[\]byte, secret \[\]byte\) string](<#DecryptOTP>)
 - [func Delete\(id string\) error](<#Delete>)
 - [func DisableRecovery\(\)](<#DisableRecovery>)
 - [func EnableRecovery\(key string\)](<#EnableRecovery>)
+- [func Encrypt\(text string, secret string\) \(string, error\)](<#Encrypt>)
 - [func EncryptOTP\(text string\) \(\[\]byte, \[\]byte\)](<#EncryptOTP>)
 - [func Exists\(id string\) \(bool, error\)](<#Exists>)
 - [func FilePath\(id string\) \(string, error\)](<#FilePath>)
@@ -111,6 +113,15 @@ func Clean() error
 
 Clean \(delete\) all stored passwords.
 
+<a name="Decrypt"></a>
+## func [Decrypt](<https://github.com/image357/password/blob/main/encryption.go#L221>)
+
+```go
+func Decrypt(ciphertext string, secret string) (string, error)
+```
+
+Decrypt a given ciphertext in base64 representation with AES256. The secret is hashed with the custom Hash function. Galois Counter Mode is used. The nonce is retrieved as a prefix of the ciphertext.
+
 <a name="DecryptOTP"></a>
 ## func [DecryptOTP](<https://github.com/image357/password/blob/main/encryption.go#L282>)
 
@@ -146,6 +157,15 @@ func EnableRecovery(key string)
 ```
 
 EnableRecovery will enforce recovery key file storage alongside passwords.
+
+<a name="Encrypt"></a>
+## func [Encrypt](<https://github.com/image357/password/blob/main/encryption.go#L180>)
+
+```go
+func Encrypt(text string, secret string) (string, error)
+```
+
+Encrypt a given text with AES256 and return a base64 representation. The secret is hashed with the custom Hash function. Galois Counter Mode is used. The nonce is stored as a prefix of the ciphertext.
 
 <a name="EncryptOTP"></a>
 ## func [EncryptOTP](<https://github.com/image357/password/blob/main/encryption.go#L269>)
