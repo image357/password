@@ -258,7 +258,7 @@ func Decrypt(ciphertext string, secret string) (string, error) {
 	}
 
 	if !utf8.Valid(textBytes) {
-		return "", fmt.Errorf("invalid utf8 character after decrypt")
+		return "", fmt.Errorf("invalid utf8 character after decryption")
 	}
 	text := string(textBytes)
 
