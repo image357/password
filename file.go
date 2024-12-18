@@ -43,6 +43,7 @@ type FileStorage struct {
 	storageTreeMutex sync.Mutex
 }
 
+// NewFileStorage returns a default initialized storage backend for persistent files.
 func NewFileStorage() *FileStorage {
 	f := new(FileStorage)
 
