@@ -10,6 +10,9 @@ void TestStorage::SetUp() {
 }
 
 void TestStorage::TearDown() {
+    // remove current manager
+    CPWD__RegisterDefaultManager("old");
+
     Test::TearDown();
 }
 
@@ -100,4 +103,17 @@ TEST_F(TestStorage, FilePath) {
     // fail: size
     ret = CPWD__FilePath("myid", buffer, strlen(expected_string));
     ASSERT_EQ(ret, -1);
+}
+
+TEST_F(TestStorage, SetTemporaryStorage) {
+    // set temporary storage
+    CPWD__SetTemporaryStorage();
+
+    // create
+    auto ret_overwrite = CPWD__Overwrite("foo", "bar", "123");
+    ASSERT_EQ(ret_overwrite, 0);
+
+    // test
+    char buffer[256];
+    ASSERT_EQ(CPWD__Get("foo", "123", buffer, 256), 0);
 }
