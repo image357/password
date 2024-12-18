@@ -40,6 +40,11 @@ func DisableRecovery() {
 	GetDefaultManager().DisableRecovery()
 }
 
+// SetTemporaryStorage overwrites the current storage backend with a memory based one.
+func SetTemporaryStorage() {
+	GetDefaultManager().storageBackend = NewTemporaryStorage()
+}
+
 // Overwrite an existing password or create a new one.
 // key is the encryption secret for storage.
 func Overwrite(id string, password string, key string) error {
