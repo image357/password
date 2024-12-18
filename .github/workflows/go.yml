@@ -22,16 +22,19 @@ jobs:
       with:
         go-version: ${{matrix.go-version}}
 
+    - name: Build decrypt tool
+      run: go build -v github.com/image357/password/cmd/decrypt
+    - name: Build encrypt tool
+      run: go build -v github.com/image357/password/cmd/encrypt
     - name: Build exampleservice
       run: go build -v github.com/image357/password/cmd/exampleservice
-    - name: Build patchheader
+    - name: Build patchheader tool
       run: go build -v github.com/image357/password/cmd/patchheader
     - name: Build recovery tool
       run: go build -v github.com/image357/password/cmd/recovery
-    - name: Build cinterface
+    - name: Build cinterface library
       run: go build -buildmode=c-shared -o ./cinterface/ -v github.com/image357/password/cinterface
     - name: Test password
       run: go test -v github.com/image357/password
     - name: Test rest
       run: go test -v github.com/image357/password/rest
-      
