@@ -235,13 +235,13 @@ func TestFileStorage_lockId(t *testing.T) {
 				t.Fatalf("len(f.storageTreeLockCount) = %v, want %v", lenStorageTreeLockCount, 1)
 			}
 
-			if numLocks := f.storageTreeLockCount[NormalizeId(tt.args.id)]; numLocks != 1 {
-				t.Fatalf("storageTreeLockCount[NormalizeId(id)] = %v, want %v", numLocks, 1)
+			if numLocks := f.storageTreeLockCount[tt.args.id]; numLocks != 1 {
+				t.Fatalf("storageTreeLockCount[id] = %v, want %v", numLocks, 1)
 			}
 
-			success = f.storageTree[NormalizeId(tt.args.id)].TryLock()
+			success = f.storageTree[tt.args.id].TryLock()
 			if success {
-				t.Fatalf("storageTree[NormalizeId(id)].TryLock() = %v", success)
+				t.Fatalf("storageTree[id].TryLock() = %v", success)
 			}
 		})
 	}
