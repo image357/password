@@ -70,6 +70,10 @@ type multiCleanData struct {
 // "/prefix/clean" (DELETE).
 // The callback of type TestAccessFunc will be called for every request to determine access.
 func StartMultiService(bindAddress string, prefix string, key string, callback TestAccessFunc) error {
+	// prepare arguments
+	prefix = preparePrefix(prefix)
+
+	// setup service
 	engine, service, err := setupService(bindAddress, prefix, key, callback)
 	if err != nil {
 		return err
@@ -88,15 +92,15 @@ func StartMultiService(bindAddress string, prefix string, key string, callback T
 	localCleanCallback := func(c *gin.Context) { multiCleanCallback(c, manager, service) }
 
 	// setup rest endpoints
-	engine.PUT(pathlib.Join("/", pwd.NormalizeId(prefix), "/overwrite"), localOverwriteCallback)
-	engine.GET(pathlib.Join("/", pwd.NormalizeId(prefix), "/get"), localGetCallback)
-	engine.GET(pathlib.Join("/", pwd.NormalizeId(prefix), "/check"), localCheckCallback)
-	engine.PUT(pathlib.Join("/", pwd.NormalizeId(prefix), "/set"), localSetCallback)
-	engine.DELETE(pathlib.Join("/", pwd.NormalizeId(prefix), "/unset"), localUnsetCallback)
-	engine.GET(pathlib.Join("/", pwd.NormalizeId(prefix), "/exists"), localExistsCallback)
-	engine.GET(pathlib.Join("/", pwd.NormalizeId(prefix), "/list"), localListCallback)
-	engine.DELETE(pathlib.Join("/", pwd.NormalizeId(prefix), "/delete"), localDeleteCallback)
-	engine.DELETE(pathlib.Join("/", pwd.NormalizeId(prefix), "/clean"), localCleanCallback)
+	engine.PUT(pathlib.Join("/", prefix, "/overwrite"), localOverwriteCallback)
+	engine.GET(pathlib.Join("/", prefix, "/get"), localGetCallback)
+	engine.GET(pathlib.Join("/", prefix, "/check"), localCheckCallback)
+	engine.PUT(pathlib.Join("/", prefix, "/set"), localSetCallback)
+	engine.DELETE(pathlib.Join("/", prefix, "/unset"), localUnsetCallback)
+	engine.GET(pathlib.Join("/", prefix, "/exists"), localExistsCallback)
+	engine.GET(pathlib.Join("/", prefix, "/list"), localListCallback)
+	engine.DELETE(pathlib.Join("/", prefix, "/delete"), localDeleteCallback)
+	engine.DELETE(pathlib.Join("/", prefix, "/clean"), localCleanCallback)
 
 	go func() {
 		log.Info(restStartedLogMsg, "addr", bindAddress, "prefix", prefix, "type", "multi")

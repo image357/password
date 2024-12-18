@@ -8,6 +8,7 @@ import (
 	"github.com/image357/password/log"
 	"net/http"
 	pathlib "path"
+	"strings"
 	"time"
 )
 
@@ -75,6 +76,15 @@ type simpleDeleteData struct {
 	AccessToken string `form:"accessToken" json:"accessToken" xml:"accessToken"  binding:"required"`
 }
 
+// preparePrefix returns a normalized prefix.
+func preparePrefix(prefix string) string {
+	prefix = strings.ToLower(prefix)
+	prefix = strings.ReplaceAll(prefix, "\\", "/")
+	prefix = pathlib.Join("/", prefix)
+	prefix = strings.TrimPrefix(prefix, "/")
+	return pathlib.Clean(prefix)
+}
+
 // setupService returns a basic gin.Engine without any endpoint configuration.
 func setupService(bindAddress string, prefix string, key string, callback TestAccessFunc) (*gin.Engine, *restService, error) {
 	name := pathlib.Clean(bindAddress + "/" + prefix)
@@ -120,6 +130,10 @@ func logContext(c *gin.Context) {
 // "/prefix/delete" (DELETE).
 // The callback of type TestAccessFunc will be called for every request to determine access.
 func StartSimpleService(bindAddress string, prefix string, key string, callback TestAccessFunc) error {
+	// prepare arguments
+	prefix = preparePrefix(prefix)
+
+	// setup service
 	engine, service, err := setupService(bindAddress, prefix, key, callback)
 	if err != nil {
 		return err
@@ -136,13 +150,13 @@ func StartSimpleService(bindAddress string, prefix string, key string, callback 
 	localDeleteCallback := func(c *gin.Context) { simpleDeleteCallback(c, manager, service) }
 
 	// setup rest endpoints
-	engine.PUT(pathlib.Join("/", pwd.NormalizeId(prefix), "/overwrite"), localOverwriteCallback)
-	engine.GET(pathlib.Join("/", pwd.NormalizeId(prefix), "/get"), localGetCallback)
-	engine.GET(pathlib.Join("/", pwd.NormalizeId(prefix), "/check"), localCheckCallback)
-	engine.PUT(pathlib.Join("/", pwd.NormalizeId(prefix), "/set"), localSetCallback)
-	engine.DELETE(pathlib.Join("/", pwd.NormalizeId(prefix), "/unset"), localUnsetCallback)
-	engine.GET(pathlib.Join("/", pwd.NormalizeId(prefix), "/exists"), localExistsCallback)
-	engine.DELETE(pathlib.Join("/", pwd.NormalizeId(prefix), "/delete"), localDeleteCallback)
+	engine.PUT(pathlib.Join("/", prefix, "/overwrite"), localOverwriteCallback)
+	engine.GET(pathlib.Join("/", prefix, "/get"), localGetCallback)
+	engine.GET(pathlib.Join("/", prefix, "/check"), localCheckCallback)
+	engine.PUT(pathlib.Join("/", prefix, "/set"), localSetCallback)
+	engine.DELETE(pathlib.Join("/", prefix, "/unset"), localUnsetCallback)
+	engine.GET(pathlib.Join("/", prefix, "/exists"), localExistsCallback)
+	engine.DELETE(pathlib.Join("/", prefix, "/delete"), localDeleteCallback)
 
 	go func() {
 		log.Info(restStartedLogMsg, "addr", bindAddress, "prefix", prefix, "type", "simple")
@@ -158,6 +172,10 @@ func StartSimpleService(bindAddress string, prefix string, key string, callback 
 // StopService will block execution and try to gracefully shut down any rest service during the timeout period.
 // The service is guaranteed to be closed at the end of the timeout.
 func StopService(timeout int, bindAddress string, prefix string) error {
+	// prepare arguments
+	prefix = preparePrefix(prefix)
+
+	// get service
 	name := pathlib.Clean(bindAddress + "/" + prefix)
 	service, ok := services[name]
 	if !ok {
@@ -165,13 +183,17 @@ func StopService(timeout int, bindAddress string, prefix string) error {
 		return restStoppedErr
 	}
 
+	// prepare timeout
 	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*time.Duration(timeout))
 	defer cancel()
 
+	// try stop service
 	err := service.server.Shutdown(ctx)
 	if err != nil {
 		log.Warn(restStoppedLogMsg, "error", err)
 	}
+
+	// force stop service
 	err = service.server.Close()
 	if err != nil {
 		log.Warn(restStoppedLogMsg, "error", err)

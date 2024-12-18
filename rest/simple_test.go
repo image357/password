@@ -22,6 +22,34 @@ func ExampleStartSimpleService() {
 	}
 }
 
+func Test_preparePrefix(t *testing.T) {
+	type args struct {
+		prefix string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{"first", args{"First.pwd"}, "first.pwd"},
+		{"second", args{"/"}, "."},
+		{"third", args{"//"}, "."},
+		{"fourth", args{"pAth/foUrth.pwD"}, "path/fourth.pwd"},
+		{"fifth", args{"./Path\\tO/../fiftH.pWd"}, "path/fifth.pwd"},
+		{"sixth", args{"\\"}, "."},
+		{"seventh", args{"\\\\"}, "."},
+		{"eighth", args{"./../.."}, "."},
+		{"ninth", args{"./foo/../../to/../../path"}, "path"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := preparePrefix(tt.args.prefix); got != tt.want {
+				t.Errorf("preparePrefix() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestStartSimpleService(t *testing.T) {
 	type args struct {
 		bindAddress string
