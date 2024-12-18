@@ -79,8 +79,13 @@ func (t *TemporaryStorage) Delete(id string) error {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
 
-	delete(t.registry, id)
+	_, ok := t.registry[id]
+	if !ok {
+		delete(t.registry, id)
+		return invalidTemporaryStorageIdErr
+	}
 
+	delete(t.registry, id)
 	return nil
 }
 

@@ -203,3 +203,45 @@ func TestTemporaryStorage_List(t1 *testing.T) {
 		}
 	}
 }
+
+func TestTemporaryStorage_Delete(t1 *testing.T) {
+	type args struct {
+		id string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"first", args{"first"}, false},
+		{"second", args{"second"}, false},
+		{"third", args{"third"}, false},
+		{"invalid id", args{"invalid"}, true},
+	}
+	// init
+	t := NewTemporaryStorage()
+
+	err := t.Store("first", "1")
+	if err != nil {
+		t1.Fatal(err)
+	}
+
+	err = t.Store("second", "2")
+	if err != nil {
+		t1.Fatal(err)
+	}
+
+	err = t.Store("third", "3")
+	if err != nil {
+		t1.Fatal(err)
+	}
+
+	// tests
+	for _, tt := range tests {
+		t1.Run(tt.name, func(t1 *testing.T) {
+			if err := t.Delete(tt.args.id); (err != nil) != tt.wantErr {
+				t1.Errorf("Delete() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
