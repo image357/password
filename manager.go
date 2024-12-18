@@ -122,6 +122,8 @@ func (m *Manager) Get(id string, key string) (string, error) {
 // Check an existing password for equality with the provided password.
 // key is the encryption secret for storage.
 func (m *Manager) Check(id string, password string, key string) (bool, error) {
+	id = NormalizeId(id)
+
 	decryptedPassword, err := m.Get(id, key)
 	if err != nil {
 		return false, err
@@ -144,6 +146,8 @@ func (m *Manager) Check(id string, password string, key string) (bool, error) {
 // oldPassword must match the currently stored password.
 // key is the encryption secret for storage.
 func (m *Manager) Set(id string, oldPassword string, newPassword string, key string) error {
+	id = NormalizeId(id)
+
 	exists, err := m.storageBackend.Exists(id)
 	if err != nil {
 		return err
@@ -170,6 +174,8 @@ func (m *Manager) Set(id string, oldPassword string, newPassword string, key str
 // password must match the currently stored password.
 // key is the encryption secret for storage.
 func (m *Manager) Unset(id string, password string, key string) error {
+	id = NormalizeId(id)
+
 	correct, err := m.Check(id, password, key)
 	if err != nil {
 		return err
@@ -183,6 +189,7 @@ func (m *Manager) Unset(id string, password string, key string) error {
 
 // Exists tests if a given id already exists in the storage backend.
 func (m *Manager) Exists(id string) (bool, error) {
+	id = NormalizeId(id)
 	return m.storageBackend.Exists(id)
 }
 
@@ -193,6 +200,7 @@ func (m *Manager) List() ([]string, error) {
 
 // Delete an existing password.
 func (m *Manager) Delete(id string) error {
+	id = NormalizeId(id)
 	return m.storageBackend.Delete(id)
 }
 
