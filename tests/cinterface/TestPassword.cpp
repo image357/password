@@ -19,6 +19,11 @@ void TestPassword::SetUp() {
 
     // enable recovery
     CPWD__EnableRecovery("recovery_key");
+
+    // register manger
+    CPWD__RegisterDefaultManager("current");
+    auto ret_set_manager = CPWD__SetDefaultManager("current");
+    ASSERT_EQ(ret_set_manager, 0);
 }
 
 void TestPassword::TearDown() {
@@ -30,6 +35,9 @@ void TestPassword::TearDown() {
 
     // disable recovery
     CPWD__DisableRecovery();
+
+    // remove current manager
+    CPWD__RegisterDefaultManager("old");
 
     Test::TearDown();
 }
