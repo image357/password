@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="go build patchheader" type="GoApplicationRunConfiguration" factoryName="Go Application">
     <module name="password" />
-    <working_directory value="$PROJECT_DIR$/cmd/exampleservice" />
+    <working_directory value="$PROJECT_DIR$" />
     <kind value="PACKAGE" />
     <package value="github.com/image357/password/cmd/patchheader" />
     <directory value="$PROJECT_DIR$" />
