@@ -9,7 +9,7 @@ Hence, use regular `Get` operations of the standard API to access your lost stor
 
 There is also a small helper tool under [/cmd/recovery](../cmd/recovery), which you can install via
 ```shell
-go install https://github.com/image357/password/cmd/recovery@latest
+go install github.com/image357/password/cmd/recovery@latest
 ```
 Once installed, just point the executable towards anyone file (recovery or original password file):
 ```shell
@@ -26,10 +26,11 @@ For instance, the [exampleservice](../cmd/exampleservice) will write recovery ke
 
 If you know the storage key you can also use the encryption helper tools:
 ```shell
-go install https://github.com/image357/password/cmd/encrypt@latest
-go install https://github.com/image357/password/cmd/decrypt@latest
-
+go install github.com/image357/password/cmd/encrypt@latest
+go install github.com/image357/password/cmd/decrypt@latest
+```
+This will then print the encrypted/decrypted contents to stdout:
+```shell
 encrypt <file> <key>
 decrypt <file> <key>
 ```
-This will print the encrypted/decrypted contents to stdout.
