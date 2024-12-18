@@ -32,7 +32,7 @@ void TestPassword::TearDown() {
     CPWD__DisableRecovery();
 
     // remove current manager
-    CPWD__RegisterDefaultManager("old")
+    CPWD__RegisterDefaultManager("old");
 
     Test::TearDown();
 }
