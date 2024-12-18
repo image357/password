@@ -245,3 +245,46 @@ func TestTemporaryStorage_Delete(t1 *testing.T) {
 		})
 	}
 }
+
+func TestTemporaryStorage_Clean(t1 *testing.T) {
+	tests := []struct {
+		name    string
+		wantErr bool
+	}{
+		{"normal", false},
+		{"empty", false},
+	}
+	// init
+	t := NewTemporaryStorage()
+
+	err := t.Store("first", "1")
+	if err != nil {
+		t1.Fatal(err)
+	}
+
+	err = t.Store("second", "2")
+	if err != nil {
+		t1.Fatal(err)
+	}
+
+	err = t.Store("third", "3")
+	if err != nil {
+		t1.Fatal(err)
+	}
+
+	// tests
+	for _, tt := range tests {
+		t1.Run(tt.name, func(t1 *testing.T) {
+			if err := t.Clean(); (err != nil) != tt.wantErr {
+				t1.Errorf("Clean() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			list, err := t.List()
+			if err != nil {
+				t1.Fatal(err)
+			}
+			if len(list) != 0 {
+				t1.Errorf("Clean() list = %v, want empty", list)
+			}
+		})
+	}
+}
