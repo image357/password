@@ -71,7 +71,7 @@ func (m *Manager) Overwrite(id string, password string, key string) error {
 		return err
 	}
 
-	encryptedData, err := encrypt(packedData, key)
+	encryptedData, err := Encrypt(packedData, key)
 	if err != nil {
 		return err
 	}
@@ -103,7 +103,7 @@ func (m *Manager) Get(id string, key string) (string, error) {
 		return "", err
 	}
 
-	packedData, err := decrypt(encryptedData, key)
+	packedData, err := Decrypt(encryptedData, key)
 	if err != nil {
 		return "", err
 	}

@@ -173,11 +173,11 @@ func unpackData(input string) (string, string, error) {
 	return id, data, nil
 }
 
-// encrypt a given text with AES256 and return a base64 representation.
+// Encrypt a given text with AES256 and return a base64 representation.
 // The secret is hashed with the custom Hash function.
 // Galois Counter Mode is used.
 // The nonce is stored as a prefix of the ciphertext.
-func encrypt(text string, secret string) (string, error) {
+func Encrypt(text string, secret string) (string, error) {
 	// create salt
 	salt := make([]byte, saltLength)
 	_, err := rand.Read(salt)
@@ -214,11 +214,11 @@ func encrypt(text string, secret string) (string, error) {
 	return base64.StdEncoding.EncodeToString(cipherBytes), nil
 }
 
-// decrypt a given ciphertext in base64 representation with AES256.
+// Decrypt a given ciphertext in base64 representation with AES256.
 // The secret is hashed with the custom Hash function.
 // Galois Counter Mode is used.
 // The nonce is retrieved as a prefix of the ciphertext.
-func decrypt(ciphertext string, secret string) (string, error) {
+func Decrypt(ciphertext string, secret string) (string, error) {
 	// extract salt
 	cipherBytes, err := base64.StdEncoding.DecodeString(ciphertext)
 	if err != nil {
