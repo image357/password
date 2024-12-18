@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func Test_encrypt_decrypt(t *testing.T) {
+func Test_Encrypt_Decrypt(t *testing.T) {
 	type args struct {
 		text   string
 		secret string
@@ -92,7 +92,7 @@ func Test_compareHashedPassword(t *testing.T) {
 	}
 }
 
-func Test_packData(t *testing.T) {
+func Test_packData_unpackData(t *testing.T) {
 	type args struct {
 		id   string
 		data string

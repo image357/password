@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestSetGetDefaultManager(t *testing.T) {
+func Test_SetDefaultManger_GetDefaultManager(t *testing.T) {
 	tests := []struct {
 		name string
 		want *Manager
@@ -110,7 +110,7 @@ func TestToggleHashPassword(t *testing.T) {
 	}
 }
 
-func TestEnableDisableRecovery(t *testing.T) {
+func Test_EnableRecovery_DisableRecovery(t *testing.T) {
 	type args struct {
 		key string
 	}
