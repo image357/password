@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="go build encrypt" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="password" />
+    <working_directory value="$PROJECT_DIR$/cmd/encrypt" />
+    <parameters value="../exampleservice/password/myid.pwd storage_key" />
+    <kind value="PACKAGE" />
+    <package value="github.com/image357/password/cmd/encrypt" />
+    <directory value="$PROJECT_DIR$" />
+    <filePath value="$PROJECT_DIR$" />
+    <method v="2" />
+  </configuration>
+</component>
