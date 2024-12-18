@@ -32,6 +32,7 @@ import "github.com/image357/password"
 - [func SetDefaultManager\(manager \*Manager\)](<#SetDefaultManager>)
 - [func SetFileEnding\(e string\) error](<#SetFileEnding>)
 - [func SetStorePath\(path string\) error](<#SetStorePath>)
+- [func SetTemporaryStorage\(\)](<#SetTemporaryStorage>)
 - [func ToggleHashPassword\(\) bool](<#ToggleHashPassword>)
 - [func Unset\(id string, password string, key string\) error](<#Unset>)
 - [type FileStorage](<#FileStorage>)
@@ -63,6 +64,14 @@ import "github.com/image357/password"
   - [func \(m \*Manager\) Set\(id string, oldPassword string, newPassword string, key string\) error](<#Manager.Set>)
   - [func \(m \*Manager\) Unset\(id string, password string, key string\) error](<#Manager.Unset>)
 - [type Storage](<#Storage>)
+- [type TemporaryStorage](<#TemporaryStorage>)
+  - [func NewTemporaryStorage\(\) \*TemporaryStorage](<#NewTemporaryStorage>)
+  - [func \(t \*TemporaryStorage\) Clean\(\) error](<#TemporaryStorage.Clean>)
+  - [func \(t \*TemporaryStorage\) Delete\(id string\) error](<#TemporaryStorage.Delete>)
+  - [func \(t \*TemporaryStorage\) Exists\(id string\) \(bool, error\)](<#TemporaryStorage.Exists>)
+  - [func \(t \*TemporaryStorage\) List\(\) \(\[\]string, error\)](<#TemporaryStorage.List>)
+  - [func \(t \*TemporaryStorage\) Retrieve\(id string\) \(string, error\)](<#TemporaryStorage.Retrieve>)
+  - [func \(t \*TemporaryStorage\) Store\(id string, data string\) error](<#TemporaryStorage.Store>)
 
 
 ## Constants
@@ -293,6 +302,15 @@ func SetStorePath(path string) error
 
 SetStorePath accepts a new storage path with system\-unspecific or mixed path separators.
 
+<a name="SetTemporaryStorage"></a>
+## func [SetTemporaryStorage](<https://github.com/image357/password/blob/main/storage.go#L98>)
+
+```go
+func SetTemporaryStorage()
+```
+
+SetTemporaryStorage overwrites the current storage backend with a memory based one.
+
 <a name="ToggleHashPassword"></a>
 ## func [ToggleHashPassword](<https://github.com/image357/password/blob/main/password.go#L27>)
 
@@ -323,16 +341,16 @@ type FileStorage struct {
 ```
 
 <a name="NewFileStorage"></a>
-### func [NewFileStorage](<https://github.com/image357/password/blob/main/file.go#L46>)
+### func [NewFileStorage](<https://github.com/image357/password/blob/main/file.go#L47>)
 
 ```go
 func NewFileStorage() *FileStorage
 ```
 
-
+NewFileStorage returns a default initialized storage backend for persistent files.
 
 <a name="FileStorage.Clean"></a>
-### func \(\*FileStorage\) [Clean](<https://github.com/image357/password/blob/main/file.go#L243>)
+### func \(\*FileStorage\) [Clean](<https://github.com/image357/password/blob/main/file.go#L244>)
 
 ```go
 func (f *FileStorage) Clean() error
@@ -341,7 +359,7 @@ func (f *FileStorage) Clean() error
 Clean \(delete\) all stored passwords.
 
 <a name="FileStorage.Delete"></a>
-### func \(\*FileStorage\) [Delete](<https://github.com/image357/password/blob/main/file.go#L231>)
+### func \(\*FileStorage\) [Delete](<https://github.com/image357/password/blob/main/file.go#L232>)
 
 ```go
 func (f *FileStorage) Delete(id string) error
@@ -350,7 +368,7 @@ func (f *FileStorage) Delete(id string) error
 Delete an existing password.
 
 <a name="FileStorage.Exists"></a>
-### func \(\*FileStorage\) [Exists](<https://github.com/image357/password/blob/main/file.go#L185>)
+### func \(\*FileStorage\) [Exists](<https://github.com/image357/password/blob/main/file.go#L186>)
 
 ```go
 func (f *FileStorage) Exists(id string) (bool, error)
@@ -359,7 +377,7 @@ func (f *FileStorage) Exists(id string) (bool, error)
 Exists tests if a given id already exists in the storage backend.
 
 <a name="FileStorage.FilePath"></a>
-### func \(\*FileStorage\) [FilePath](<https://github.com/image357/password/blob/main/file.go#L86>)
+### func \(\*FileStorage\) [FilePath](<https://github.com/image357/password/blob/main/file.go#L87>)
 
 ```go
 func (f *FileStorage) FilePath(id string) string
@@ -368,7 +386,7 @@ func (f *FileStorage) FilePath(id string) string
 FilePath returns the storage filepath of a given password\-id with system\-specific path separators. It accepts system\-unspecific or mixed id separators, i.e. forward\- and backward\-slashes are treated as the same character.
 
 <a name="FileStorage.GetFileEnding"></a>
-### func \(\*FileStorage\) [GetFileEnding](<https://github.com/image357/password/blob/main/file.go#L75>)
+### func \(\*FileStorage\) [GetFileEnding](<https://github.com/image357/password/blob/main/file.go#L76>)
 
 ```go
 func (f *FileStorage) GetFileEnding() string
@@ -377,7 +395,7 @@ func (f *FileStorage) GetFileEnding() string
 GetFileEnding returns the current file ending of storage files.
 
 <a name="FileStorage.GetStorePath"></a>
-### func \(\*FileStorage\) [GetStorePath](<https://github.com/image357/password/blob/main/file.go#L58>)
+### func \(\*FileStorage\) [GetStorePath](<https://github.com/image357/password/blob/main/file.go#L59>)
 
 ```go
 func (f *FileStorage) GetStorePath() string
@@ -386,7 +404,7 @@ func (f *FileStorage) GetStorePath() string
 GetStorePath returns the current storage path with system\-specific path separators.
 
 <a name="FileStorage.List"></a>
-### func \(\*FileStorage\) [List](<https://github.com/image357/password/blob/main/file.go#L197>)
+### func \(\*FileStorage\) [List](<https://github.com/image357/password/blob/main/file.go#L198>)
 
 ```go
 func (f *FileStorage) List() ([]string, error)
@@ -395,7 +413,7 @@ func (f *FileStorage) List() ([]string, error)
 List all stored password\-ids.
 
 <a name="FileStorage.Retrieve"></a>
-### func \(\*FileStorage\) [Retrieve](<https://github.com/image357/password/blob/main/file.go#L168>)
+### func \(\*FileStorage\) [Retrieve](<https://github.com/image357/password/blob/main/file.go#L169>)
 
 ```go
 func (f *FileStorage) Retrieve(id string) (string, error)
@@ -404,7 +422,7 @@ func (f *FileStorage) Retrieve(id string) (string, error)
 Retrieve data from an existing file. id is converted to the corresponding filepath.
 
 <a name="FileStorage.SetFileEnding"></a>
-### func \(\*FileStorage\) [SetFileEnding](<https://github.com/image357/password/blob/main/file.go#L80>)
+### func \(\*FileStorage\) [SetFileEnding](<https://github.com/image357/password/blob/main/file.go#L81>)
 
 ```go
 func (f *FileStorage) SetFileEnding(e string)
@@ -413,7 +431,7 @@ func (f *FileStorage) SetFileEnding(e string)
 SetFileEnding accepts a new file ending for storage files.
 
 <a name="FileStorage.SetStorePath"></a>
-### func \(\*FileStorage\) [SetStorePath](<https://github.com/image357/password/blob/main/file.go#L63>)
+### func \(\*FileStorage\) [SetStorePath](<https://github.com/image357/password/blob/main/file.go#L64>)
 
 ```go
 func (f *FileStorage) SetStorePath(path string)
@@ -422,7 +440,7 @@ func (f *FileStorage) SetStorePath(path string)
 SetStorePath accepts a new storage path with system\-unspecific or mixed path separators.
 
 <a name="FileStorage.Store"></a>
-### func \(\*FileStorage\) [Store](<https://github.com/image357/password/blob/main/file.go#L144>)
+### func \(\*FileStorage\) [Store](<https://github.com/image357/password/blob/main/file.go#L145>)
 
 ```go
 func (f *FileStorage) Store(id string, data string) error
@@ -590,5 +608,79 @@ type Storage interface {
     Clean() error
 }
 ```
+
+<a name="TemporaryStorage"></a>
+## type [TemporaryStorage](<https://github.com/image357/password/blob/main/temporary.go#L12-L15>)
+
+TemporaryStorage is a memory based storage backend.
+
+```go
+type TemporaryStorage struct {
+    // contains filtered or unexported fields
+}
+```
+
+<a name="NewTemporaryStorage"></a>
+### func [NewTemporaryStorage](<https://github.com/image357/password/blob/main/temporary.go#L18>)
+
+```go
+func NewTemporaryStorage() *TemporaryStorage
+```
+
+NewTemporaryStorage returns a memory based storage backend.
+
+<a name="TemporaryStorage.Clean"></a>
+### func \(\*TemporaryStorage\) [Clean](<https://github.com/image357/password/blob/main/temporary.go#L93>)
+
+```go
+func (t *TemporaryStorage) Clean() error
+```
+
+Clean \(delete\) all stored passwords.
+
+<a name="TemporaryStorage.Delete"></a>
+### func \(\*TemporaryStorage\) [Delete](<https://github.com/image357/password/blob/main/temporary.go#L78>)
+
+```go
+func (t *TemporaryStorage) Delete(id string) error
+```
+
+Delete an existing password.
+
+<a name="TemporaryStorage.Exists"></a>
+### func \(\*TemporaryStorage\) [Exists](<https://github.com/image357/password/blob/main/temporary.go#L49>)
+
+```go
+func (t *TemporaryStorage) Exists(id string) (bool, error)
+```
+
+Exists tests if a given id already exists in the storage backend.
+
+<a name="TemporaryStorage.List"></a>
+### func \(\*TemporaryStorage\) [List](<https://github.com/image357/password/blob/main/temporary.go#L63>)
+
+```go
+func (t *TemporaryStorage) List() ([]string, error)
+```
+
+List all stored password\-ids.
+
+<a name="TemporaryStorage.Retrieve"></a>
+### func \(\*TemporaryStorage\) [Retrieve](<https://github.com/image357/password/blob/main/temporary.go#L35>)
+
+```go
+func (t *TemporaryStorage) Retrieve(id string) (string, error)
+```
+
+Retrieve data from an existing memory location.
+
+<a name="TemporaryStorage.Store"></a>
+### func \(\*TemporaryStorage\) [Store](<https://github.com/image357/password/blob/main/temporary.go#L25>)
+
+```go
+func (t *TemporaryStorage) Store(id string, data string) error
+```
+
+Store \(create/overwrite\) the provided data.
 
 Generated by [gomarkdoc](<https://github.com/princjef/gomarkdoc>)
