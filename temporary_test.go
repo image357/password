@@ -55,3 +55,51 @@ func TestTemporaryStorage_Store(t1 *testing.T) {
 		})
 	}
 }
+
+func TestTemporaryStorage_Retrieve(t1 *testing.T) {
+	type args struct {
+		id string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{"first", args{"first"}, "1", false},
+		{"second", args{"second"}, "2", false},
+		{"third", args{"third"}, "3", false},
+		{"invalid id", args{"invalid"}, "", true},
+	}
+	// init
+	t := NewTemporaryStorage()
+
+	err := t.Store("first", "1")
+	if err != nil {
+		t1.Fatal(err)
+	}
+
+	err = t.Store("second", "2")
+	if err != nil {
+		t1.Fatal(err)
+	}
+
+	err = t.Store("third", "3")
+	if err != nil {
+		t1.Fatal(err)
+	}
+
+	// tests
+	for _, tt := range tests {
+		t1.Run(tt.name, func(t1 *testing.T) {
+			got, err := t.Retrieve(tt.args.id)
+			if (err != nil) != tt.wantErr {
+				t1.Errorf("Retrieve() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t1.Errorf("Retrieve() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
