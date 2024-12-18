@@ -89,15 +89,6 @@ func CPWD__DisableRecovery() {
 	pwd.DisableRecovery()
 }
 
-// CPWD__SetTemporaryStorage calls password.SetTemporaryStorage.
-//
-// For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
-//
-//export CPWD__SetTemporaryStorage
-func CPWD__SetTemporaryStorage() {
-	pwd.SetTemporaryStorage()
-}
-
 // CPWD__Overwrite calls password.Overwrite and returns 0 on success, -1 on error.
 //
 // For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
@@ -497,6 +488,15 @@ func CPWD__FilePath(id *C.cchar_t, buffer *C.char, length int) int {
 	C.strcpy(buffer, cs)
 
 	return 0
+}
+
+// CPWD__SetTemporaryStorage calls password.SetTemporaryStorage.
+//
+// For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
+//
+//export CPWD__SetTemporaryStorage
+func CPWD__SetTemporaryStorage() {
+	pwd.SetTemporaryStorage()
 }
 
 // CPWD__LogLevel calls log.Level and returns 0 on success, -1 on error.

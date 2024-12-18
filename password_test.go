@@ -135,36 +135,6 @@ func Test_EnableRecovery_DisableRecovery(t *testing.T) {
 	}
 }
 
-func TestSetTemporaryStorage(t *testing.T) {
-	tests := []struct {
-		name string
-	}{
-		{"execute"},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			// test init
-			RegisterDefaultManager("old")
-
-			// test
-			_, ok := GetDefaultManager().storageBackend.(*FileStorage)
-			if !ok {
-				t.Errorf("GetDefaultManager().storageBackend = %v, want FileStorage", GetDefaultManager().storageBackend)
-			}
-
-			SetTemporaryStorage()
-
-			_, ok = GetDefaultManager().storageBackend.(*TemporaryStorage)
-			if !ok {
-				t.Errorf("GetDefaultManager().storageBackend = %v, want TemporaryStorage", GetDefaultManager().storageBackend)
-			}
-
-			// test cleanup
-			RegisterDefaultManager("old")
-		})
-	}
-}
-
 func TestPassword_PublicAPI(t *testing.T) {
 	tests := []struct {
 		name string

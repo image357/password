@@ -93,3 +93,8 @@ func FilePath(id string) (string, error) {
 
 	return "", unsupportedError
 }
+
+// SetTemporaryStorage overwrites the current storage backend with a memory based one.
+func SetTemporaryStorage() {
+	GetDefaultManager().storageBackend = NewTemporaryStorage()
+}
