@@ -294,6 +294,8 @@ To make the storage backend cross-platform compatible, ids have the following co
 1. Forward- and backward-slashes are treated as the same character.
 2. Upper- and lower-case characters are treated as the same character.
 
+You can also switch to temporary (in-memory) storage (see below for full docs).
+
 ### Encryption
 Yes, the usual - AES256, hashed secrets, etc.
 For more info have a look at the [source code](./encryption.go).
