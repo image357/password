@@ -1,6 +1,7 @@
 package password
 
 import (
+	"os"
 	"reflect"
 	"sync"
 	"testing"
@@ -284,6 +285,119 @@ func TestTemporaryStorage_Clean(t1 *testing.T) {
 			}
 			if len(list) != 0 {
 				t1.Errorf("Clean() list = %v, want empty", list)
+			}
+		})
+	}
+}
+
+func TestTemporaryStorage_WriteToDisk(t1 *testing.T) {
+	type args struct {
+		path string
+		data map[string]string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"execute", args{
+			"./tests/workdir/TemporaryStorage_WriteToDisk",
+			map[string]string{
+				"a":       "1",
+				"b":       "2",
+				"c":       "2",
+				"foo/bar": "foobar",
+			},
+		}, false},
+	}
+	// init
+	for _, tt := range tests {
+		t1.Run(tt.name, func(t1 *testing.T) {
+			// init test
+			t := NewTemporaryStorage()
+			for k, v := range tt.args.data {
+				err := t.Store(k, v)
+				if err != nil {
+					t1.Fatal(err)
+				}
+			}
+
+			// test
+			if err := t.WriteToDisk(tt.args.path); (err != nil) != tt.wantErr {
+				t1.Errorf("WriteToDisk() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			f := NewFileStorage()
+			f.SetStorePath(tt.args.path)
+			list, err := f.List()
+			if err != nil {
+				t1.Fatal(err)
+			}
+			if len(list) != len(tt.args.data) {
+				t1.Errorf("List() list = %v, want %v", list, tt.args.data)
+			}
+
+			// cleanup test
+			path := f.GetStorePath()
+			err = os.RemoveAll(path)
+			if err != nil {
+				t1.Fatal(err)
+			}
+		})
+	}
+}
+
+func TestTemporaryStorage_ReadFromDisk(t1 *testing.T) {
+	type args struct {
+		path string
+		data map[string]string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"execute", args{
+			"./tests/workdir/TemporaryStorage_ReadFromDisk",
+			map[string]string{
+				"a":       "1",
+				"b":       "2",
+				"c":       "2",
+				"foo/bar": "foobar",
+			},
+		}, false},
+	}
+	for _, tt := range tests {
+		t1.Run(tt.name, func(t1 *testing.T) {
+			// init test
+			f := NewFileStorage()
+			f.SetStorePath(tt.args.path)
+			for k, v := range tt.args.data {
+				err := f.Store(k, v)
+				if err != nil {
+					t1.Fatal(err)
+				}
+			}
+
+			// test
+			t := NewTemporaryStorage()
+			if err := t.ReadFromDisk(tt.args.path); (err != nil) != tt.wantErr {
+				t1.Errorf("ReadFromDisk() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			list, err := t.List()
+			if err != nil {
+				t1.Fatal(err)
+			}
+			if len(list) != len(tt.args.data) {
+				t1.Errorf("List() list = %v, want %v", list, tt.args.data)
+			}
+
+			// cleanup test
+			path := f.GetStorePath()
+			err = os.RemoveAll(path)
+			if err != nil {
+				t1.Fatal(err)
 			}
 		})
 	}
