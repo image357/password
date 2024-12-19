@@ -1,6 +1,7 @@
 package password
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 )
@@ -71,14 +72,13 @@ func TestGetStorePath(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// init test
 			RegisterDefaultManager("old")
 			currentManager := GetDefaultManager()
 			currentManager.storageBackend = tt.backend
 
+			// test
 			got, err := GetStorePath()
-
-			SetDefaultManager(Managers["old"])
-
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetStorePath() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -86,6 +86,9 @@ func TestGetStorePath(t *testing.T) {
 			if got != tt.want {
 				t.Errorf("GetStorePath() got = %v, want %v", got, tt.want)
 			}
+
+			// cleanup test
+			SetDefaultManager(Managers["old"])
 		})
 	}
 }
@@ -105,17 +108,19 @@ func TestSetStorePath(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// init test
 			RegisterDefaultManager("old")
 			currentManager := GetDefaultManager()
 			currentManager.storageBackend = tt.backend
 
+			// test
 			err := SetStorePath(tt.args.path)
-
-			SetDefaultManager(Managers["old"])
-
 			if (err != nil) != tt.wantErr {
 				t.Errorf("SetStorePath() error = %v, wantErr %v", err, tt.wantErr)
 			}
+
+			// cleanup test
+			SetDefaultManager(Managers["old"])
 		})
 	}
 }
@@ -132,14 +137,13 @@ func TestGetFileEnding(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// init test
 			RegisterDefaultManager("old")
 			currentManager := GetDefaultManager()
 			currentManager.storageBackend = tt.backend
 
+			// test
 			got, err := GetFileEnding()
-
-			SetDefaultManager(Managers["old"])
-
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetFileEnding() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -147,6 +151,9 @@ func TestGetFileEnding(t *testing.T) {
 			if got != tt.want {
 				t.Errorf("GetFileEnding() got = %v, want %v", got, tt.want)
 			}
+
+			// cleanup test
+			SetDefaultManager(Managers["old"])
 		})
 	}
 }
@@ -166,17 +173,19 @@ func TestSetFileEnding(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// init test
 			RegisterDefaultManager("old")
 			currentManager := GetDefaultManager()
 			currentManager.storageBackend = tt.backend
 
+			// test
 			err := SetFileEnding(tt.args.e)
-
-			SetDefaultManager(Managers["old"])
-
 			if (err != nil) != tt.wantErr {
 				t.Errorf("SetFileEnding() error = %v, wantErr %v", err, tt.wantErr)
 			}
+
+			// cleanup test
+			SetDefaultManager(Managers["old"])
 		})
 	}
 }
@@ -197,14 +206,13 @@ func TestFilePath(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// init test
 			RegisterDefaultManager("old")
 			currentManager := GetDefaultManager()
 			currentManager.storageBackend = tt.backend
 
+			// test
 			got, err := FilePath(tt.args.id)
-
-			SetDefaultManager(Managers["old"])
-
 			if (err != nil) != tt.wantErr {
 				t.Errorf("FilePath() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -212,6 +220,9 @@ func TestFilePath(t *testing.T) {
 			if got != tt.want {
 				t.Errorf("FilePath() got = %v, want %v", got, tt.want)
 			}
+
+			// cleanup test
+			SetDefaultManager(Managers["old"])
 		})
 	}
 }
@@ -224,7 +235,7 @@ func TestSetTemporaryStorage(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// test init
+			// init test
 			RegisterDefaultManager("old")
 
 			// test
@@ -240,8 +251,83 @@ func TestSetTemporaryStorage(t *testing.T) {
 				t.Errorf("GetDefaultManager().storageBackend = %v, want TemporaryStorage", GetDefaultManager().storageBackend)
 			}
 
-			// test cleanup
+			// cleanup test
 			RegisterDefaultManager("old")
+		})
+	}
+}
+
+func TestWriteToDisk(t *testing.T) {
+	type args struct {
+		path string
+	}
+	tests := []struct {
+		name    string
+		backend Storage
+		args    args
+		wantErr bool
+	}{
+		{"FileStorage", NewFileStorage(), args{"./tests/workdir/Storage_WriteToDisk"}, true},
+		{"TemporaryStorage", NewTemporaryStorage(), args{"./tests/workdir/Storage_WriteToDisk"}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// init test
+			RegisterDefaultManager("old")
+			currentManager := GetDefaultManager()
+			currentManager.storageBackend = tt.backend
+
+			// test
+			if err := WriteToDisk(tt.args.path); (err != nil) != tt.wantErr {
+				t.Errorf("WriteToDisk() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			// cleanup
+			err := os.RemoveAll(tt.args.path)
+			if err != nil {
+				t.Error(err)
+			}
+			SetDefaultManager(Managers["old"])
+		})
+	}
+}
+
+func TestReadFromDisk(t *testing.T) {
+	type args struct {
+		path string
+	}
+	tests := []struct {
+		name    string
+		backend Storage
+		args    args
+		wantErr bool
+	}{
+		{"FileStorage", NewFileStorage(), args{"./tests/workdir/Storage_ReadFromDisk"}, true},
+		{"TemporaryStorage", NewTemporaryStorage(), args{"./tests/workdir/Storage_ReadFromDisk"}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// init test
+			RegisterDefaultManager("old")
+			currentManager := GetDefaultManager()
+			currentManager.storageBackend = tt.backend
+
+			err := os.MkdirAll(tt.args.path, storageDirMode)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// test
+			if err := ReadFromDisk(tt.args.path); (err != nil) != tt.wantErr {
+				t.Errorf("ReadFromDisk() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			// cleanup
+			err = os.RemoveAll(tt.args.path)
+			if err != nil {
+				t.Error(err)
+			}
+			SetDefaultManager(Managers["old"])
 		})
 	}
 }

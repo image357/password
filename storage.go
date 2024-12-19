@@ -98,3 +98,33 @@ func FilePath(id string) (string, error) {
 func SetTemporaryStorage() {
 	GetDefaultManager().storageBackend = NewTemporaryStorage()
 }
+
+// WriteToDisk saves the current storage to files via FileStorage mechanisms.
+// Warning: This method does not block operations on the underlying storage backends (read/write/create/delete).
+// You should stop operations manually before usage or ignore the reported error.
+// Data consistency is guaranteed.
+func WriteToDisk(path string) error {
+	m := GetDefaultManager()
+
+	switch m.storageBackend.(type) {
+	case *TemporaryStorage:
+		return m.storageBackend.(*TemporaryStorage).WriteToDisk(path)
+	}
+
+	return unsupportedError
+}
+
+// ReadFromDisk loads a FileStorage backend from disk into the current storage.
+// Warning: This method does not block operations on the underlying storage backends (read/write/create/delete).
+// You should stop operations manually before usage or ignore the reported error.
+// Data consistency is guaranteed.
+func ReadFromDisk(path string) error {
+	m := GetDefaultManager()
+
+	switch m.storageBackend.(type) {
+	case *TemporaryStorage:
+		return m.storageBackend.(*TemporaryStorage).ReadFromDisk(path)
+	}
+
+	return unsupportedError
+}
