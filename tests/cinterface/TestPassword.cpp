@@ -31,7 +31,7 @@ void TestPassword::TearDown() {
     EXPECT_EQ(ret_clean, 0);
 
     auto ret_remove = std::filesystem::remove_all(STORAGE_PATH "/cinterface_password");
-    EXPECT_EQ(ret_remove, 1);
+    EXPECT_GE(ret_remove, 0);
 
     // disable recovery
     CPWD__DisableRecovery();

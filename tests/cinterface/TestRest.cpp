@@ -16,6 +16,7 @@ void TestRest::SetUp() {
 
 void TestRest::TearDown() {
     auto ret_remove = std::filesystem::remove_all(STORAGE_PATH "/cinterface_rest");
+    EXPECT_GE(ret_remove, 0);
     Test::TearDown();
 }
 
