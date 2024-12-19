@@ -98,3 +98,69 @@ func (t *TemporaryStorage) Clean() error {
 
 	return nil
 }
+
+// WriteToDisk saves the temporary storage to files via FileStorage mechanisms.
+// Warning: This method does not block operations on the underlying storage backends (read/write/create/delete).
+// You should stop operations manually before usage or ignore the reported error.
+// Data consistency is guaranteed.
+func (t *TemporaryStorage) WriteToDisk(path string) error {
+	f := NewFileStorage()
+	f.SetStorePath(path)
+
+	list, err := t.List()
+	if err != nil {
+		return err
+	}
+
+	var lastErr error = nil
+	for _, id := range list {
+		data, err := t.Retrieve(id)
+		if err != nil {
+			lastErr = err
+			continue
+		}
+
+		err = f.Store(id, data)
+		if err != nil {
+			lastErr = err
+		}
+	}
+
+	if lastErr != nil {
+		return lastErr
+	}
+	return nil
+}
+
+// ReadFromDisk loads a FileStorage backend from disk into a temporary storage.
+// Warning: This method does not block operations on the underlying storage backends (read/write/create/delete).
+// You should stop operations manually before usage or ignore the reported error.
+// Data consistency is guaranteed.
+func (t *TemporaryStorage) ReadFromDisk(path string) error {
+	f := NewFileStorage()
+	f.SetStorePath(path)
+
+	list, err := f.List()
+	if err != nil {
+		return err
+	}
+
+	var lastErr error = nil
+	for _, id := range list {
+		data, err := f.Retrieve(id)
+		if err != nil {
+			lastErr = err
+			continue
+		}
+
+		err = t.Store(id, data)
+		if err != nil {
+			lastErr = err
+		}
+	}
+
+	if lastErr != nil {
+		return lastErr
+	}
+	return nil
+}
