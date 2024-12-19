@@ -38,11 +38,12 @@ TEST_F(TestStorage, NormalizeId) {
 
 TEST_F(TestStorage, StorePath) {
     // set
-    CPWD__SetStorePath("test");
+    int ret = CPWD__SetStorePath("test");
+    ASSERT_EQ(ret, 0);
 
     // success
     char buffer[256];
-    int ret = CPWD__GetStorePath(buffer, 256);
+    ret = CPWD__GetStorePath(buffer, 256);
     ASSERT_EQ(ret, 0);
 
     const char expected_string[] = "test";
@@ -61,11 +62,12 @@ TEST_F(TestStorage, StorePath) {
 
 TEST_F(TestStorage, FileEnding) {
     // set
-    CPWD__SetFileEnding("test");
+    int ret = CPWD__SetFileEnding("test");
+    ASSERT_EQ(ret, 0);
 
     // success
     char buffer[256];
-    int ret = CPWD__GetFileEnding(buffer, 256);
+    ret = CPWD__GetFileEnding(buffer, 256);
     ASSERT_EQ(ret, 0);
     ASSERT_STREQ(buffer, "test");
 
