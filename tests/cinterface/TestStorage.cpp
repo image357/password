@@ -19,7 +19,7 @@ void TestStorage::TearDown() {
 TEST_F(TestStorage, NormalizeId) {
     // success
     char buffer[256];
-    int ret = CPWD__NormalizeId("//TEST", buffer, 256);
+    auto ret = CPWD__NormalizeId("//TEST", buffer, 256);
     ASSERT_EQ(ret, 0);
     ASSERT_STREQ(buffer, "test");
 
@@ -38,7 +38,7 @@ TEST_F(TestStorage, NormalizeId) {
 
 TEST_F(TestStorage, StorePath) {
     // set
-    int ret = CPWD__SetStorePath("test");
+    auto ret = CPWD__SetStorePath("test");
     ASSERT_EQ(ret, 0);
 
     // success
@@ -62,7 +62,7 @@ TEST_F(TestStorage, StorePath) {
 
 TEST_F(TestStorage, FileEnding) {
     // set
-    int ret = CPWD__SetFileEnding("test");
+    auto ret = CPWD__SetFileEnding("test");
     ASSERT_EQ(ret, 0);
 
     // success
@@ -118,4 +118,34 @@ TEST_F(TestStorage, SetTemporaryStorage) {
     // test
     char buffer[256];
     ASSERT_EQ(CPWD__Get("foo", "123", buffer, 256), 0);
+}
+
+TEST_F(TestStorage, WriteToDiskReadFromDisk) {
+    CPWD__SetTemporaryStorage();
+
+    // create
+    auto ret_overwrite = CPWD__Overwrite("foo", "bar", "123");
+    ASSERT_EQ(ret_overwrite, 0);
+
+    // confirm
+    char buffer[256];
+    ASSERT_EQ(CPWD__Get("foo", "123", buffer, 256), 0);
+
+    // test
+    char path[] = STORAGE_PATH "/cinterface_storage_ReadWriteDisk";
+    auto ret_write = CPWD__WriteToDisk(path);
+    EXPECT_EQ(ret_write, 0);
+
+    auto ret_clean = CPWD_Clean();
+    EXPECT_EQ(ret_clean, 0);
+
+    auto ret_read = CPWD_ReadFromDisk(path);
+    EXPECT_EQ(ret_read, 0);
+
+    // confirm again
+    EXPECT_EQ(CPWD__Get("foo", "123", buffer, 256), 0);
+
+    // cleanup
+    auto ret_remove = std::filesystem::remove_all(path);
+    EXPECT_EQ(ret_remove, 1);
 }
