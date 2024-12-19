@@ -37,7 +37,7 @@ func main() {}
 
 // CPWD__SetDefaultManager calls password.SetDefaultManager.
 // Returns 0 if the identifier has already been registered, -1 if not.
-
+//
 // For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
 //
 //export CPWD__SetDefaultManager
@@ -408,16 +408,18 @@ func CPWD__GetStorePath(buffer *C.char, length int) int {
 	return 0
 }
 
-// CPWD__SetStorePath calls password.SetStorePath.
+// CPWD__SetStorePath calls password.SetStorePath and returns 0 on success, -1 on error.
 //
 // For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
 //
 //export CPWD__SetStorePath
-func CPWD__SetStorePath(path *C.cchar_t) {
+func CPWD__SetStorePath(path *C.cchar_t) int {
 	err := pwd.SetStorePath(C.GoString(path))
 	if err != nil {
 		log.Error("CPWD__SetStorePath: SetStorePath failed", "error", err)
+		return -1
 	}
+	return 0
 }
 
 // CPWD__GetFileEnding calls password.GetFileEnding and returns 0 on success, -1 on error.
@@ -449,16 +451,18 @@ func CPWD__GetFileEnding(buffer *C.char, length int) int {
 	return 0
 }
 
-// CPWD__SetFileEnding calls password.SetFileEnding.
+// CPWD__SetFileEnding calls password.SetFileEnding and returns 0 on success, -1 on error.
 //
 // For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
 //
 //export CPWD__SetFileEnding
-func CPWD__SetFileEnding(ending *C.cchar_t) {
-	err := pwd.SetFileEnding(C.GoString(ending))
+func CPWD__SetFileEnding(e *C.cchar_t) int {
+	err := pwd.SetFileEnding(C.GoString(e))
 	if err != nil {
 		log.Error("CPWD__SetFileEnding: SetFileEnding failed", "error", err)
+		return -1
 	}
+	return 0
 }
 
 // CPWD__FilePath calls password.FilePath and returns 0 on success, -1 on error.
@@ -497,6 +501,34 @@ func CPWD__FilePath(id *C.cchar_t, buffer *C.char, length int) int {
 //export CPWD__SetTemporaryStorage
 func CPWD__SetTemporaryStorage() {
 	pwd.SetTemporaryStorage()
+}
+
+// CPWD__WriteToDisk calls password.WriteToDisk and returns 0 on success, -1 on error.
+//
+// For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
+//
+//export CPWD__WriteToDisk
+func CPWD__WriteToDisk(path *C.cchar_t) int {
+	err := pwd.WriteToDisk(C.GoString(path))
+	if err != nil {
+		log.Error("CPWD__WriteToDisk: WriteToDisk failed", "error", err)
+		return -1
+	}
+	return 0
+}
+
+// CPWD__ReadFromDisk calls password.ReadFromDisk and returns 0 on success, -1 on error.
+//
+// For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
+//
+//export CPWD__ReadFromDisk
+func CPWD__ReadFromDisk(path *C.cchar_t) int {
+	err := pwd.ReadFromDisk(C.GoString(path))
+	if err != nil {
+		log.Error("CPWD__ReadFromDisk: ReadFromDisk failed", "error", err)
+		return -1
+	}
+	return 0
 }
 
 // CPWD__LogLevel calls log.Level and returns 0 on success, -1 on error.
