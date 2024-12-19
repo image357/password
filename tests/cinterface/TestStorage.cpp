@@ -147,5 +147,5 @@ TEST_F(TestStorage, WriteToDiskReadFromDisk) {
 
     // cleanup
     auto ret_remove = std::filesystem::remove_all(path);
-    EXPECT_GE(ret_remove, 0);
+    EXPECT_GE(ret_remove, 1);
 }
