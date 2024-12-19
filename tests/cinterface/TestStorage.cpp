@@ -136,10 +136,10 @@ TEST_F(TestStorage, WriteToDiskReadFromDisk) {
     auto ret_write = CPWD__WriteToDisk(path);
     EXPECT_EQ(ret_write, 0);
 
-    auto ret_clean = CPWD_Clean();
+    auto ret_clean = CPWD__Clean();
     EXPECT_EQ(ret_clean, 0);
 
-    auto ret_read = CPWD_ReadFromDisk(path);
+    auto ret_read = CPWD__ReadFromDisk(path);
     EXPECT_EQ(ret_read, 0);
 
     // confirm again
