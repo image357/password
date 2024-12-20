@@ -642,3 +642,107 @@ func TestManager_Clean(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestManager_RewriteKey(t *testing.T) {
+	type args struct {
+		id     string
+		oldKey string
+		newKey string
+	}
+	tests := []struct {
+		name     string
+		args     args
+		recovery bool
+		wantErr  bool
+	}{
+		{"no recovery", args{"foobar", "123", "456"}, false, false},
+		{"with recovery", args{"foo/bar", "1234", "5678"}, true, false},
+	}
+	// init
+	m := NewManager()
+	m.storageBackend.(*FileStorage).SetStorePath("./tests/workdir/Manager_RewriteKey")
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// init test
+			if tt.recovery {
+				m.EnableRecovery("recovery_key")
+			} else {
+				m.DisableRecovery()
+			}
+
+			err := m.Overwrite(tt.args.id, "123", tt.args.oldKey)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			temp, err := m.storageBackend.Retrieve(tt.args.id)
+			if err != nil {
+				t.Fatal(err)
+			}
+			oldData, err := Decrypt(temp, tt.args.oldKey)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			oldRecovery := "some"
+			if tt.recovery {
+				temp, err = m.storageBackend.Retrieve(tt.args.id + RecoveryIdSuffix)
+				if err != nil {
+					t.Fatal(err)
+				}
+				oldRecovery, err = Decrypt(temp, "recovery_key")
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			// test
+			if err := m.RewriteKey(tt.args.id, tt.args.oldKey, tt.args.newKey); (err != nil) != tt.wantErr {
+				t.Errorf("RewriteKey() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			temp, err = m.storageBackend.Retrieve(tt.args.id)
+			if err != nil {
+				t.Fatal(err)
+			}
+			newData, err := Decrypt(temp, tt.args.newKey)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			newRecovery := "another"
+			if tt.recovery {
+				temp, err = m.storageBackend.Retrieve(tt.args.id + RecoveryIdSuffix)
+				if err != nil {
+					t.Fatal(err)
+				}
+				newRecovery, err = Decrypt(temp, "recovery_key")
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			if oldData != newData {
+				t.Errorf("File contents should match. got = %v, want %v", oldData, newData)
+			}
+
+			if oldRecovery == newRecovery {
+				t.Errorf("Recovery contents should not match. got = %v, want %v", oldRecovery, newRecovery)
+			}
+
+			// cleanup
+			err = m.Clean()
+			if err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+
+	// cleanup
+	path := m.storageBackend.(*FileStorage).GetStorePath()
+	err := os.RemoveAll(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
