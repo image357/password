@@ -29,6 +29,7 @@ import "github.com/image357/password"
 - [func Overwrite\(id string, password string, key string\) error](<#Overwrite>)
 - [func ReadFromDisk\(path string\) error](<#ReadFromDisk>)
 - [func RegisterDefaultManager\(identifier string\)](<#RegisterDefaultManager>)
+- [func RewriteKey\(id string, oldKey string, newKey string\) error](<#RewriteKey>)
 - [func Set\(id string, oldPassword string, newPassword string, key string\) error](<#Set>)
 - [func SetDefaultManager\(manager \*Manager\)](<#SetDefaultManager>)
 - [func SetFileEnding\(e string\) error](<#SetFileEnding>)
@@ -63,6 +64,7 @@ import "github.com/image357/password"
   - [func \(m \*Manager\) Get\(id string, key string\) \(string, error\)](<#Manager.Get>)
   - [func \(m \*Manager\) List\(\) \(\[\]string, error\)](<#Manager.List>)
   - [func \(m \*Manager\) Overwrite\(id string, password string, key string\) error](<#Manager.Overwrite>)
+  - [func \(m \*Manager\) RewriteKey\(id string, oldKey string, newKey string\) error](<#Manager.RewriteKey>)
   - [func \(m \*Manager\) Set\(id string, oldPassword string, newPassword string, key string\) error](<#Manager.Set>)
   - [func \(m \*Manager\) Unset\(id string, password string, key string\) error](<#Manager.Unset>)
 - [type Storage](<#Storage>)
@@ -278,6 +280,15 @@ func RegisterDefaultManager(identifier string)
 ```
 
 RegisterDefaultManager will register the current default password manger under the identifier and set a new default manager.
+
+<a name="RewriteKey"></a>
+## func [RewriteKey](<https://github.com/image357/password/blob/main/password.go#L98>)
+
+```go
+func RewriteKey(id string, oldKey string, newKey string) error
+```
+
+RewriteKey changes the storage key of a password from oldKey to newKey. Encryption hashes will be renewed. Stored metadata will be unchanged. If enabled, recovery entries will be recreated.
 
 <a name="Set"></a>
 ## func [Set](<https://github.com/image357/password/blob/main/password.go#L64>)
@@ -596,6 +607,15 @@ func (m *Manager) Overwrite(id string, password string, key string) error
 ```
 
 Overwrite an existing password or create a new one. key is the encryption secret for storage.
+
+<a name="Manager.RewriteKey"></a>
+### func \(\*Manager\) [RewriteKey](<https://github.com/image357/password/blob/main/manager.go#L215>)
+
+```go
+func (m *Manager) RewriteKey(id string, oldKey string, newKey string) error
+```
+
+RewriteKey changes the storage key of a password from oldKey to newKey. Encryption hashes will be renewed. Stored metadata will be unchanged. If enabled, recovery entries will be recreated.
 
 <a name="Manager.Set"></a>
 ### func \(\*Manager\) [Set](<https://github.com/image357/password/blob/main/manager.go#L148>)
