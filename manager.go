@@ -211,7 +211,7 @@ func (m *Manager) Clean() error {
 
 // RewriteKey changes the storage key of a password file from oldKey to newKey.
 // Encryption hashes will be renewed, stored metadata will be unchanged.
-// If enabled, recovery keys will be rewritten, too.
+// If enabled, recovery files will be recreated.
 func (m *Manager) RewriteKey(id string, oldKey string, newKey string) error {
 	id = NormalizeId(id)
 
@@ -238,7 +238,7 @@ func (m *Manager) RewriteKey(id string, oldKey string, newKey string) error {
 	if m.withRecovery && !strings.HasSuffix(id, RecoveryIdSuffix) {
 		// write recovery key file
 		recoveryId := id + RecoveryIdSuffix
-		err = m.RewriteKey(recoveryId, newKey, m.getRecoveryKey())
+		err = m.Overwrite(recoveryId, newKey, m.getRecoveryKey())
 		if err != nil {
 			log.Warn("cannot write recovery key file", "id", recoveryId)
 		}
