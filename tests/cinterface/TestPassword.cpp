@@ -291,7 +291,7 @@ TEST_F(TestPassword, RewriteKey) {
     ASSERT_EQ(CPWD__Check("foo", "bar", "123"), 0);
 
     // rewrite key
-    auto ret_rewrite = CPWD__RewriteKey("foo", "123", "456")
+    auto ret_rewrite = CPWD__RewriteKey("foo", "123", "456");
     ASSERT_EQ(ret_rewrite, 0);
 
     // test
