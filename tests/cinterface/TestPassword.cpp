@@ -281,3 +281,19 @@ TEST_F(TestPassword, Clean) {
     ASSERT_EQ(CPWD__Get("clean1", "123", buffer, 256), -1);
     ASSERT_EQ(CPWD__Get("clean2", "123", buffer, 256), -1);
 }
+
+TEST_F(TestPassword, RewriteKey) {
+    // create
+    auto ret_overwrite = CPWD__Overwrite("foo", "bar", "123");
+    ASSERT_EQ(ret_overwrite, 0);
+
+    // confirm
+    ASSERT_EQ(CPWD__Check("foo", "bar", "123"), 0);
+
+    // rewrite key
+    auto ret_rewrite = CPWD__RewriteKey("foo", "123", "456")
+    ASSERT_EQ(ret_rewrite, 0);
+
+    // test
+    ASSERT_EQ(CPWD__Check("foo", "bar", "456"), 0);
+}
