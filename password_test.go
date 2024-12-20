@@ -225,3 +225,55 @@ func TestPassword_PublicAPI(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestRewriteKey(t *testing.T) {
+	type args struct {
+		id     string
+		oldKey string
+		newKey string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"success", args{"foobar", "123", "456"}, false},
+	}
+	// init
+	err := SetStorePath("tests/workdir/Password_RewriteKey")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// tests
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// init test
+			err := Overwrite(tt.args.id, "password", tt.args.oldKey)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// test
+			if err := RewriteKey(tt.args.id, tt.args.oldKey, tt.args.newKey); (err != nil) != tt.wantErr {
+				t.Errorf("RewriteKey() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			// cleanup test
+			err = Clean()
+			if err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+
+	// cleanup
+	path, err := GetStorePath()
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = os.RemoveAll(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+}

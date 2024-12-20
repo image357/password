@@ -91,3 +91,10 @@ func Delete(id string) error {
 func Clean() error {
 	return GetDefaultManager().Clean()
 }
+
+// RewriteKey changes the storage key of a password from oldKey to newKey.
+// Encryption hashes will be renewed. Stored metadata will be unchanged.
+// If enabled, recovery entries will be recreated.
+func RewriteKey(id string, oldKey string, newKey string) error {
+	return GetDefaultManager().RewriteKey(id, oldKey, newKey)
+}
