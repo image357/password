@@ -209,9 +209,9 @@ func (m *Manager) Clean() error {
 	return m.storageBackend.Clean()
 }
 
-// RewriteKey changes the storage key of a password file from oldKey to newKey.
-// Encryption hashes will be renewed, stored metadata will be unchanged.
-// If enabled, recovery files will be recreated.
+// RewriteKey changes the storage key of a password from oldKey to newKey.
+// Encryption hashes will be renewed. Stored metadata will be unchanged.
+// If enabled, recovery entries will be recreated.
 func (m *Manager) RewriteKey(id string, oldKey string, newKey string) error {
 	id = NormalizeId(id)
 
