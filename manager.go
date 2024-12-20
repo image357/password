@@ -225,12 +225,12 @@ func (m *Manager) RewriteKey(id string, oldKey string, newKey string) error {
 		return err
 	}
 
-	newEncryptedData, err := Encrypt(packedData, newKey)
+	newData, err := Encrypt(packedData, newKey)
 	if err != nil {
 		return err
 	}
 
-	err = m.storageBackend.Store(id, newEncryptedData)
+	err = m.storageBackend.Store(id, newData)
 	if err != nil {
 		return err
 	}
