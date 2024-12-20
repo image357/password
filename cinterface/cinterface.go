@@ -270,6 +270,20 @@ func CPWD__Clean() int {
 	return 0
 }
 
+// CPWD__RewriteKey calls password.RewriteKey and returns 0 on success, -1 on error.
+//
+// For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
+//
+//export CPWD__RewriteKey
+func CPWD__RewriteKey(id *C.cchar_t, oldKey *C.cchar_t, newKey *C.cchar_t) int {
+	err := pwd.RewriteKey(C.GoString(id), C.GoString(oldKey), C.GoString(newKey))
+	if err != nil {
+		log.Error("CPWD__RewriteKey: RewriteKey failed", "error", err)
+		return -1
+	}
+	return 0
+}
+
 // CPWD__StartSimpleService calls rest.StartSimpleService and returns 0 on success, -1 on error.
 //
 // For full documentation visit https://github.com/image357/password/blob/main/docs/rest.md
