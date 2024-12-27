@@ -185,10 +185,7 @@ func (t *TemporaryStorage) WriteToDisk(path string) error {
 		}
 	}
 
-	if lastErr != nil {
-		return lastErr
-	}
-	return nil
+	return lastErr
 }
 
 // ReadFromDisk loads a FileStorage backend from disk into a temporary storage.
@@ -218,8 +215,5 @@ func (t *TemporaryStorage) ReadFromDisk(path string) error {
 		}
 	}
 
-	if lastErr != nil {
-		return lastErr
-	}
-	return nil
+	return lastErr
 }

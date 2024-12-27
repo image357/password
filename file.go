@@ -285,6 +285,7 @@ func (f *FileStorage) DumpJSON() (string, error) {
 		data, err := f.Retrieve(id)
 		if err != nil {
 			lastErr = err
+			continue
 		}
 		registry[id] = data
 	}

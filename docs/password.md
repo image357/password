@@ -111,7 +111,7 @@ const RecoveryIdSuffix string = ".recovery"
 <a name="Managers"></a>Managers stores a map of string identifiers for all created password managers. The identifier "default" always holds the default manager from GetDefaultManager. It can be set via SetDefaultManager. Do not manipulate directly.
 
 ```go
-var Managers map[string]*Manager = map[string]*Manager{
+var Managers = map[string]*Manager{
     "default": NewManager(),
 }
 ```
@@ -479,7 +479,7 @@ func (f *FileStorage) List() ([]string, error)
 List all stored password\-ids.
 
 <a name="FileStorage.LoadJSON"></a>
-### func \(\*FileStorage\) [LoadJSON](<https://github.com/image357/password/blob/main/file.go#L305>)
+### func \(\*FileStorage\) [LoadJSON](<https://github.com/image357/password/blob/main/file.go#L306>)
 
 ```go
 func (f *FileStorage) LoadJSON(input string) error
@@ -785,7 +785,7 @@ func (t *TemporaryStorage) LoadJSON(input string) error
 LoadJSON deserializes a JSON string into the storage backend.
 
 <a name="TemporaryStorage.ReadFromDisk"></a>
-### func \(\*TemporaryStorage\) [ReadFromDisk](<https://github.com/image357/password/blob/main/temporary.go#L198>)
+### func \(\*TemporaryStorage\) [ReadFromDisk](<https://github.com/image357/password/blob/main/temporary.go#L195>)
 
 ```go
 func (t *TemporaryStorage) ReadFromDisk(path string) error
