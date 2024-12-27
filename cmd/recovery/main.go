@@ -51,10 +51,10 @@ func main() {
 	}
 
 	// brute force to get storePath and id
-	var storePath string = ""
-	var id string = ""
-	var storageKey string = ""
-	var password string = ""
+	var storePath = ""
+	var id = ""
+	var storageKey = ""
+	var password = ""
 	err = nil
 
 	pathParts := strings.Split(dir, "/")
