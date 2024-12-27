@@ -1,12 +1,16 @@
 package password
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"sort"
+	"strings"
 	"sync"
 )
 
 var invalidTemporaryStorageIdErr = errors.New("invalid temporary storage id")
+var invalidTemporaryStorageTypeErr = errors.New("invalid temporary storage type")
 
 // TemporaryStorage is a memory based storage backend.
 type TemporaryStorage struct {
@@ -95,6 +99,62 @@ func (t *TemporaryStorage) Clean() error {
 	defer t.mutex.Unlock()
 
 	t.registry = make(map[string]string)
+
+	return nil
+}
+
+// DumpJSON serializes the storage backend to a JSON string.
+func (t *TemporaryStorage) DumpJSON() (string, error) {
+	// prepare encoder
+	temp := new(bytes.Buffer)
+	enc := json.NewEncoder(temp)
+	enc.SetEscapeHTML(false)
+	enc.SetIndent("", "")
+
+	// lock storage
+	t.mutex.Lock()
+	defer t.mutex.Unlock()
+
+	// serialize
+	err := enc.Encode(t.registry)
+	if err != nil {
+		return "", err
+	}
+
+	return strings.ReplaceAll(temp.String(), "\n", ""), nil
+}
+
+// LoadJSON deserializes a JSON string into the storage backend.
+func (t *TemporaryStorage) LoadJSON(input string) error {
+	// prepare decoder
+	dec := json.NewDecoder(strings.NewReader(input))
+	dec.DisallowUnknownFields()
+
+	// deserialize
+	temp := make(map[string]interface{})
+	err := dec.Decode(&temp)
+	if err != nil {
+		return err
+	}
+
+	// check value types
+	for _, v := range temp {
+		switch v.(type) {
+		case string:
+			// pass
+		default:
+			return invalidTemporaryStorageTypeErr
+		}
+	}
+
+	// lock storage
+	t.mutex.Lock()
+	defer t.mutex.Unlock()
+
+	// insert data
+	for k, v := range temp {
+		t.registry[k] = v.(string)
+	}
 
 	return nil
 }
