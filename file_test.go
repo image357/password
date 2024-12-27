@@ -606,3 +606,134 @@ func TestFileStorage_Clean(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestFileStorage_DumpJSON(t *testing.T) {
+	type fields struct {
+		storePath string
+		registry  map[string]string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		want    string
+		wantErr bool
+	}{
+		{"execute", fields{
+			storePath: "tests/workdir/FileStorage_DumpJSON",
+			registry: map[string]string{
+				"a":   "a_data",
+				"b/c": "bc_data",
+			}},
+			`{"a":"a_data","b/c":"bc_data"}`,
+			false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// init test
+			f := NewFileStorage()
+			f.SetStorePath(tt.fields.storePath)
+
+			for k, v := range tt.fields.registry {
+				err := f.Store(k, v)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			// test
+			got, err := f.DumpJSON()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("DumpJSON() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("DumpJSON() got = %v, want %v", got, tt.want)
+			}
+
+			// cleanup test
+			path := f.GetStorePath()
+			err = os.RemoveAll(path)
+			if err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+func TestFileStorage_LoadJSON(t *testing.T) {
+	type fields struct {
+		storePath string
+		registry  map[string]string
+	}
+	type args struct {
+		input string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantMap map[string]string
+		wantErr bool
+	}{
+		{"success", fields{
+			storePath: "tests/workdir/FileStorage_LoadJSON",
+			registry: map[string]string{
+				"a":   "old_data",
+				"b/c": "old_data",
+			}},
+			args{`{"a":"a_data","b/c":"bc_data","d":"d_data"}`},
+			map[string]string{"a": "a_data", "b/c": "bc_data", "d": "d_data"},
+			false,
+		},
+
+		{"wrong type", fields{
+			storePath: "tests/workdir/FileStorage_LoadJSON",
+			registry: map[string]string{
+				"a":   "old_data",
+				"b/c": "old_data",
+			}},
+			args{`{"a":"a_data","b/c":"bc_data","d":123}`},
+			map[string]string{"a": "old_data", "b/c": "old_data"},
+			true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// init test
+			f := NewFileStorage()
+			f.SetStorePath(tt.fields.storePath)
+
+			for k, v := range tt.fields.registry {
+				err := f.Store(k, v)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			// test
+			if err := f.LoadJSON(tt.args.input); (err != nil) != tt.wantErr {
+				t.Errorf("LoadJSON() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			var got map[string]string = make(map[string]string)
+			for k := range tt.wantMap {
+				data, err := f.Retrieve(k)
+				if err != nil {
+					t.Error(err)
+				}
+				got[k] = data
+			}
+			if !reflect.DeepEqual(got, tt.wantMap) {
+				t.Errorf("storage contents = %v, want %v", got, tt.wantMap)
+			}
+
+			// cleanup test
+			path := f.GetStorePath()
+			err := os.RemoveAll(path)
+			if err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}

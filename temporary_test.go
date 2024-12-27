@@ -369,7 +369,7 @@ func TestTemporaryStorage_LoadJSON(t1 *testing.T) {
 				t1.Errorf("LoadJSON() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			if got := t.registry; !reflect.DeepEqual(got, tt.wantMap) {
-				t1.Errorf("storage registry = %v, want %v", got, tt.wantMap)
+				t1.Errorf("storage contents = %v, want %v", got, tt.wantMap)
 			}
 		})
 	}
