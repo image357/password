@@ -717,12 +717,12 @@ func TestFileStorage_LoadJSON(t *testing.T) {
 			}
 
 			var got map[string]string = make(map[string]string)
-			for k := range tt.wantMap {
-				data, err := f.Retrieve(k)
+			for id := range tt.wantMap {
+				data, err := f.Retrieve(id)
 				if err != nil {
 					t.Error(err)
 				}
-				got[k] = data
+				got[id] = data
 			}
 			if !reflect.DeepEqual(got, tt.wantMap) {
 				t.Errorf("storage contents = %v, want %v", got, tt.wantMap)
