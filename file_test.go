@@ -716,7 +716,7 @@ func TestFileStorage_LoadJSON(t *testing.T) {
 				t.Errorf("LoadJSON() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
-			var got map[string]string = make(map[string]string)
+			var got = make(map[string]string)
 			for id := range tt.wantMap {
 				data, err := f.Retrieve(id)
 				if err != nil {
