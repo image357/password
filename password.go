@@ -3,7 +3,7 @@ package password
 // Managers stores a map of string identifiers for all created password managers.
 // The identifier "default" always holds the default manager from GetDefaultManager.
 // It can be set via SetDefaultManager. Do not manipulate directly.
-var Managers map[string]*Manager = map[string]*Manager{
+var Managers = map[string]*Manager{
 	"default": NewManager(),
 }
 
