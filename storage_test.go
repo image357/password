@@ -282,7 +282,7 @@ func TestWriteToDisk(t *testing.T) {
 				t.Errorf("WriteToDisk() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
-			// cleanup
+			// cleanup test
 			err := os.RemoveAll(tt.args.path)
 			if err != nil {
 				t.Error(err)
@@ -322,7 +322,7 @@ func TestReadFromDisk(t *testing.T) {
 				t.Errorf("ReadFromDisk() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
-			// cleanup
+			// cleanup test
 			err = os.RemoveAll(tt.args.path)
 			if err != nil {
 				t.Error(err)
