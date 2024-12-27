@@ -290,6 +290,91 @@ func TestTemporaryStorage_Clean(t1 *testing.T) {
 	}
 }
 
+func TestTemporaryStorage_DumpJSON(t1 *testing.T) {
+	type fields struct {
+		registry map[string]string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		want    string
+		wantErr bool
+	}{
+		{"execute", fields{
+			registry: map[string]string{
+				"a":   "a_data",
+				"b/c": "bc_data",
+			}},
+			`{"a":"a_data","b/c":"bc_data"}`,
+			false,
+		},
+	}
+	for _, tt := range tests {
+		t1.Run(tt.name, func(t1 *testing.T) {
+			t := &TemporaryStorage{
+				registry: tt.fields.registry,
+			}
+			got, err := t.DumpJSON()
+			if (err != nil) != tt.wantErr {
+				t1.Errorf("DumpJSON() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t1.Errorf("DumpJSON() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestTemporaryStorage_LoadJSON(t1 *testing.T) {
+	type fields struct {
+		registry map[string]string
+	}
+	type args struct {
+		input string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantMap map[string]string
+		wantErr bool
+	}{
+		{"success", fields{
+			registry: map[string]string{
+				"a":   "old_data",
+				"b/c": "old_data",
+			}},
+			args{`{"a":"a_data","b/c":"bc_data","d":"d_data"}`},
+			map[string]string{"a": "a_data", "b/c": "bc_data", "d": "d_data"},
+			false,
+		},
+
+		{"wrong type", fields{
+			registry: map[string]string{
+				"a":   "old_data",
+				"b/c": "old_data",
+			}},
+			args{`{"a":"a_data","b/c":"bc_data","d":123}`},
+			map[string]string{"a": "old_data", "b/c": "old_data"},
+			true,
+		},
+	}
+	for _, tt := range tests {
+		t1.Run(tt.name, func(t1 *testing.T) {
+			t := &TemporaryStorage{
+				registry: tt.fields.registry,
+			}
+			if err := t.LoadJSON(tt.args.input); (err != nil) != tt.wantErr {
+				t1.Errorf("LoadJSON() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if got := t.registry; !reflect.DeepEqual(got, tt.wantMap) {
+				t1.Errorf("storage registry = %v, want %v", got, tt.wantMap)
+			}
+		})
+	}
+}
+
 func TestTemporaryStorage_WriteToDisk(t1 *testing.T) {
 	type args struct {
 		path string
