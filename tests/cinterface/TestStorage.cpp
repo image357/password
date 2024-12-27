@@ -120,6 +120,31 @@ TEST_F(TestStorage, SetTemporaryStorage) {
     ASSERT_EQ(CPWD__Get("foo", "123", buffer, 256), 0);
 }
 
+TEST_F(TestStorage, DumpJSONLoadJSON) {
+    CPWD__SetTemporaryStorage();
+
+    // create
+    auto ret_overwrite = CPWD__Overwrite("foo", "bar", "123");
+    ASSERT_EQ(ret_overwrite, 0);
+
+    // confirm
+    char buffer[1024];
+    ASSERT_EQ(CPWD__Get("foo", "123", buffer, 1024), 0);
+
+    // test
+    auto ret_dump = CPWD__DumpJSON(buffer, 1024);
+    EXPECT_EQ(ret_dump, 0);
+
+    auto ret_clean = CPWD__Clean();
+    EXPECT_EQ(ret_clean, 0);
+
+    auto ret_load = CPWD__LoadJSON(buffer);
+    EXPECT_EQ(ret_load, 0);
+
+    // confirm again
+    EXPECT_EQ(CPWD__Get("foo", "123", buffer, 1024), 0);
+}
+
 TEST_F(TestStorage, WriteToDiskReadFromDisk) {
     CPWD__SetTemporaryStorage();
 
