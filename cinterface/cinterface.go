@@ -551,7 +551,7 @@ func CPWD__DumpJSON(buffer *C.char, length int) int {
 // For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
 //
 //export CPWD__LoadJSON
-func CPWD__LoadJSON(input *C.cchart_t) int {
+func CPWD__LoadJSON(input *C.cchar_t) int {
 	err := pwd.LoadJSON(C.GoString(input))
 	if err != nil {
 		log.Error("CPWD__LoadJSON: LoadJSON failed", "error", err)
