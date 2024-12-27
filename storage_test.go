@@ -257,6 +257,106 @@ func TestSetTemporaryStorage(t *testing.T) {
 	}
 }
 
+func TestDumpJSON(t *testing.T) {
+	tests := []struct {
+		name    string
+		backend Storage
+		want    string
+		wantErr bool
+	}{
+		{"FileStorage", NewFileStorage(), "{}", false},
+		{"TemporaryStorage", NewTemporaryStorage(), "{}", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// init test
+			RegisterDefaultManager("old")
+			currentManager := GetDefaultManager()
+			currentManager.storageBackend = tt.backend
+
+			switch tt.backend.(type) {
+			case *FileStorage:
+				tt.backend.(*FileStorage).SetStorePath("./tests/workdir/Storage_DumpJSON")
+				path := tt.backend.(*FileStorage).GetStorePath()
+				err := os.MkdirAll(path, storageDirMode)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			// test
+			got, err := DumpJSON()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("DumpJSON() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("DumpJSON() got = %v, want %v", got, tt.want)
+			}
+
+			// cleanup test
+			switch tt.backend.(type) {
+			case *FileStorage:
+				path := tt.backend.(*FileStorage).GetStorePath()
+				err = os.RemoveAll(path)
+				if err != nil {
+					t.Error(err)
+				}
+			}
+			SetDefaultManager(Managers["old"])
+		})
+	}
+}
+
+func TestLoadJSON(t *testing.T) {
+	type args struct {
+		input string
+	}
+	tests := []struct {
+		name    string
+		backend Storage
+		args    args
+		wantErr bool
+	}{
+		{"FileStorage", NewFileStorage(), args{"{}"}, false},
+		{"TemporaryStorage", NewTemporaryStorage(), args{"{}"}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// init test
+			RegisterDefaultManager("old")
+			currentManager := GetDefaultManager()
+			currentManager.storageBackend = tt.backend
+
+			switch tt.backend.(type) {
+			case *FileStorage:
+				tt.backend.(*FileStorage).SetStorePath("./tests/workdir/Storage_LoadJSON")
+				path := tt.backend.(*FileStorage).GetStorePath()
+				err := os.MkdirAll(path, storageDirMode)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			// test
+			if err := LoadJSON(tt.args.input); (err != nil) != tt.wantErr {
+				t.Errorf("LoadJSON() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			// cleanup test
+			switch tt.backend.(type) {
+			case *FileStorage:
+				path := tt.backend.(*FileStorage).GetStorePath()
+				err := os.RemoveAll(path)
+				if err != nil {
+					t.Error(err)
+				}
+			}
+			SetDefaultManager(Managers["old"])
+		})
+	}
+}
+
 func TestWriteToDisk(t *testing.T) {
 	type args struct {
 		path string
