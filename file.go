@@ -280,7 +280,7 @@ func (f *FileStorage) DumpJSON() (string, error) {
 
 	// loop storage
 	var lastErr error = nil
-	var registry map[string]string = make(map[string]string)
+	var registry = make(map[string]string)
 	for _, id := range list {
 		data, err := f.Retrieve(id)
 		if err != nil {
