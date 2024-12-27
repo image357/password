@@ -143,7 +143,7 @@ print(r.content)
 The REST API mirrors the [Go](./docs/password.md) and [C\C++](./docs/cinterface.md) interface.
 This means that the signature is the same - with three exceptions:
 
-1. For REST you need an `accessToken`. For `Go/C/C++` you need a `storage_key`.
+1. For REST, you need an `accessToken`. For `Go/C/C++` you need a `storage_key`.
 2. The C/C++ API accepts result pointers and returns status codes. The Go API directly returns values and errors.
 3. The [simple service](./docs/rest.md#StartSimpleService) does not require "id" properties and will not bind to `Clean` and `List` calls.
 

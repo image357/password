@@ -30,7 +30,7 @@ func main() {
 		return
 	}
 
-	// wait for sigterm or siginterrupt
+	// wait for signal term or interrupt
 	cancelChan := make(chan os.Signal, 1)
 	signal.Notify(cancelChan, syscall.SIGTERM, syscall.SIGINT)
 	sig := <-cancelChan
