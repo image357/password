@@ -16,6 +16,7 @@ import "github.com/image357/password"
 - [func DecryptOTP\(cipherBytes \[\]byte, secret \[\]byte\) string](<#DecryptOTP>)
 - [func Delete\(id string\) error](<#Delete>)
 - [func DisableRecovery\(\)](<#DisableRecovery>)
+- [func DumpJSON\(\) \(string, error\)](<#DumpJSON>)
 - [func EnableRecovery\(key string\)](<#EnableRecovery>)
 - [func Encrypt\(text string, secret string\) \(string, error\)](<#Encrypt>)
 - [func EncryptOTP\(text string\) \(\[\]byte, \[\]byte\)](<#EncryptOTP>)
@@ -25,6 +26,7 @@ import "github.com/image357/password"
 - [func GetFileEnding\(\) \(string, error\)](<#GetFileEnding>)
 - [func GetStorePath\(\) \(string, error\)](<#GetStorePath>)
 - [func List\(\) \(\[\]string, error\)](<#List>)
+- [func LoadJSON\(input string\) error](<#LoadJSON>)
 - [func NormalizeId\(id string\) string](<#NormalizeId>)
 - [func Overwrite\(id string, password string, key string\) error](<#Overwrite>)
 - [func ReadFromDisk\(path string\) error](<#ReadFromDisk>)
@@ -42,11 +44,13 @@ import "github.com/image357/password"
   - [func NewFileStorage\(\) \*FileStorage](<#NewFileStorage>)
   - [func \(f \*FileStorage\) Clean\(\) error](<#FileStorage.Clean>)
   - [func \(f \*FileStorage\) Delete\(id string\) error](<#FileStorage.Delete>)
+  - [func \(f \*FileStorage\) DumpJSON\(\) \(string, error\)](<#FileStorage.DumpJSON>)
   - [func \(f \*FileStorage\) Exists\(id string\) \(bool, error\)](<#FileStorage.Exists>)
   - [func \(f \*FileStorage\) FilePath\(id string\) string](<#FileStorage.FilePath>)
   - [func \(f \*FileStorage\) GetFileEnding\(\) string](<#FileStorage.GetFileEnding>)
   - [func \(f \*FileStorage\) GetStorePath\(\) string](<#FileStorage.GetStorePath>)
   - [func \(f \*FileStorage\) List\(\) \(\[\]string, error\)](<#FileStorage.List>)
+  - [func \(f \*FileStorage\) LoadJSON\(input string\) error](<#FileStorage.LoadJSON>)
   - [func \(f \*FileStorage\) Retrieve\(id string\) \(string, error\)](<#FileStorage.Retrieve>)
   - [func \(f \*FileStorage\) SetFileEnding\(e string\)](<#FileStorage.SetFileEnding>)
   - [func \(f \*FileStorage\) SetStorePath\(path string\)](<#FileStorage.SetStorePath>)
@@ -72,8 +76,10 @@ import "github.com/image357/password"
   - [func NewTemporaryStorage\(\) \*TemporaryStorage](<#NewTemporaryStorage>)
   - [func \(t \*TemporaryStorage\) Clean\(\) error](<#TemporaryStorage.Clean>)
   - [func \(t \*TemporaryStorage\) Delete\(id string\) error](<#TemporaryStorage.Delete>)
+  - [func \(t \*TemporaryStorage\) DumpJSON\(\) \(string, error\)](<#TemporaryStorage.DumpJSON>)
   - [func \(t \*TemporaryStorage\) Exists\(id string\) \(bool, error\)](<#TemporaryStorage.Exists>)
   - [func \(t \*TemporaryStorage\) List\(\) \(\[\]string, error\)](<#TemporaryStorage.List>)
+  - [func \(t \*TemporaryStorage\) LoadJSON\(input string\) error](<#TemporaryStorage.LoadJSON>)
   - [func \(t \*TemporaryStorage\) ReadFromDisk\(path string\) error](<#TemporaryStorage.ReadFromDisk>)
   - [func \(t \*TemporaryStorage\) Retrieve\(id string\) \(string, error\)](<#TemporaryStorage.Retrieve>)
   - [func \(t \*TemporaryStorage\) Store\(id string, data string\) error](<#TemporaryStorage.Store>)
@@ -164,6 +170,15 @@ func DisableRecovery()
 
 DisableRecovery will stop recovery key file storage alongside passwords.
 
+<a name="DumpJSON"></a>
+## func [DumpJSON](<https://github.com/image357/password/blob/main/storage.go#L121>)
+
+```go
+func DumpJSON() (string, error)
+```
+
+DumpJSON serializes the storage backend to a JSON string.
+
 <a name="EnableRecovery"></a>
 ## func [EnableRecovery](<https://github.com/image357/password/blob/main/password.go#L34>)
 
@@ -201,7 +216,7 @@ func Exists(id string) (bool, error)
 Exists tests if a given id already exists in the storage backend.
 
 <a name="FilePath"></a>
-## func [FilePath](<https://github.com/image357/password/blob/main/storage.go#L86>)
+## func [FilePath](<https://github.com/image357/password/blob/main/storage.go#L104>)
 
 ```go
 func FilePath(id string) (string, error)
@@ -219,7 +234,7 @@ func Get(id string, key string) (string, error)
 Get an existing password with id. key is the encryption secret for storage.
 
 <a name="GetFileEnding"></a>
-## func [GetFileEnding](<https://github.com/image357/password/blob/main/storage.go#L60>)
+## func [GetFileEnding](<https://github.com/image357/password/blob/main/storage.go#L78>)
 
 ```go
 func GetFileEnding() (string, error)
@@ -228,7 +243,7 @@ func GetFileEnding() (string, error)
 GetFileEnding returns the current file ending of storage files.
 
 <a name="GetStorePath"></a>
-## func [GetStorePath](<https://github.com/image357/password/blob/main/storage.go#L35>)
+## func [GetStorePath](<https://github.com/image357/password/blob/main/storage.go#L53>)
 
 ```go
 func GetStorePath() (string, error)
@@ -245,8 +260,17 @@ func List() ([]string, error)
 
 List all stored password\-ids.
 
+<a name="LoadJSON"></a>
+## func [LoadJSON](<https://github.com/image357/password/blob/main/storage.go#L135>)
+
+```go
+func LoadJSON(input string) error
+```
+
+LoadJSON deserializes a JSON string into the storage backend.
+
 <a name="NormalizeId"></a>
-## func [NormalizeId](<https://github.com/image357/password/blob/main/storage.go#L26>)
+## func [NormalizeId](<https://github.com/image357/password/blob/main/storage.go#L44>)
 
 ```go
 func NormalizeId(id string) string
@@ -264,7 +288,7 @@ func Overwrite(id string, password string, key string) error
 Overwrite an existing password or create a new one. key is the encryption secret for storage.
 
 <a name="ReadFromDisk"></a>
-## func [ReadFromDisk](<https://github.com/image357/password/blob/main/storage.go#L121>)
+## func [ReadFromDisk](<https://github.com/image357/password/blob/main/storage.go#L167>)
 
 ```go
 func ReadFromDisk(path string) error
@@ -309,7 +333,7 @@ func SetDefaultManager(manager *Manager)
 SetDefaultManager will overwrite the current default password manager with the provided one.
 
 <a name="SetFileEnding"></a>
-## func [SetFileEnding](<https://github.com/image357/password/blob/main/storage.go#L72>)
+## func [SetFileEnding](<https://github.com/image357/password/blob/main/storage.go#L90>)
 
 ```go
 func SetFileEnding(e string) error
@@ -318,7 +342,7 @@ func SetFileEnding(e string) error
 SetFileEnding accepts a new file ending for storage files.
 
 <a name="SetStorePath"></a>
-## func [SetStorePath](<https://github.com/image357/password/blob/main/storage.go#L47>)
+## func [SetStorePath](<https://github.com/image357/password/blob/main/storage.go#L65>)
 
 ```go
 func SetStorePath(path string) error
@@ -327,7 +351,7 @@ func SetStorePath(path string) error
 SetStorePath accepts a new storage path with system\-unspecific or mixed path separators.
 
 <a name="SetTemporaryStorage"></a>
-## func [SetTemporaryStorage](<https://github.com/image357/password/blob/main/storage.go#L98>)
+## func [SetTemporaryStorage](<https://github.com/image357/password/blob/main/storage.go#L116>)
 
 ```go
 func SetTemporaryStorage()
@@ -354,7 +378,7 @@ func Unset(id string, password string, key string) error
 Unset \(delete\) an existing password. password must match the currently stored password. key is the encryption secret for storage.
 
 <a name="WriteToDisk"></a>
-## func [WriteToDisk](<https://github.com/image357/password/blob/main/storage.go#L106>)
+## func [WriteToDisk](<https://github.com/image357/password/blob/main/storage.go#L152>)
 
 ```go
 func WriteToDisk(path string) error
@@ -363,7 +387,7 @@ func WriteToDisk(path string) error
 WriteToDisk saves the current storage to files via FileStorage mechanisms. Warning: This method does not block operations on the underlying storage backends \(read/write/create/delete\). You should stop operations manually before usage or ignore the reported error. Data consistency is guaranteed.
 
 <a name="FileStorage"></a>
-## type [FileStorage](<https://github.com/image357/password/blob/main/file.go#L29-L44>)
+## type [FileStorage](<https://github.com/image357/password/blob/main/file.go#L31-L46>)
 
 FileStorage is a file based storage backend.
 
@@ -374,7 +398,7 @@ type FileStorage struct {
 ```
 
 <a name="NewFileStorage"></a>
-### func [NewFileStorage](<https://github.com/image357/password/blob/main/file.go#L47>)
+### func [NewFileStorage](<https://github.com/image357/password/blob/main/file.go#L49>)
 
 ```go
 func NewFileStorage() *FileStorage
@@ -383,7 +407,7 @@ func NewFileStorage() *FileStorage
 NewFileStorage returns a default initialized storage backend for persistent files.
 
 <a name="FileStorage.Clean"></a>
-### func \(\*FileStorage\) [Clean](<https://github.com/image357/password/blob/main/file.go#L246>)
+### func \(\*FileStorage\) [Clean](<https://github.com/image357/password/blob/main/file.go#L248>)
 
 ```go
 func (f *FileStorage) Clean() error
@@ -392,7 +416,7 @@ func (f *FileStorage) Clean() error
 Clean \(delete\) all stored passwords.
 
 <a name="FileStorage.Delete"></a>
-### func \(\*FileStorage\) [Delete](<https://github.com/image357/password/blob/main/file.go#L233>)
+### func \(\*FileStorage\) [Delete](<https://github.com/image357/password/blob/main/file.go#L235>)
 
 ```go
 func (f *FileStorage) Delete(id string) error
@@ -400,8 +424,17 @@ func (f *FileStorage) Delete(id string) error
 
 Delete an existing password.
 
+<a name="FileStorage.DumpJSON"></a>
+### func \(\*FileStorage\) [DumpJSON](<https://github.com/image357/password/blob/main/file.go#L268>)
+
+```go
+func (f *FileStorage) DumpJSON() (string, error)
+```
+
+DumpJSON serializes the storage backend to a JSON string. Warning: This method does not block operations on the underlying storage backend \(read/write/create/delete\). You should stop operations manually before usage or ignore the reported error. Data consistency is guaranteed.
+
 <a name="FileStorage.Exists"></a>
-### func \(\*FileStorage\) [Exists](<https://github.com/image357/password/blob/main/file.go#L187>)
+### func \(\*FileStorage\) [Exists](<https://github.com/image357/password/blob/main/file.go#L189>)
 
 ```go
 func (f *FileStorage) Exists(id string) (bool, error)
@@ -410,7 +443,7 @@ func (f *FileStorage) Exists(id string) (bool, error)
 Exists tests if a given id already exists in the storage backend.
 
 <a name="FileStorage.FilePath"></a>
-### func \(\*FileStorage\) [FilePath](<https://github.com/image357/password/blob/main/file.go#L87>)
+### func \(\*FileStorage\) [FilePath](<https://github.com/image357/password/blob/main/file.go#L89>)
 
 ```go
 func (f *FileStorage) FilePath(id string) string
@@ -419,7 +452,7 @@ func (f *FileStorage) FilePath(id string) string
 FilePath returns the storage filepath of a given password\-id with system\-specific path separators. It accepts system\-unspecific or mixed id separators, i.e. forward\- and backward\-slashes are treated as the same character.
 
 <a name="FileStorage.GetFileEnding"></a>
-### func \(\*FileStorage\) [GetFileEnding](<https://github.com/image357/password/blob/main/file.go#L76>)
+### func \(\*FileStorage\) [GetFileEnding](<https://github.com/image357/password/blob/main/file.go#L78>)
 
 ```go
 func (f *FileStorage) GetFileEnding() string
@@ -428,7 +461,7 @@ func (f *FileStorage) GetFileEnding() string
 GetFileEnding returns the current file ending of storage files.
 
 <a name="FileStorage.GetStorePath"></a>
-### func \(\*FileStorage\) [GetStorePath](<https://github.com/image357/password/blob/main/file.go#L59>)
+### func \(\*FileStorage\) [GetStorePath](<https://github.com/image357/password/blob/main/file.go#L61>)
 
 ```go
 func (f *FileStorage) GetStorePath() string
@@ -437,7 +470,7 @@ func (f *FileStorage) GetStorePath() string
 GetStorePath returns the current storage path with system\-specific path separators.
 
 <a name="FileStorage.List"></a>
-### func \(\*FileStorage\) [List](<https://github.com/image357/password/blob/main/file.go#L199>)
+### func \(\*FileStorage\) [List](<https://github.com/image357/password/blob/main/file.go#L201>)
 
 ```go
 func (f *FileStorage) List() ([]string, error)
@@ -445,8 +478,17 @@ func (f *FileStorage) List() ([]string, error)
 
 List all stored password\-ids.
 
+<a name="FileStorage.LoadJSON"></a>
+### func \(\*FileStorage\) [LoadJSON](<https://github.com/image357/password/blob/main/file.go#L305>)
+
+```go
+func (f *FileStorage) LoadJSON(input string) error
+```
+
+LoadJSON deserializes a JSON string into the storage backend. Warning: This method does not block operations on the underlying storage backend \(read/write/create/delete\). You should stop operations manually before usage or ignore the reported error. Data consistency is guaranteed.
+
 <a name="FileStorage.Retrieve"></a>
-### func \(\*FileStorage\) [Retrieve](<https://github.com/image357/password/blob/main/file.go#L169>)
+### func \(\*FileStorage\) [Retrieve](<https://github.com/image357/password/blob/main/file.go#L171>)
 
 ```go
 func (f *FileStorage) Retrieve(id string) (string, error)
@@ -455,7 +497,7 @@ func (f *FileStorage) Retrieve(id string) (string, error)
 Retrieve data from an existing file. id is converted to the corresponding filepath.
 
 <a name="FileStorage.SetFileEnding"></a>
-### func \(\*FileStorage\) [SetFileEnding](<https://github.com/image357/password/blob/main/file.go#L81>)
+### func \(\*FileStorage\) [SetFileEnding](<https://github.com/image357/password/blob/main/file.go#L83>)
 
 ```go
 func (f *FileStorage) SetFileEnding(e string)
@@ -464,7 +506,7 @@ func (f *FileStorage) SetFileEnding(e string)
 SetFileEnding accepts a new file ending for storage files.
 
 <a name="FileStorage.SetStorePath"></a>
-### func \(\*FileStorage\) [SetStorePath](<https://github.com/image357/password/blob/main/file.go#L64>)
+### func \(\*FileStorage\) [SetStorePath](<https://github.com/image357/password/blob/main/file.go#L66>)
 
 ```go
 func (f *FileStorage) SetStorePath(path string)
@@ -473,7 +515,7 @@ func (f *FileStorage) SetStorePath(path string)
 SetStorePath accepts a new storage path with system\-unspecific or mixed path separators.
 
 <a name="FileStorage.Store"></a>
-### func \(\*FileStorage\) [Store](<https://github.com/image357/password/blob/main/file.go#L145>)
+### func \(\*FileStorage\) [Store](<https://github.com/image357/password/blob/main/file.go#L147>)
 
 ```go
 func (f *FileStorage) Store(id string, data string) error
@@ -636,23 +678,40 @@ func (m *Manager) Unset(id string, password string, key string) error
 Unset \(delete\) an existing password. password must match the currently stored password. key is the encryption secret for storage.
 
 <a name="Storage"></a>
-## type [Storage](<https://github.com/image357/password/blob/main/storage.go#L11-L18>)
+## type [Storage](<https://github.com/image357/password/blob/main/storage.go#L12-L36>)
 
 
 
 ```go
 type Storage interface {
+    // Store (create/overwrite) the provided data.
     Store(id string, data string) error
+
+    // Retrieve data from an existing storage entry.
     Retrieve(id string) (string, error)
+
+    // Exists tests if a given id already exists in the storage backend.
     Exists(id string) (bool, error)
+
+    // List all stored password-ids.
     List() ([]string, error)
+
+    // Delete an existing password.
     Delete(id string) error
+
+    // Clean (delete) all stored passwords.
     Clean() error
+
+    // DumpJSON serializes the storage backend to a JSON string.
+    DumpJSON() (string, error)
+
+    // LoadJSON deserializes a JSON string into the storage backend.
+    LoadJSON(input string) error
 }
 ```
 
 <a name="TemporaryStorage"></a>
-## type [TemporaryStorage](<https://github.com/image357/password/blob/main/temporary.go#L12-L15>)
+## type [TemporaryStorage](<https://github.com/image357/password/blob/main/temporary.go#L15-L18>)
 
 TemporaryStorage is a memory based storage backend.
 
@@ -663,7 +722,7 @@ type TemporaryStorage struct {
 ```
 
 <a name="NewTemporaryStorage"></a>
-### func [NewTemporaryStorage](<https://github.com/image357/password/blob/main/temporary.go#L18>)
+### func [NewTemporaryStorage](<https://github.com/image357/password/blob/main/temporary.go#L21>)
 
 ```go
 func NewTemporaryStorage() *TemporaryStorage
@@ -672,7 +731,7 @@ func NewTemporaryStorage() *TemporaryStorage
 NewTemporaryStorage returns a memory based storage backend.
 
 <a name="TemporaryStorage.Clean"></a>
-### func \(\*TemporaryStorage\) [Clean](<https://github.com/image357/password/blob/main/temporary.go#L93>)
+### func \(\*TemporaryStorage\) [Clean](<https://github.com/image357/password/blob/main/temporary.go#L96>)
 
 ```go
 func (t *TemporaryStorage) Clean() error
@@ -681,7 +740,7 @@ func (t *TemporaryStorage) Clean() error
 Clean \(delete\) all stored passwords.
 
 <a name="TemporaryStorage.Delete"></a>
-### func \(\*TemporaryStorage\) [Delete](<https://github.com/image357/password/blob/main/temporary.go#L78>)
+### func \(\*TemporaryStorage\) [Delete](<https://github.com/image357/password/blob/main/temporary.go#L81>)
 
 ```go
 func (t *TemporaryStorage) Delete(id string) error
@@ -689,8 +748,17 @@ func (t *TemporaryStorage) Delete(id string) error
 
 Delete an existing password.
 
+<a name="TemporaryStorage.DumpJSON"></a>
+### func \(\*TemporaryStorage\) [DumpJSON](<https://github.com/image357/password/blob/main/temporary.go#L106>)
+
+```go
+func (t *TemporaryStorage) DumpJSON() (string, error)
+```
+
+DumpJSON serializes the storage backend to a JSON string.
+
 <a name="TemporaryStorage.Exists"></a>
-### func \(\*TemporaryStorage\) [Exists](<https://github.com/image357/password/blob/main/temporary.go#L49>)
+### func \(\*TemporaryStorage\) [Exists](<https://github.com/image357/password/blob/main/temporary.go#L52>)
 
 ```go
 func (t *TemporaryStorage) Exists(id string) (bool, error)
@@ -699,7 +767,7 @@ func (t *TemporaryStorage) Exists(id string) (bool, error)
 Exists tests if a given id already exists in the storage backend.
 
 <a name="TemporaryStorage.List"></a>
-### func \(\*TemporaryStorage\) [List](<https://github.com/image357/password/blob/main/temporary.go#L63>)
+### func \(\*TemporaryStorage\) [List](<https://github.com/image357/password/blob/main/temporary.go#L66>)
 
 ```go
 func (t *TemporaryStorage) List() ([]string, error)
@@ -707,8 +775,17 @@ func (t *TemporaryStorage) List() ([]string, error)
 
 List all stored password\-ids.
 
+<a name="TemporaryStorage.LoadJSON"></a>
+### func \(\*TemporaryStorage\) [LoadJSON](<https://github.com/image357/password/blob/main/temporary.go#L127>)
+
+```go
+func (t *TemporaryStorage) LoadJSON(input string) error
+```
+
+LoadJSON deserializes a JSON string into the storage backend.
+
 <a name="TemporaryStorage.ReadFromDisk"></a>
-### func \(\*TemporaryStorage\) [ReadFromDisk](<https://github.com/image357/password/blob/main/temporary.go#L139>)
+### func \(\*TemporaryStorage\) [ReadFromDisk](<https://github.com/image357/password/blob/main/temporary.go#L198>)
 
 ```go
 func (t *TemporaryStorage) ReadFromDisk(path string) error
@@ -717,7 +794,7 @@ func (t *TemporaryStorage) ReadFromDisk(path string) error
 ReadFromDisk loads a FileStorage backend from disk into a temporary storage. Warning: This method does not block operations on the underlying storage backends \(read/write/create/delete\). You should stop operations manually before usage or ignore the reported error. Data consistency is guaranteed.
 
 <a name="TemporaryStorage.Retrieve"></a>
-### func \(\*TemporaryStorage\) [Retrieve](<https://github.com/image357/password/blob/main/temporary.go#L35>)
+### func \(\*TemporaryStorage\) [Retrieve](<https://github.com/image357/password/blob/main/temporary.go#L38>)
 
 ```go
 func (t *TemporaryStorage) Retrieve(id string) (string, error)
@@ -726,7 +803,7 @@ func (t *TemporaryStorage) Retrieve(id string) (string, error)
 Retrieve data from an existing memory location.
 
 <a name="TemporaryStorage.Store"></a>
-### func \(\*TemporaryStorage\) [Store](<https://github.com/image357/password/blob/main/temporary.go#L25>)
+### func \(\*TemporaryStorage\) [Store](<https://github.com/image357/password/blob/main/temporary.go#L28>)
 
 ```go
 func (t *TemporaryStorage) Store(id string, data string) error
@@ -735,7 +812,7 @@ func (t *TemporaryStorage) Store(id string, data string) error
 Store \(create/overwrite\) the provided data.
 
 <a name="TemporaryStorage.WriteToDisk"></a>
-### func \(\*TemporaryStorage\) [WriteToDisk](<https://github.com/image357/password/blob/main/temporary.go#L106>)
+### func \(\*TemporaryStorage\) [WriteToDisk](<https://github.com/image357/password/blob/main/temporary.go#L165>)
 
 ```go
 func (t *TemporaryStorage) WriteToDisk(path string) error
