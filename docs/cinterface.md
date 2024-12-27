@@ -20,7 +20,7 @@ import "github.com/image357/password/cinterface"
 - [func CPWD\_\_GetFileEnding\(buffer \*C.char, length int\) int](<#CPWD__GetFileEnding>)
 - [func CPWD\_\_GetStorePath\(buffer \*C.char, length int\) int](<#CPWD__GetStorePath>)
 - [func CPWD\_\_List\(buffer \*C.char, length int, delim \*C.cchar\_t\) int](<#CPWD__List>)
-- [func CPWD\_\_LoadJSON\(input \*C.cchart\_t\) int](<#CPWD__LoadJSON>)
+- [func CPWD\_\_LoadJSON\(input \*C.cchar\_t\) int](<#CPWD__LoadJSON>)
 - [func CPWD\_\_LogLevel\(level int\) int](<#CPWD__LogLevel>)
 - [func CPWD\_\_LogSetDefault\(\)](<#CPWD__LogSetDefault>)
 - [func CPWD\_\_LogSetFileJSON\(filePath \*C.cchar\_t\) int](<#CPWD__LogSetFileJSON>)
@@ -183,7 +183,7 @@ For full documentation visit https://github.com/image357/password/blob/main/docs
 ## func [CPWD\\\_\\\_LoadJSON](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L554>)
 
 ```go
-func CPWD__LoadJSON(input *C.cchart_t) int
+func CPWD__LoadJSON(input *C.cchar_t) int
 ```
 
 CPWD\_\_LoadJSON calls password.LoadJSON and returns 0 on success, \-1 on error.
