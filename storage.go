@@ -49,34 +49,6 @@ func NormalizeId(id string) string {
 	return pathlib.Clean(id)
 }
 
-// DumpJSON serializes the storage backend to a JSON string.
-func DumpJSON() (string, error) {
-	m := GetDefaultManager()
-
-	switch m.storageBackend.(type) {
-	case *FileStorage:
-		return m.storageBackend.(*FileStorage).DumpJSON()
-	case *TemporaryStorage:
-		return m.storageBackend.(*TemporaryStorage).DumpJSON()
-	}
-
-	return "", unsupportedStorageError
-}
-
-// LoadJSON deserializes a JSON string into the storage backend.
-func LoadJSON(input string) error {
-	m := GetDefaultManager()
-
-	switch m.storageBackend.(type) {
-	case *FileStorage:
-		return m.storageBackend.(*FileStorage).LoadJSON(input)
-	case *TemporaryStorage:
-		return m.storageBackend.(*TemporaryStorage).LoadJSON(input)
-	}
-
-	return unsupportedStorageError
-}
-
 // GetStorePath returns the current storage path with system-specific path separators.
 func GetStorePath() (string, error) {
 	m := GetDefaultManager()
@@ -143,6 +115,34 @@ func FilePath(id string) (string, error) {
 // SetTemporaryStorage overwrites the current storage backend with a memory based one.
 func SetTemporaryStorage() {
 	GetDefaultManager().storageBackend = NewTemporaryStorage()
+}
+
+// DumpJSON serializes the storage backend to a JSON string.
+func DumpJSON() (string, error) {
+	m := GetDefaultManager()
+
+	switch m.storageBackend.(type) {
+	case *FileStorage:
+		return m.storageBackend.(*FileStorage).DumpJSON()
+	case *TemporaryStorage:
+		return m.storageBackend.(*TemporaryStorage).DumpJSON()
+	}
+
+	return "", unsupportedStorageError
+}
+
+// LoadJSON deserializes a JSON string into the storage backend.
+func LoadJSON(input string) error {
+	m := GetDefaultManager()
+
+	switch m.storageBackend.(type) {
+	case *FileStorage:
+		return m.storageBackend.(*FileStorage).LoadJSON(input)
+	case *TemporaryStorage:
+		return m.storageBackend.(*TemporaryStorage).LoadJSON(input)
+	}
+
+	return unsupportedStorageError
 }
 
 // WriteToDisk saves the current storage to files via FileStorage mechanisms.
