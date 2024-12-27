@@ -27,6 +27,12 @@ type Storage interface {
 
 	// Clean (delete) all stored passwords.
 	Clean() error
+
+	// DumpJSON serializes the storage backend to a JSON string.
+	DumpJSON() (string, error)
+
+	// LoadJSON deserializes a JSON string into the storage backend.
+	LoadJSON(input string) error
 }
 
 // normalizeSeparator replaces all backward-slash ("\\") with forward-slash ("/") characters
