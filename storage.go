@@ -9,11 +9,22 @@ import (
 var unsupportedError = errors.New("unsupported storage backend")
 
 type Storage interface {
+	// Store (create/overwrite) the provided data.
 	Store(id string, data string) error
+
+	// Retrieve data from an existing storage entry.
 	Retrieve(id string) (string, error)
+
+	// Exists tests if a given id already exists in the storage backend.
 	Exists(id string) (bool, error)
+
+	// List all stored password-ids.
 	List() ([]string, error)
+
+	// Delete an existing password.
 	Delete(id string) error
+
+	// Clean (delete) all stored passwords.
 	Clean() error
 }
 
