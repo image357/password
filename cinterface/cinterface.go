@@ -517,6 +517,49 @@ func CPWD__SetTemporaryStorage() {
 	pwd.SetTemporaryStorage()
 }
 
+// CPWD__DumpJSON calls password.DumpJSON and returns 0 on success, -1 on error.
+// The result will be stored in buffer.
+//
+// For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
+//
+//export CPWD__DumpJSON
+func CPWD__DumpJSON(buffer *C.char, length int) int {
+	if buffer == nil {
+		log.Error("CPWD__DumpJSON: buffer is nullptr")
+		return -1
+	}
+
+	s, err := pwd.DumpJSON()
+	if err != nil {
+		log.Error("CPWD__DumpJSON: DumpJSON failed", "error", err)
+		return -1
+	}
+
+	cs := C.CString(s)
+	defer C.free(unsafe.Pointer(cs))
+	if int(C.strlen(cs)) >= length {
+		log.Error("CPWD__DumpJSON: buffer is too small")
+		return -1
+	}
+	C.strcpy(buffer, cs)
+
+	return 0
+}
+
+// CPWD__LoadJSON calls password.LoadJSON and returns 0 on success, -1 on error.
+//
+// For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
+//
+//export CPWD__LoadJSON
+func CPWD__LoadJSON(input *C.cchart_t) int {
+	err := pwd.LoadJSON(C.GoString(input))
+	if err != nil {
+		log.Error("CPWD__LoadJSON: LoadJSON failed", "error", err)
+		return -1
+	}
+	return 0
+}
+
 // CPWD__WriteToDisk calls password.WriteToDisk and returns 0 on success, -1 on error.
 //
 // For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
