@@ -6,7 +6,8 @@ import (
 	"strings"
 )
 
-var unsupportedError = errors.New("unsupported storage backend")
+var unsupportedStorageError = errors.New("unsupported storage backend")
+var invalidStorageTypeErr = errors.New("invalid storage type")
 
 type Storage interface {
 	// Store (create/overwrite) the provided data.
@@ -51,7 +52,7 @@ func GetStorePath() (string, error) {
 		return m.storageBackend.(*FileStorage).GetStorePath(), nil
 	}
 
-	return "", unsupportedError
+	return "", unsupportedStorageError
 }
 
 // SetStorePath accepts a new storage path with system-unspecific or mixed path separators.
@@ -64,7 +65,7 @@ func SetStorePath(path string) error {
 		return nil
 	}
 
-	return unsupportedError
+	return unsupportedStorageError
 }
 
 // GetFileEnding returns the current file ending of storage files.
@@ -76,7 +77,7 @@ func GetFileEnding() (string, error) {
 		return m.storageBackend.(*FileStorage).GetFileEnding(), nil
 	}
 
-	return "", unsupportedError
+	return "", unsupportedStorageError
 }
 
 // SetFileEnding accepts a new file ending for storage files.
@@ -89,7 +90,7 @@ func SetFileEnding(e string) error {
 		return nil
 	}
 
-	return unsupportedError
+	return unsupportedStorageError
 }
 
 // FilePath returns the storage filepath of a given password-id with system-specific path separators.
@@ -102,7 +103,7 @@ func FilePath(id string) (string, error) {
 		return m.storageBackend.(*FileStorage).FilePath(id), nil
 	}
 
-	return "", unsupportedError
+	return "", unsupportedStorageError
 }
 
 // SetTemporaryStorage overwrites the current storage backend with a memory based one.
@@ -122,7 +123,7 @@ func WriteToDisk(path string) error {
 		return m.storageBackend.(*TemporaryStorage).WriteToDisk(path)
 	}
 
-	return unsupportedError
+	return unsupportedStorageError
 }
 
 // ReadFromDisk loads a FileStorage backend from disk into the current storage.
@@ -137,5 +138,5 @@ func ReadFromDisk(path string) error {
 		return m.storageBackend.(*TemporaryStorage).ReadFromDisk(path)
 	}
 
-	return unsupportedError
+	return unsupportedStorageError
 }

@@ -10,7 +10,6 @@ import (
 )
 
 var invalidTemporaryStorageIdErr = errors.New("invalid temporary storage id")
-var invalidTemporaryStorageTypeErr = errors.New("invalid temporary storage type")
 
 // TemporaryStorage is a memory based storage backend.
 type TemporaryStorage struct {
@@ -143,7 +142,7 @@ func (t *TemporaryStorage) LoadJSON(input string) error {
 		case string:
 			// pass
 		default:
-			return invalidTemporaryStorageTypeErr
+			return invalidStorageTypeErr
 		}
 	}
 

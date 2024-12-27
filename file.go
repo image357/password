@@ -1,6 +1,8 @@
 package password
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/image357/password/log"
 	"io/fs"
@@ -256,5 +258,80 @@ func (f *FileStorage) Clean() error {
 			lastErr = err
 		}
 	}
+	return lastErr
+}
+
+// DumpJSON serializes the storage backend to a JSON string.
+// Warning: This method does not block operations on the underlying storage backend (read/write/create/delete).
+// You should stop operations manually before usage or ignore the reported error.
+// Data consistency is guaranteed.
+func (f *FileStorage) DumpJSON() (string, error) {
+	// prepare encoder
+	temp := new(bytes.Buffer)
+	enc := json.NewEncoder(temp)
+	enc.SetEscapeHTML(false)
+	enc.SetIndent("", "")
+
+	// get ids
+	list, err := f.List()
+	if err != nil {
+		return "", err
+	}
+
+	// loop storage
+	var lastErr error = nil
+	var registry map[string]string = make(map[string]string)
+	for _, id := range list {
+		data, err := f.Retrieve(id)
+		if err != nil {
+			lastErr = err
+		}
+		registry[id] = data
+	}
+
+	// serialize
+	err = enc.Encode(registry)
+	if err != nil {
+		return "", err
+	}
+
+	return strings.ReplaceAll(temp.String(), "\n", ""), lastErr
+}
+
+// LoadJSON deserializes a JSON string into the storage backend.
+// Warning: This method does not block operations on the underlying storage backend (read/write/create/delete).
+// You should stop operations manually before usage or ignore the reported error.
+// Data consistency is guaranteed.
+func (f *FileStorage) LoadJSON(input string) error {
+	// prepare decoder
+	dec := json.NewDecoder(strings.NewReader(input))
+	dec.DisallowUnknownFields()
+
+	// deserialize
+	temp := make(map[string]interface{})
+	err := dec.Decode(&temp)
+	if err != nil {
+		return err
+	}
+
+	// check value types
+	for _, v := range temp {
+		switch v.(type) {
+		case string:
+			// pass
+		default:
+			return invalidStorageTypeErr
+		}
+	}
+
+	// write data files
+	var lastErr error = nil
+	for k, v := range temp {
+		err := f.Store(k, v.(string))
+		if err != nil {
+			lastErr = err
+		}
+	}
+
 	return lastErr
 }
