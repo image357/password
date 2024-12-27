@@ -37,5 +37,5 @@ func main() {
 	}
 
 	// print data
-	fmt.Printf("%v", string(encryptedData))
+	fmt.Printf("%v", encryptedData)
 }

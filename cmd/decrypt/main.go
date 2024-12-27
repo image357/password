@@ -37,5 +37,5 @@ func main() {
 	}
 
 	// print data
-	fmt.Printf("%v", string(packedData))
+	fmt.Printf("%v", packedData)
 }
