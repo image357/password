@@ -53,6 +53,16 @@ TEST_F(TestPassword, Overwrite) {
     ASSERT_EQ(CPWD__Get("foo", "123", buffer, 256), 0);
 }
 
+TEST_F(TestPassword, mOverwrite) {
+    // success
+    auto ret_overwrite = CPWD__mOverwrite("default", "foo", "bar", "123");
+    ASSERT_EQ(ret_overwrite, 0);
+
+    // failure
+    ret_overwrite = CPWD__mOverwrite(nullptr, "foo", "bar", "123");
+    ASSERT_EQ(ret_overwrite, -1);
+}
+
 TEST_F(TestPassword, Get) {
     // prepare
     CPWD__DisableHashing();
@@ -68,6 +78,23 @@ TEST_F(TestPassword, Get) {
 
     // fail
     ret_get = CPWD__Get("get_invalid", "123", buffer, 256);
+    ASSERT_EQ(ret_get, -1);
+}
+
+TEST_F(TestPassword, mGet) {
+    // prepare
+    CPWD__DisableHashing();
+
+    auto ret_overwrite = CPWD__Overwrite("get1", "bar", "123");
+    ASSERT_EQ(ret_overwrite, 0);
+
+    // success
+    char buffer[256];
+    auto ret_get = CPWD__mGet("default", "get1", "123", buffer, 256);
+    ASSERT_EQ(ret_get, 0);
+
+    // failure
+    ret_get = CPWD__mGet(nullptr, "get1", "123", buffer, 256);
     ASSERT_EQ(ret_get, -1);
 }
 
@@ -123,6 +150,21 @@ TEST_F(TestPassword, Check) {
     ASSERT_EQ(result, true);
 }
 
+TEST_F(TestPassword, mCheck) {
+    // prepare
+    auto ret_overwrite = CPWD__Overwrite("check1", "bar", "123");
+    ASSERT_EQ(ret_overwrite, 0);
+
+    // success
+    bool result;
+    auto ret_check = CPWD__mCheck("default", "check1", "bar", "123", &result);
+    ASSERT_EQ(ret_check, 0);
+
+    // failure
+    ret_check = CPWD__mCheck(nullptr, "check1", "bar", "123", &result);
+    ASSERT_EQ(ret_check, -1);
+}
+
 TEST_F(TestPassword, CheckResultNull) {
     // prepare
     auto ret_overwrite = CPWD__Overwrite("check2", "bar", "123");
@@ -163,6 +205,22 @@ TEST_F(TestPassword, Set) {
     ASSERT_STREQ(buffer, "foobar");
 }
 
+TEST_F(TestPassword, mSet) {
+    // prepare
+    CPWD__DisableHashing();
+
+    auto ret_overwrite = CPWD__Overwrite("set1", "bar", "123");
+    ASSERT_EQ(ret_overwrite, 0);
+
+    // success
+    auto ret_set = CPWD__mSet("default", "set1", "bar", "foo", "123");
+    ASSERT_EQ(ret_set, 0);
+
+    // failure
+    ret_set = CPWD__mSet(nullptr, "set1", "bar", "foo", "123");
+    ASSERT_EQ(ret_set, -1);
+}
+
 TEST_F(TestPassword, Unset) {
     // prepare
     auto ret_overwrite = CPWD__Overwrite("unset1", "bar", "123");
@@ -185,6 +243,22 @@ TEST_F(TestPassword, Unset) {
     ASSERT_EQ(ret_unset, -1);
 }
 
+TEST_F(TestPassword, mUnset) {
+    // prepare
+    auto ret_overwrite = CPWD__Overwrite("unset1", "bar", "123");
+    ASSERT_EQ(ret_overwrite, 0);
+    ret_overwrite = CPWD__Overwrite("unset2", "bar", "123");
+    ASSERT_EQ(ret_overwrite, 0);
+
+    // success
+    auto ret_unset = CPWD__mUnset("default", "unset1", "bar", "123");
+    ASSERT_EQ(ret_unset, 0);
+
+    // failure
+    ret_unset = CPWD__mUnset(nullptr, "unset2", "bar", "123");
+    ASSERT_EQ(ret_unset, -1);
+}
+
 TEST_F(TestPassword, Exists) {
     // prepare
     auto ret_overwrite = CPWD__Overwrite("exists1", "foobar", "123");
@@ -201,6 +275,21 @@ TEST_F(TestPassword, Exists) {
     ret_exists = CPWD__Exists("not_exists", &result);
     ASSERT_EQ(ret_exists, 0);
     ASSERT_EQ(result, false);
+}
+
+TEST_F(TestPassword, mExists) {
+    // prepare
+    auto ret_overwrite = CPWD__Overwrite("exists1", "foobar", "123");
+    ASSERT_EQ(ret_overwrite, 0);
+
+    // success
+    bool result;
+    auto ret_exists = CPWD__mExists("default", "exists1", &result);
+    ASSERT_EQ(ret_exists, 0);
+
+    // failure
+    ret_exists = CPWD__mExists(nullptr, "exists1", &result);
+    ASSERT_EQ(ret_exists, -1);
 }
 
 TEST_F(TestPassword, ExistsResultNull) {
@@ -230,6 +319,23 @@ TEST_F(TestPassword, List) {
 
     // fail: delim
     ret_list = CPWD__List(buffer, 1024, "list");
+    ASSERT_EQ(ret_list, -1);
+}
+
+TEST_F(TestPassword, mList) {
+    // prepare
+    auto ret_overwrite = CPWD__Overwrite("list1", "bar", "123");
+    ASSERT_EQ(ret_overwrite, 0);
+    ret_overwrite = CPWD__Overwrite("list2", "bar", "123");
+    ASSERT_EQ(ret_overwrite, 0);
+
+    // success
+    char buffer[1024];
+    auto ret_list = CPWD__mList("default", buffer, 1024, ";;;");
+    ASSERT_EQ(ret_list, 0);
+
+    // failure
+    ret_list = CPWD__mList(nullptr, buffer, 1024, ";;;");
     ASSERT_EQ(ret_list, -1);
 }
 
@@ -275,6 +381,22 @@ TEST_F(TestPassword, Delete) {
     ASSERT_EQ(ret_delete, -1);
 }
 
+TEST_F(TestPassword, mDelete) {
+    // prepare
+    auto ret_overwrite = CPWD__Overwrite("delete1", "bar", "123");
+    ASSERT_EQ(ret_overwrite, 0);
+    ret_overwrite = CPWD__Overwrite("delete2", "bar", "123");
+    ASSERT_EQ(ret_overwrite, 0);
+
+    // success
+    auto ret_delete = CPWD__mDelete("default", "delete1");
+    ASSERT_EQ(ret_delete, 0);
+
+    // failure
+    ret_delete = CPWD__mDelete(nullptr, "delete2");
+    ASSERT_EQ(ret_delete, -1);
+}
+
 TEST_F(TestPassword, Clean) {
     // prepare
     auto ret_overwrite = CPWD__Overwrite("clean1", "bar", "123");
@@ -284,9 +406,28 @@ TEST_F(TestPassword, Clean) {
 
     // success
     auto ret_clean = CPWD__Clean();
+    ASSERT_EQ(ret_clean, 0);
+
+    // confirm
     char buffer[256];
     ASSERT_EQ(CPWD__Get("clean1", "123", buffer, 256), -1);
     ASSERT_EQ(CPWD__Get("clean2", "123", buffer, 256), -1);
+}
+
+TEST_F(TestPassword, mClean) {
+    // prepare
+    auto ret_overwrite = CPWD__Overwrite("clean1", "bar", "123");
+    ASSERT_EQ(ret_overwrite, 0);
+    ret_overwrite = CPWD__Overwrite("clean2", "bar", "123");
+    ASSERT_EQ(ret_overwrite, 0);
+
+    // success
+    auto ret_clean = CPWD__mClean("default");
+    ASSERT_EQ(ret_clean, 0);
+
+    // failure
+    ret_clean = CPWD__mClean(nullptr);
+    ASSERT_EQ(ret_clean, -1);
 }
 
 TEST_F(TestPassword, RewriteKey) {
@@ -304,4 +445,18 @@ TEST_F(TestPassword, RewriteKey) {
 
     // test
     ASSERT_EQ(CPWD__Get("foo", "456", buffer, 256), 0);
+}
+
+TEST_F(TestPassword, mRewriteKey) {
+    // prepare
+    auto ret_overwrite = CPWD__Overwrite("foo", "bar", "123");
+    ASSERT_EQ(ret_overwrite, 0);
+
+    // success
+    auto ret_rewrite = CPWD__mRewriteKey("default", "foo", "123", "456");
+    ASSERT_EQ(ret_rewrite, 0);
+
+    // failure
+    ret_rewrite = CPWD__mRewriteKey(nullptr, "foo", "456", "789");
+    ASSERT_EQ(ret_rewrite, -1);
 }
