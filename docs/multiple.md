@@ -29,3 +29,18 @@ func main() {
     password.RegisterDefaultManager("rest service 2")
 }
 ```
+
+When working with the C API in a multi manager setup, you can use the manager specific function set:
+```cpp
+CPWD__mOverwrite("some_manager", ...)
+CPWD__mGet("some_manager", ...)
+CPWD__mCheck("some_manager", ...)
+CPWD__mSet("some_manager", ...)
+CPWD__mUnset("some_manager", ...)
+CPWD__mExists("some_manager", ...)
+CPWD__mList("some_manager", ...)
+CPWD__mDelete("some_manager", ...)
+CPWD__mClean("some_manager", ...)
+CPWD__mRewriteKey("some_manager", ...)
+```
+For instance, the default manager can be referenced via the `"default"` identifier string.
