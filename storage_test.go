@@ -15,11 +15,11 @@ func Test_normalizeSeparator(t *testing.T) {
 		args args
 		want string
 	}{
-		{"first", args{"first.pwd"}, "first.pwd"},
+		{"first", args{"first.suffix"}, "first.suffix"},
 		{"second", args{"/"}, "/"},
 		{"third", args{"//"}, "//"},
-		{"fourth", args{"path/fourth.pwd"}, "path/fourth.pwd"},
-		{"fifth", args{"path\\fifth.pwd"}, "path/fifth.pwd"},
+		{"fourth", args{"path/fourth.suffix"}, "path/fourth.suffix"},
+		{"fifth", args{"path\\fifth.suffix"}, "path/fifth.suffix"},
 		{"sixth", args{"\\"}, "/"},
 		{"seventh", args{"\\\\"}, "//"},
 	}
@@ -41,11 +41,11 @@ func Test_NormalizeId(t *testing.T) {
 		args args
 		want string
 	}{
-		{"first", args{"First.pwd"}, "first.pwd"},
+		{"first", args{"First.suffix"}, "first.suffix"},
 		{"second", args{"/"}, "."},
 		{"third", args{"//"}, "."},
-		{"fourth", args{"pAth/foUrth.pwD"}, "path/fourth.pwd"},
-		{"fifth", args{"./Path\\tO/../fiftH.pWd"}, "path/fifth.pwd"},
+		{"fourth", args{"pAth/foUrth.suffiX"}, "path/fourth.suffix"},
+		{"fifth", args{"./Path\\tO/../fiftH.suffIx"}, "path/fifth.suffix"},
 		{"sixth", args{"\\"}, "."},
 		{"seventh", args{"\\\\"}, "."},
 		{"eighth", args{"./../.."}, "."},
@@ -67,7 +67,7 @@ func TestGetStorePath(t *testing.T) {
 		want    string
 		wantErr bool
 	}{
-		{"pass", &FileStorage{storePath: "foo/bar", fileEnding: "pwd"}, filepath.FromSlash("foo/bar"), false},
+		{"pass", &FileStorage{storePath: "foo/bar"}, filepath.FromSlash("foo/bar"), false},
 		{"fail", nil, filepath.FromSlash(""), true},
 	}
 	for _, tt := range tests {
@@ -125,71 +125,6 @@ func TestSetStorePath(t *testing.T) {
 	}
 }
 
-func TestGetFileEnding(t *testing.T) {
-	tests := []struct {
-		name    string
-		backend Storage
-		want    string
-		wantErr bool
-	}{
-		{"pass", &FileStorage{fileEnding: "foobar"}, "foobar", false},
-		{"fail", nil, "", true},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			// init test
-			RegisterDefaultManager("old")
-			currentManager := GetDefaultManager()
-			currentManager.storageBackend = tt.backend
-
-			// test
-			got, err := GetFileEnding()
-			if (err != nil) != tt.wantErr {
-				t.Errorf("GetFileEnding() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got != tt.want {
-				t.Errorf("GetFileEnding() got = %v, want %v", got, tt.want)
-			}
-
-			// cleanup test
-			SetDefaultManager(Managers["old"])
-		})
-	}
-}
-
-func TestSetFileEnding(t *testing.T) {
-	type args struct {
-		e string
-	}
-	tests := []struct {
-		name    string
-		backend Storage
-		args    args
-		wantErr bool
-	}{
-		{"pass", NewFileStorage(), args{"ending"}, false},
-		{"fail", nil, args{"ending"}, true},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			// init test
-			RegisterDefaultManager("old")
-			currentManager := GetDefaultManager()
-			currentManager.storageBackend = tt.backend
-
-			// test
-			err := SetFileEnding(tt.args.e)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("SetFileEnding() error = %v, wantErr %v", err, tt.wantErr)
-			}
-
-			// cleanup test
-			SetDefaultManager(Managers["old"])
-		})
-	}
-}
-
 func TestFilePath(t *testing.T) {
 	type args struct {
 		id string
@@ -201,7 +136,7 @@ func TestFilePath(t *testing.T) {
 		want    string
 		wantErr bool
 	}{
-		{"pass", &FileStorage{storePath: "some/path", fileEnding: "ending"}, args{"some/id"}, filepath.FromSlash("some/path/some/id.ending"), false},
+		{"pass", &FileStorage{storePath: "some/path"}, args{"some/id"}, filepath.FromSlash("some/path/some/id." + DefaultFileEnding), false},
 		{"fail", nil, args{"some/id"}, filepath.FromSlash(""), true},
 	}
 	for _, tt := range tests {

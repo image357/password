@@ -74,31 +74,6 @@ func SetStorePath(path string) error {
 	return unsupportedStorageError
 }
 
-// GetFileEnding returns the current file ending of storage files.
-func GetFileEnding() (string, error) {
-	m := GetDefaultManager()
-
-	switch m.storageBackend.(type) {
-	case *FileStorage:
-		return m.storageBackend.(*FileStorage).GetFileEnding(), nil
-	}
-
-	return "", unsupportedStorageError
-}
-
-// SetFileEnding accepts a new file ending for storage files.
-func SetFileEnding(e string) error {
-	m := GetDefaultManager()
-
-	switch m.storageBackend.(type) {
-	case *FileStorage:
-		m.storageBackend.(*FileStorage).SetFileEnding(e)
-		return nil
-	}
-
-	return unsupportedStorageError
-}
-
 // FilePath returns the storage filepath of a given password-id with system-specific path separators.
 // It accepts system-unspecific or mixed id separators, i.e. forward- and backward-slashes are treated as the same character.
 func FilePath(id string) (string, error) {

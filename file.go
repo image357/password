@@ -32,9 +32,6 @@ type FileStorage struct {
 	// storePath holds the absolute storage path.
 	storePath string
 
-	// fileEnding holds the file ending without dot prefix.
-	fileEnding string
-
 	// storageTree holds an id to sync.Mutex map for thread-safe file access.
 	storageTree map[string]*sync.Mutex
 
@@ -50,7 +47,6 @@ func NewFileStorage() *FileStorage {
 	f := new(FileStorage)
 
 	f.SetStorePath(DefaultStorePath)
-	f.SetFileEnding(DefaultFileEnding)
 	f.storageTree = make(map[string]*sync.Mutex)
 	f.storageTreeLockCount = make(map[string]int)
 
@@ -74,21 +70,11 @@ func (f *FileStorage) SetStorePath(path string) {
 	f.storePath = pathlib.Clean(path)
 }
 
-// GetFileEnding returns the current file ending of storage files.
-func (f *FileStorage) GetFileEnding() string {
-	return f.fileEnding
-}
-
-// SetFileEnding accepts a new file ending for storage files.
-func (f *FileStorage) SetFileEnding(e string) {
-	f.fileEnding = strings.ToLower(strings.Trim(e, "."))
-}
-
 // FilePath returns the storage filepath of a given password-id with system-specific path separators.
 // It accepts system-unspecific or mixed id separators, i.e. forward- and backward-slashes are treated as the same character.
 func (f *FileStorage) FilePath(id string) string {
 	id = NormalizeId(id)
-	return filepath.FromSlash(pathlib.Join(f.storePath, id+"."+f.fileEnding))
+	return filepath.FromSlash(pathlib.Join(f.storePath, id+"."+DefaultFileEnding))
 }
 
 // lockId locks a storage id mutex by first locking the storage tree and increasing lock count.
@@ -209,11 +195,11 @@ func (f *FileStorage) List() ([]string, error) {
 			return nil
 		}
 
-		if !strings.HasSuffix(d.Name(), "."+f.GetFileEnding()) {
+		if !strings.HasSuffix(d.Name(), "."+DefaultFileEnding) {
 			return nil
 		}
 
-		path = strings.TrimSuffix(path, "."+f.GetFileEnding())
+		path = strings.TrimSuffix(path, "."+DefaultFileEnding)
 		path, err = filepath.Rel(f.GetStorePath(), path)
 		if err != nil {
 			return err

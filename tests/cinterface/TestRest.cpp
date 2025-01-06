@@ -11,7 +11,6 @@ void TestRest::SetUp() {
     EXPECT_EQ(ret_loglevel, 0);
 
     CPWD__SetStorePath(STORAGE_PATH "/cinterface_rest");
-    CPWD__SetFileEnding("end");
 }
 
 void TestRest::TearDown() {

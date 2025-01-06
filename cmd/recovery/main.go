@@ -28,6 +28,11 @@ func main() {
 		os.Exit(1)
 	}
 
+	if filepath.Ext(abs) != ("." + pwd.DefaultFileEnding) {
+		fmt.Println("Error: <file> must end with \"." + pwd.DefaultFileEnding + "\"")
+		os.Exit(1)
+	}
+
 	abs = strings.ReplaceAll(abs, "\\", "/")
 	dir, file := path.Split(abs)
 	recoveryKey := args[1]
@@ -36,18 +41,13 @@ func main() {
 	var recoveryFile string
 	var passwordFile string
 
-	fileParts := strings.Split(file, ".")
-	if len(fileParts) < 2 {
-		fmt.Println("Error: <file> is not a password or recovery key file")
-		os.Exit(1)
-	}
-
-	if fileParts[len(fileParts)-2] == pwd.RecoveryIdSuffix[1:] && len(fileParts) >= 3 {
-		passwordFile = strings.Join(fileParts[:len(fileParts)-2], ".") + "." + fileParts[len(fileParts)-1]
+	suffix := filepath.Ext(strings.TrimSuffix(file, "."+pwd.DefaultFileEnding))
+	if suffix == pwd.RecoveryIdSuffix {
+		passwordFile = strings.TrimSuffix(strings.TrimSuffix(file, "."+pwd.DefaultFileEnding), pwd.RecoveryIdSuffix) + "." + pwd.DefaultFileEnding
 		recoveryFile = file
 	} else {
 		passwordFile = file
-		recoveryFile = strings.Join(fileParts[:len(fileParts)-1], ".") + pwd.RecoveryIdSuffix + "." + fileParts[len(fileParts)-1]
+		recoveryFile = strings.TrimSuffix(file, "."+pwd.DefaultFileEnding) + pwd.RecoveryIdSuffix + "." + pwd.DefaultFileEnding
 	}
 
 	// brute force to get storePath and id
@@ -62,16 +62,11 @@ func main() {
 		storePath = path.Clean(strings.Join(pathParts[:i+1], "/") + "/")
 
 		id = strings.Join(pathParts[i+1:], "/")
-		idParts := strings.Split(passwordFile, ".")
-		id = pwd.NormalizeId(path.Join(id, strings.Join(idParts[:len(idParts)-1], ".")))
-
-		fileEnding := idParts[len(idParts)-1]
+		id = id + "/" + passwordFile
+		id = strings.TrimSuffix(id, "."+pwd.DefaultFileEnding)
+		id = pwd.NormalizeId(id)
 
 		err = pwd.SetStorePath(storePath)
-		if err != nil {
-			continue
-		}
-		err = pwd.SetFileEnding(fileEnding)
 		if err != nil {
 			continue
 		}

@@ -720,49 +720,6 @@ func CPWD__SetStorePath(path *C.cchar_t) int {
 	return 0
 }
 
-// CPWD__GetFileEnding calls password.GetFileEnding and returns 0 on success, -1 on error.
-// The result will be stored in buffer.
-//
-// For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
-//
-//export CPWD__GetFileEnding
-func CPWD__GetFileEnding(buffer *C.char, length int) int {
-	if buffer == nil {
-		log.Error("CPWD__GetFileEnding: buffer is nullptr")
-		return -1
-	}
-
-	s, err := pwd.GetFileEnding()
-	if err != nil {
-		log.Error("CPWD__GetFileEnding: GetFileEnding failed", "error", err)
-		return -1
-	}
-
-	cs := C.CString(s)
-	defer C.free(unsafe.Pointer(cs))
-	if int(C.strlen(cs)) >= length {
-		log.Error("CPWD__GetFileEnding: buffer is too small")
-		return -1
-	}
-	C.strcpy(buffer, cs)
-
-	return 0
-}
-
-// CPWD__SetFileEnding calls password.SetFileEnding and returns 0 on success, -1 on error.
-//
-// For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
-//
-//export CPWD__SetFileEnding
-func CPWD__SetFileEnding(e *C.cchar_t) int {
-	err := pwd.SetFileEnding(C.GoString(e))
-	if err != nil {
-		log.Error("CPWD__SetFileEnding: SetFileEnding failed", "error", err)
-		return -1
-	}
-	return 0
-}
-
 // CPWD__FilePath calls password.FilePath and returns 0 on success, -1 on error.
 // The result will be stored in buffer.
 //

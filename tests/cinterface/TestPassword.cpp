@@ -10,7 +10,6 @@ void TestPassword::SetUp() {
     EXPECT_EQ(ret_loglevel, 0);
 
     CPWD__SetStorePath(STORAGE_PATH "/cinterface_password");
-    CPWD__SetFileEnding("end");
 
     // set HashPassword to true
     CPWD__EnableHashing();

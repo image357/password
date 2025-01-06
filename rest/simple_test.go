@@ -31,11 +31,11 @@ func Test_preparePrefix(t *testing.T) {
 		args args
 		want string
 	}{
-		{"first", args{"First.pwd"}, "first.pwd"},
+		{"first", args{"First.xml"}, "first.xml"},
 		{"second", args{"/"}, "."},
 		{"third", args{"//"}, "."},
-		{"fourth", args{"pAth/foUrth.pwD"}, "path/fourth.pwd"},
-		{"fifth", args{"./Path\\tO/../fiftH.pWd"}, "path/fifth.pwd"},
+		{"fourth", args{"pAth/foUrth.XML"}, "path/fourth.xml"},
+		{"fifth", args{"./Path\\tO/../fiftH.XML"}, "path/fifth.xml"},
 		{"sixth", args{"\\"}, "."},
 		{"seventh", args{"\\\\"}, "."},
 		{"eighth", args{"./../.."}, "."},
