@@ -1,3 +1,5 @@
+// Package password provides a simple-password-manager library with an encryption backend to handle app passwords.
+// For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
 package password
 
 // Managers stores a map of string identifiers for all created password managers.

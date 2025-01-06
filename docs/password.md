@@ -6,6 +6,8 @@
 import "github.com/image357/password"
 ```
 
+Package password provides a simple\-password\-manager library with an encryption backend to handle app passwords. For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
+
 ## Index
 
 - [Constants](<#constants>)
@@ -114,7 +116,7 @@ var Managers = map[string]*Manager{
 ```
 
 <a name="Check"></a>
-## func [Check](<https://github.com/image357/password/blob/main/password.go#L64>)
+## func [Check](<https://github.com/image357/password/blob/main/password.go#L66>)
 
 ```go
 func Check(id string, password string, key string) (bool, error)
@@ -123,7 +125,7 @@ func Check(id string, password string, key string) (bool, error)
 Check an existing password for equality with the provided password. key is the encryption secret for storage.
 
 <a name="Clean"></a>
-## func [Clean](<https://github.com/image357/password/blob/main/password.go#L98>)
+## func [Clean](<https://github.com/image357/password/blob/main/password.go#L100>)
 
 ```go
 func Clean() error
@@ -150,7 +152,7 @@ func DecryptOTP(cipherBytes []byte, secret []byte) string
 DecryptOTP returns the decrypted message from a One\-Time\-Pad \(OTP\) encryption.
 
 <a name="Delete"></a>
-## func [Delete](<https://github.com/image357/password/blob/main/password.go#L93>)
+## func [Delete](<https://github.com/image357/password/blob/main/password.go#L95>)
 
 ```go
 func Delete(id string) error
@@ -159,7 +161,7 @@ func Delete(id string) error
 Delete an existing password.
 
 <a name="DisableHashing"></a>
-## func [DisableHashing](<https://github.com/image357/password/blob/main/password.go#L35>)
+## func [DisableHashing](<https://github.com/image357/password/blob/main/password.go#L37>)
 
 ```go
 func DisableHashing()
@@ -168,7 +170,7 @@ func DisableHashing()
 DisableHashing will set the config variable Manager.HashPassword of the default password manager to false. This disables storage of hashed passwords.
 
 <a name="DisableRecovery"></a>
-## func [DisableRecovery](<https://github.com/image357/password/blob/main/password.go#L46>)
+## func [DisableRecovery](<https://github.com/image357/password/blob/main/password.go#L48>)
 
 ```go
 func DisableRecovery()
@@ -186,7 +188,7 @@ func DumpJSON() (string, error)
 DumpJSON serializes the storage backend to a JSON string.
 
 <a name="EnableHashing"></a>
-## func [EnableHashing](<https://github.com/image357/password/blob/main/password.go#L28>)
+## func [EnableHashing](<https://github.com/image357/password/blob/main/password.go#L30>)
 
 ```go
 func EnableHashing()
@@ -195,7 +197,7 @@ func EnableHashing()
 EnableHashing will set the config variable Manager.HashPassword of the default password manager to true. This enables storage of hashed passwords.
 
 <a name="EnableRecovery"></a>
-## func [EnableRecovery](<https://github.com/image357/password/blob/main/password.go#L41>)
+## func [EnableRecovery](<https://github.com/image357/password/blob/main/password.go#L43>)
 
 ```go
 func EnableRecovery(key string)
@@ -222,7 +224,7 @@ func EncryptOTP(text string) ([]byte, []byte)
 EncryptOTP returns a One\-Time\-Pad \(OTP\) encrypted message and its OTP secret.
 
 <a name="Exists"></a>
-## func [Exists](<https://github.com/image357/password/blob/main/password.go#L83>)
+## func [Exists](<https://github.com/image357/password/blob/main/password.go#L85>)
 
 ```go
 func Exists(id string) (bool, error)
@@ -240,7 +242,7 @@ func FilePath(id string) (string, error)
 FilePath returns the storage filepath of a given password\-id with system\-specific path separators. It accepts system\-unspecific or mixed id separators, i.e. forward\- and backward\-slashes are treated as the same character.
 
 <a name="Get"></a>
-## func [Get](<https://github.com/image357/password/blob/main/password.go#L58>)
+## func [Get](<https://github.com/image357/password/blob/main/password.go#L60>)
 
 ```go
 func Get(id string, key string) (string, error)
@@ -258,7 +260,7 @@ func GetStorePath() (string, error)
 GetStorePath returns the current storage path with system\-specific path separators.
 
 <a name="List"></a>
-## func [List](<https://github.com/image357/password/blob/main/password.go#L88>)
+## func [List](<https://github.com/image357/password/blob/main/password.go#L90>)
 
 ```go
 func List() ([]string, error)
@@ -285,7 +287,7 @@ func NormalizeId(id string) string
 NormalizeId transforms path to lower case letters and normalizes the path separator
 
 <a name="Overwrite"></a>
-## func [Overwrite](<https://github.com/image357/password/blob/main/password.go#L52>)
+## func [Overwrite](<https://github.com/image357/password/blob/main/password.go#L54>)
 
 ```go
 func Overwrite(id string, password string, key string) error
@@ -303,7 +305,7 @@ func ReadFromDisk(path string) error
 ReadFromDisk loads a FileStorage backend from disk into the current storage. Warning: This method does not block operations on the underlying storage backends \(read/write/create/delete\). You should stop operations manually before usage or ignore the reported error. Data consistency is guaranteed.
 
 <a name="RegisterDefaultManager"></a>
-## func [RegisterDefaultManager](<https://github.com/image357/password/blob/main/password.go#L21>)
+## func [RegisterDefaultManager](<https://github.com/image357/password/blob/main/password.go#L23>)
 
 ```go
 func RegisterDefaultManager(identifier string)
@@ -312,7 +314,7 @@ func RegisterDefaultManager(identifier string)
 RegisterDefaultManager will register the current default password manger under the identifier and set a new default manager.
 
 <a name="RewriteKey"></a>
-## func [RewriteKey](<https://github.com/image357/password/blob/main/password.go#L105>)
+## func [RewriteKey](<https://github.com/image357/password/blob/main/password.go#L107>)
 
 ```go
 func RewriteKey(id string, oldKey string, newKey string) error
@@ -321,7 +323,7 @@ func RewriteKey(id string, oldKey string, newKey string) error
 RewriteKey changes the storage key of a password from oldKey to newKey. Encryption hashes will be renewed. Stored metadata will be unchanged. If enabled, recovery entries will be recreated.
 
 <a name="Set"></a>
-## func [Set](<https://github.com/image357/password/blob/main/password.go#L71>)
+## func [Set](<https://github.com/image357/password/blob/main/password.go#L73>)
 
 ```go
 func Set(id string, oldPassword string, newPassword string, key string) error
@@ -330,7 +332,7 @@ func Set(id string, oldPassword string, newPassword string, key string) error
 Set an existing password\-id or create a new one. oldPassword must match the currently stored password. key is the encryption secret for storage.
 
 <a name="SetDefaultManager"></a>
-## func [SetDefaultManager](<https://github.com/image357/password/blob/main/password.go#L16>)
+## func [SetDefaultManager](<https://github.com/image357/password/blob/main/password.go#L18>)
 
 ```go
 func SetDefaultManager(manager *Manager)
@@ -357,7 +359,7 @@ func SetTemporaryStorage()
 SetTemporaryStorage overwrites the current storage backend with a memory based one.
 
 <a name="Unset"></a>
-## func [Unset](<https://github.com/image357/password/blob/main/password.go#L78>)
+## func [Unset](<https://github.com/image357/password/blob/main/password.go#L80>)
 
 ```go
 func Unset(id string, password string, key string) error
@@ -522,7 +524,7 @@ type Manager struct {
 ```
 
 <a name="GetDefaultManager"></a>
-### func [GetDefaultManager](<https://github.com/image357/password/blob/main/password.go#L11>)
+### func [GetDefaultManager](<https://github.com/image357/password/blob/main/password.go#L13>)
 
 ```go
 func GetDefaultManager() *Manager
