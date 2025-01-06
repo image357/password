@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// RecoveryIdSuffix stores the id and file suffix that identifies recovery key files.
+// RecoveryIdSuffix stores the id/file suffix that identifies recovery key files.
 const RecoveryIdSuffix string = ".recovery"
 
 type Manager struct {

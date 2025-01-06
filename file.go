@@ -18,7 +18,7 @@ import (
 // DefaultStorePath is the default relative storage path of a file storage backend.
 const DefaultStorePath = "./password"
 
-// DefaultFileEnding is the default file ending for password files of a file storage backend.
+// DefaultFileEnding is the default file extension for password files.
 const DefaultFileEnding string = "pwd"
 
 // storageFileMode controls the file permission set by this package.

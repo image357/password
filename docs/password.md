@@ -87,7 +87,7 @@ Package password provides a simple\-password\-manager library with an encryption
 
 ## Constants
 
-<a name="DefaultFileEnding"></a>DefaultFileEnding is the default file ending for password files of a file storage backend.
+<a name="DefaultFileEnding"></a>DefaultFileEnding is the default file extension for password files.
 
 ```go
 const DefaultFileEnding string = "pwd"
@@ -99,7 +99,7 @@ const DefaultFileEnding string = "pwd"
 const DefaultStorePath = "./password"
 ```
 
-<a name="RecoveryIdSuffix"></a>RecoveryIdSuffix stores the id and file suffix that identifies recovery key files.
+<a name="RecoveryIdSuffix"></a>RecoveryIdSuffix stores the id/file suffix that identifies recovery key files.
 
 ```go
 const RecoveryIdSuffix string = ".recovery"
