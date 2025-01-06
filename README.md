@@ -60,7 +60,6 @@ import (
     "github.com/image357/password"
     "github.com/image357/password/log"
     "github.com/image357/password/rest"
-    "log/slog"
 )
 
 func main() {
