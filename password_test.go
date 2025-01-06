@@ -53,31 +53,35 @@ func TestRegisterDefaultManager(t *testing.T) {
 	}
 }
 
-func TestToggleHashPassword(t *testing.T) {
+func Test_EnableHashing_DisableHashing(t *testing.T) {
 	type args struct {
 		id       string
 		password string
+		hashing  bool
 	}
 	tests := []struct {
 		name string
 		args args
 		want bool
 	}{
-		{"test hash", args{"hashed", "123"}, true},
-		{"empty", args{"empty", ""}, true},
+		{"test hash", args{"hashed", "123", true}, true},
+		{"empty", args{"empty", "", true}, true},
+		{"no hash", args{"hashed", "123", false}, true},
+		{"no hash empty", args{"empty", "", false}, true},
 	}
 	// init
-	err := SetStorePath("./tests/workdir/ToggleHashPassword")
+	err := SetStorePath("./tests/workdir/EnableHashing")
 	if err != nil {
 		t.Fatal(err)
-	}
-	for ok := ToggleHashPassword(); !ok; ok = ToggleHashPassword() {
-		// stop loop when true
 	}
 
 	// tests
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// init test
+			if tt.args.hashing {
+				EnableHashing()
+			}
 			err = Overwrite(tt.args.id, tt.args.password, "456")
 			if err != nil {
 				t.Errorf("Overwrite() error = %v", err)
@@ -86,20 +90,28 @@ func TestToggleHashPassword(t *testing.T) {
 			if err != nil {
 				t.Errorf("Get() error = %v", err)
 			}
-			result, err := compareHashedPassword(storedPassword, tt.args.password)
-			if err != nil {
-				t.Errorf("compareHashedPassword() error = %v", err)
+
+			// test
+			var result = false
+			if tt.args.hashing {
+				result, err = compareHashedPassword(storedPassword, tt.args.password)
+				if err != nil {
+					t.Errorf("compareHashedPassword() error = %v", err)
+				}
+			} else {
+				result = comparePassword(storedPassword, tt.args.password)
 			}
+
 			if result != tt.want {
 				t.Errorf("ToggleHashPassword(): hashes don't match")
 			}
+
+			// cleanup test
+			DisableHashing()
 		})
 	}
 
 	// cleanup
-	for ok := ToggleHashPassword(); ok; ok = ToggleHashPassword() {
-		// stop loop when false
-	}
 	path, err := GetStorePath()
 	if err != nil {
 		t.Error(err)

@@ -12,10 +12,8 @@ void TestPassword::SetUp() {
     CPWD__SetStorePath(STORAGE_PATH "/cinterface_password");
     CPWD__SetFileEnding("end");
 
-    // set HashPassword to false
-    while (CPWD__ToggleHashPassword()) {
-        // nothing
-    }
+    // set HashPassword to true
+    CPWD__EnableHashing();
 
     // enable recovery
     CPWD__EnableRecovery("recovery_key");
@@ -32,6 +30,9 @@ void TestPassword::TearDown() {
 
     auto ret_remove = std::filesystem::remove_all(STORAGE_PATH "/cinterface_password");
     EXPECT_GE(ret_remove, 1);
+
+    // set HashPassword to false
+    CPWD__DisableHashing();
 
     // disable recovery
     CPWD__DisableRecovery();
@@ -54,6 +55,8 @@ TEST_F(TestPassword, Overwrite) {
 
 TEST_F(TestPassword, Get) {
     // prepare
+    CPWD__DisableHashing();
+
     auto ret_overwrite = CPWD__Overwrite("get1", "bar", "123");
     ASSERT_EQ(ret_overwrite, 0);
 
@@ -70,6 +73,8 @@ TEST_F(TestPassword, Get) {
 
 TEST_F(TestPassword, GetBufferSize) {
     // prepare
+    CPWD__DisableHashing();
+
     auto ret_overwrite = CPWD__Overwrite("get2", "bar", "123");
     ASSERT_EQ(ret_overwrite, 0);
 
@@ -130,6 +135,8 @@ TEST_F(TestPassword, CheckResultNull) {
 
 TEST_F(TestPassword, Set) {
     // prepare
+    CPWD__DisableHashing();
+
     auto ret_overwrite = CPWD__Overwrite("set1", "bar", "123");
     ASSERT_EQ(ret_overwrite, 0);
 

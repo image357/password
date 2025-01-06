@@ -23,11 +23,18 @@ func RegisterDefaultManager(identifier string) {
 	SetDefaultManager(NewManager())
 }
 
-// ToggleHashPassword will toggle the config variable HashPassword of the default password manager and return the current state.
-func ToggleHashPassword() bool {
+// EnableHashing will set the config variable Manager.HashPassword of the default password manager to true.
+// This enables storage of hashed passwords.
+func EnableHashing() {
 	m := GetDefaultManager()
-	m.HashPassword = !m.HashPassword
-	return m.HashPassword
+	m.HashPassword = true
+}
+
+// DisableHashing will set the config variable Manager.HashPassword of the default password manager to false.
+// This disables storage of hashed passwords.
+func DisableHashing() {
+	m := GetDefaultManager()
+	m.HashPassword = false
 }
 
 // EnableRecovery will enforce recovery key file storage alongside passwords.

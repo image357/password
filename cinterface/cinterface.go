@@ -62,13 +62,22 @@ func CPWD__RegisterDefaultManager(identifier *C.cchar_t) {
 	pwd.RegisterDefaultManager(i)
 }
 
-// CPWD__ToggleHashPassword calls password.ToggleHashPassword.
+// CPWD__EnableHashing calls password.EnableHashing.
 //
 // For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
 //
-//export CPWD__ToggleHashPassword
-func CPWD__ToggleHashPassword() bool {
-	return pwd.ToggleHashPassword()
+//export CPWD__EnableHashing
+func CPWD__EnableHashing() {
+	pwd.EnableHashing()
+}
+
+// CPWD__DisableHashing calls password.DisableHashing.
+//
+// For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
+//
+//export CPWD__DisableHashing
+func CPWD__DisableHashing() {
+	pwd.DisableHashing()
 }
 
 // CPWD__EnableRecovery calls password.EnableRecovery.
