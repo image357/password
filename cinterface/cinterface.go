@@ -112,6 +112,28 @@ func CPWD__Overwrite(id *C.cchar_t, password *C.cchar_t, key *C.cchar_t) int {
 	return 0
 }
 
+// CPWD__mOverwrite calls password.Overwrite with the specified manager and returns 0 on success, -1 on error.
+//
+// For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
+//
+//export CPWD__mOverwrite
+func CPWD__mOverwrite(manager *C.cchar_t, id *C.cchar_t, password *C.cchar_t, key *C.cchar_t) int {
+	identifier := C.GoString(manager)
+	m, ok := pwd.Managers[identifier]
+	if !ok {
+		delete(pwd.Managers, identifier)
+		log.Error("CPWD__mOverwrite: Manager not found", "identifier", identifier)
+		return -1
+	}
+
+	err := m.Overwrite(C.GoString(id), C.GoString(password), C.GoString(key))
+	if err != nil {
+		log.Error("CPWD__mOverwrite: Overwrite failed", "error", err)
+		return -1
+	}
+	return 0
+}
+
 // CPWD__Get calls password.Get and returns 0 on success, -1 on error.
 // The result will be stored in buffer.
 //
@@ -141,6 +163,43 @@ func CPWD__Get(id *C.cchar_t, key *C.cchar_t, buffer *C.char, length int) int {
 	return 0
 }
 
+// CPWD__mGet calls password.Get with the specified manager and returns 0 on success, -1 on error.
+// The result will be stored in buffer.
+//
+// For full documentation visit https://github.com/image357/password/docs/password.md
+//
+//export CPWD__mGet
+func CPWD__mGet(manager *C.cchar_t, id *C.cchar_t, key *C.cchar_t, buffer *C.char, length int) int {
+	identifier := C.GoString(manager)
+	m, ok := pwd.Managers[identifier]
+	if !ok {
+		delete(pwd.Managers, identifier)
+		log.Error("CPWD__mGet: Manager not found", "identifier", identifier)
+		return -1
+	}
+
+	if buffer == nil {
+		log.Error("CPWD__mGet: buffer is nullptr")
+		return -1
+	}
+
+	password, err := m.Get(C.GoString(id), C.GoString(key))
+	if err != nil {
+		log.Error("CPWD__mGet: Get failed", "error", err)
+		return -1
+	}
+
+	cs := C.CString(password)
+	defer C.free(unsafe.Pointer(cs))
+	if int(C.strlen(cs)) >= length {
+		log.Error("CPWD__mGet: buffer is too small")
+		return -1
+	}
+	C.strcpy(buffer, cs)
+
+	return 0
+}
+
 // CPWD__Check calls password.Check and returns 0 on success, -1 on error.
 // The result will be stored via the result pointer.
 //
@@ -163,6 +222,36 @@ func CPWD__Check(id *C.cchar_t, password *C.cchar_t, key *C.cchar_t, result *C.b
 	return 0
 }
 
+// CPWD__mCheck calls password.Check with the specified manager and returns 0 on success, -1 on error.
+// The result will be stored via the result pointer.
+//
+// For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
+//
+//export CPWD__mCheck
+func CPWD__mCheck(manager *C.cchar_t, id *C.cchar_t, password *C.cchar_t, key *C.cchar_t, result *C.bool) int {
+	identifier := C.GoString(manager)
+	m, ok := pwd.Managers[identifier]
+	if !ok {
+		delete(pwd.Managers, identifier)
+		log.Error("CPWD__mCheck: Manager not found", "identifier", identifier)
+		return -1
+	}
+
+	if result == nil {
+		log.Error("CPWD__mCheck: result is nullptr")
+		return -1
+	}
+
+	check, err := m.Check(C.GoString(id), C.GoString(password), C.GoString(key))
+	if err != nil {
+		log.Error("CPWD__mCheck: Check failed", "error", err)
+		return -1
+	}
+
+	*result = C.bool(check)
+	return 0
+}
+
 // CPWD__Set calls password.Set and returns 0 on success, -1 on error.
 //
 // For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
@@ -172,6 +261,28 @@ func CPWD__Set(id *C.cchar_t, oldPassword *C.cchar_t, newPassword *C.cchar_t, ke
 	err := pwd.Set(C.GoString(id), C.GoString(oldPassword), C.GoString(newPassword), C.GoString(key))
 	if err != nil {
 		log.Error("CPWD__Set: Set failed", "error", err)
+		return -1
+	}
+	return 0
+}
+
+// CPWD__mSet calls password.Set with the specified manager and returns 0 on success, -1 on error.
+//
+// For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
+//
+//export CPWD__mSet
+func CPWD__mSet(manager *C.cchar_t, id *C.cchar_t, oldPassword *C.cchar_t, newPassword *C.cchar_t, key *C.cchar_t) int {
+	identifier := C.GoString(manager)
+	m, ok := pwd.Managers[identifier]
+	if !ok {
+		delete(pwd.Managers, identifier)
+		log.Error("CPWD__mSet: Manager not found", "identifier", identifier)
+		return -1
+	}
+
+	err := m.Set(C.GoString(id), C.GoString(oldPassword), C.GoString(newPassword), C.GoString(key))
+	if err != nil {
+		log.Error("CPWD__mSet: Set failed", "error", err)
 		return -1
 	}
 	return 0
@@ -191,6 +302,28 @@ func CPWD__Unset(id *C.cchar_t, password *C.cchar_t, key *C.cchar_t) int {
 	return 0
 }
 
+// CPWD__mUnset calls password.Unset with the specified manager and returns 0 on success, -1 on error.
+//
+// For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
+//
+//export CPWD__mUnset
+func CPWD__mUnset(manager *C.cchar_t, id *C.cchar_t, password *C.cchar_t, key *C.cchar_t) int {
+	identifier := C.GoString(manager)
+	m, ok := pwd.Managers[identifier]
+	if !ok {
+		delete(pwd.Managers, identifier)
+		log.Error("CPWD__mUnset: Manager not found", "identifier", identifier)
+		return -1
+	}
+
+	err := m.Unset(C.GoString(id), C.GoString(password), C.GoString(key))
+	if err != nil {
+		log.Error("CPWD__mUnset: Unset failed", "error", err)
+		return -1
+	}
+	return 0
+}
+
 // CPWD__Exists calls password.Exists and returns 0 on success, -1 on error.
 //
 // For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
@@ -205,6 +338,35 @@ func CPWD__Exists(id *C.cchar_t, result *C.bool) int {
 	exists, err := pwd.Exists(C.GoString(id))
 	if err != nil {
 		log.Error("CPWD__Exists: Exists failed", "error", err)
+		return -1
+	}
+
+	*result = C.bool(exists)
+	return 0
+}
+
+// CPWD__mExists calls password.Exists with the specified manager and returns 0 on success, -1 on error.
+//
+// For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
+//
+//export CPWD__mExists
+func CPWD__mExists(manager *C.cchar_t, id *C.cchar_t, result *C.bool) int {
+	identifier := C.GoString(manager)
+	m, ok := pwd.Managers[identifier]
+	if !ok {
+		delete(pwd.Managers, identifier)
+		log.Error("CPWD__mExists: Manager not found", "identifier", identifier)
+		return -1
+	}
+
+	if result == nil {
+		log.Error("CPWD__mExists: result is nullptr")
+		return -1
+	}
+
+	exists, err := m.Exists(C.GoString(id))
+	if err != nil {
+		log.Error("CPWD__mExists: Exists failed", "error", err)
 		return -1
 	}
 
@@ -251,6 +413,53 @@ func CPWD__List(buffer *C.char, length int, delim *C.cchar_t) int {
 	return 0
 }
 
+// CPWD__mList calls password.List with the specified manager and returns 0 on success, -1 on error.
+// The resulting list will be stored in buffer with delim as separator.
+// Error is returned if delim collides with any of the returned ids.
+//
+// For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
+//
+//export CPWD__mList
+func CPWD__mList(manager *C.cchar_t, buffer *C.char, length int, delim *C.cchar_t) int {
+	identifier := C.GoString(manager)
+	m, ok := pwd.Managers[identifier]
+	if !ok {
+		delete(pwd.Managers, identifier)
+		log.Error("CPWD__mList: Manager not found", "identifier", identifier)
+		return -1
+	}
+
+	if buffer == nil {
+		log.Error("CPWD__mList: buffer is nullptr")
+		return -1
+	}
+
+	list, err := m.List()
+	if err != nil {
+		log.Error("CPWD__mList: List failed", "error", err)
+		return -1
+	}
+
+	d := C.GoString(delim)
+	for _, l := range list {
+		if strings.Contains(l, d) {
+			log.Error("CPWD__mList: delimiter collision with id", "delim", d, "id", l)
+			return -1
+		}
+	}
+	s := strings.Join(list, d)
+
+	cs := C.CString(s)
+	defer C.free(unsafe.Pointer(cs))
+	if int(C.strlen(cs)) >= length {
+		log.Error("CPWD__mList: buffer is too small")
+		return -1
+	}
+	C.strcpy(buffer, cs)
+
+	return 0
+}
+
 // CPWD__Delete calls password.Delete and returns 0 on success, -1 on error.
 //
 // For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
@@ -260,6 +469,28 @@ func CPWD__Delete(id *C.cchar_t) int {
 	err := pwd.Delete(C.GoString(id))
 	if err != nil {
 		log.Error("CPWD__Delete: Delete failed", "error", err)
+		return -1
+	}
+	return 0
+}
+
+// CPWD__mDelete calls password.Delete with the specified manager and returns 0 on success, -1 on error.
+//
+// For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
+//
+//export CPWD__mDelete
+func CPWD__mDelete(manager *C.cchar_t, id *C.cchar_t) int {
+	identifier := C.GoString(manager)
+	m, ok := pwd.Managers[identifier]
+	if !ok {
+		delete(pwd.Managers, identifier)
+		log.Error("CPWD__mDelete: Manager not found", "identifier", identifier)
+		return -1
+	}
+
+	err := m.Delete(C.GoString(id))
+	if err != nil {
+		log.Error("CPWD__mDelete: Delete failed", "error", err)
 		return -1
 	}
 	return 0
@@ -279,6 +510,28 @@ func CPWD__Clean() int {
 	return 0
 }
 
+// CPWD__mClean calls password.Clean with the specified manager and returns 0 on success, -1 on error.
+//
+// For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
+//
+//export CPWD__mClean
+func CPWD__mClean(manager *C.cchar_t) int {
+	identifier := C.GoString(manager)
+	m, ok := pwd.Managers[identifier]
+	if !ok {
+		delete(pwd.Managers, identifier)
+		log.Error("CPWD__mClean: Manager not found", "identifier", identifier)
+		return -1
+	}
+
+	err := m.Clean()
+	if err != nil {
+		log.Error("CPWD__mClean: Clean failed", "error", err)
+		return -1
+	}
+	return 0
+}
+
 // CPWD__RewriteKey calls password.RewriteKey and returns 0 on success, -1 on error.
 //
 // For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
@@ -288,6 +541,28 @@ func CPWD__RewriteKey(id *C.cchar_t, oldKey *C.cchar_t, newKey *C.cchar_t) int {
 	err := pwd.RewriteKey(C.GoString(id), C.GoString(oldKey), C.GoString(newKey))
 	if err != nil {
 		log.Error("CPWD__RewriteKey: RewriteKey failed", "error", err)
+		return -1
+	}
+	return 0
+}
+
+// CPWD__mRewriteKey calls password.RewriteKey with the specified manager and returns 0 on success, -1 on error.
+//
+// For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
+//
+//export CPWD__mRewriteKey
+func CPWD__mRewriteKey(manager *C.cchar_t, id *C.cchar_t, oldKey *C.cchar_t, newKey *C.cchar_t) int {
+	identifier := C.GoString(manager)
+	m, ok := pwd.Managers[identifier]
+	if !ok {
+		delete(pwd.Managers, identifier)
+		log.Error("CPWD__mRewriteKey: Manager not found", "identifier", identifier)
+		return -1
+	}
+
+	err := m.RewriteKey(C.GoString(id), C.GoString(oldKey), C.GoString(newKey))
+	if err != nil {
+		log.Error("CPWD__mRewriteKey: RewriteKey failed", "error", err)
 		return -1
 	}
 	return 0
