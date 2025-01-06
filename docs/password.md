@@ -88,7 +88,7 @@ import "github.com/image357/password"
 <a name="DefaultFileEnding"></a>DefaultFileEnding is the default file ending for password files of a file storage backend.
 
 ```go
-const DefaultFileEnding string = "spwd"
+const DefaultFileEnding string = "pwd"
 ```
 
 <a name="DefaultStorePath"></a>DefaultStorePath is the default relative storage path of a file storage backend.
