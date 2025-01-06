@@ -6,6 +6,11 @@ import (
 	"os"
 )
 
+const LevelError = slog.LevelError
+const LevelWarn = slog.LevelWarn
+const LevelInfo = slog.LevelInfo
+const LevelDebug = slog.LevelDebug
+
 // Logger is the global log instance.
 // Overwrite it with any slog.New() compatible logger to use your custom logger.
 var Logger = slog.Default()

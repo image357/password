@@ -78,7 +78,7 @@ func main() {
     )
     
     // make logging more verbose
-    log.Level(slog.LevelDebug)
+    log.Level(log.LevelDebug)
 }
 ```
 

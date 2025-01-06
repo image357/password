@@ -8,6 +8,7 @@ import "github.com/image357/password/log"
 
 ## Index
 
+- [Constants](<#constants>)
 - [Variables](<#variables>)
 - [func Debug\(msg string, args ...any\)](<#Debug>)
 - [func Error\(msg string, args ...any\)](<#Error>)
@@ -22,6 +23,32 @@ import "github.com/image357/password/log"
 - [func SetStderrText\(\)](<#SetStderrText>)
 - [func Warn\(msg string, args ...any\)](<#Warn>)
 
+
+## Constants
+
+<a name="LevelDebug"></a>
+
+```go
+const LevelDebug = slog.LevelDebug
+```
+
+<a name="LevelError"></a>
+
+```go
+const LevelError = slog.LevelError
+```
+
+<a name="LevelInfo"></a>
+
+```go
+const LevelInfo = slog.LevelInfo
+```
+
+<a name="LevelWarn"></a>
+
+```go
+const LevelWarn = slog.LevelWarn
+```
 
 ## Variables
 
@@ -44,7 +71,7 @@ var LoggerFileMode os.FileMode = 0600
 ```
 
 <a name="Debug"></a>
-## func [Debug](<https://github.com/image357/password/blob/main/log/log.go#L132>)
+## func [Debug](<https://github.com/image357/password/blob/main/log/log.go#L137>)
 
 ```go
 func Debug(msg string, args ...any)
@@ -53,7 +80,7 @@ func Debug(msg string, args ...any)
 Debug will call \[slog.Logger.Debug\] on the global logger.
 
 <a name="Error"></a>
-## func [Error](<https://github.com/image357/password/blob/main/log/log.go#L117>)
+## func [Error](<https://github.com/image357/password/blob/main/log/log.go#L122>)
 
 ```go
 func Error(msg string, args ...any)
@@ -62,7 +89,7 @@ func Error(msg string, args ...any)
 Error will call \[slog.Logger.Error\] on the global logger.
 
 <a name="Info"></a>
-## func [Info](<https://github.com/image357/password/blob/main/log/log.go#L127>)
+## func [Info](<https://github.com/image357/password/blob/main/log/log.go#L132>)
 
 ```go
 func Info(msg string, args ...any)
@@ -71,7 +98,7 @@ func Info(msg string, args ...any)
 Info will call \[slog.Logger.Info\] on the global logger.
 
 <a name="Level"></a>
-## func [Level](<https://github.com/image357/password/blob/main/log/log.go#L21>)
+## func [Level](<https://github.com/image357/password/blob/main/log/log.go#L26>)
 
 ```go
 func Level(level slog.Level) (oldLevel slog.Level)
@@ -80,7 +107,7 @@ func Level(level slog.Level) (oldLevel slog.Level)
 Level sets the global log level and returns the previous value.
 
 <a name="SetDefault"></a>
-## func [SetDefault](<https://github.com/image357/password/blob/main/log/log.go#L32>)
+## func [SetDefault](<https://github.com/image357/password/blob/main/log/log.go#L37>)
 
 ```go
 func SetDefault()
@@ -89,7 +116,7 @@ func SetDefault()
 SetDefault will set the global Logger variable to slog.Default\(\)
 
 <a name="SetFileJSON"></a>
-## func [SetFileJSON](<https://github.com/image357/password/blob/main/log/log.go#L70>)
+## func [SetFileJSON](<https://github.com/image357/password/blob/main/log/log.go#L75>)
 
 ```go
 func SetFileJSON(filePath string) error
@@ -98,7 +125,7 @@ func SetFileJSON(filePath string) error
 SetFileJSON will set a custom file logger with JSON format.
 
 <a name="SetFileText"></a>
-## func [SetFileText](<https://github.com/image357/password/blob/main/log/log.go#L55>)
+## func [SetFileText](<https://github.com/image357/password/blob/main/log/log.go#L60>)
 
 ```go
 func SetFileText(filePath string) error
@@ -107,7 +134,7 @@ func SetFileText(filePath string) error
 SetFileText will set a custom file logger with text format.
 
 <a name="SetMultiJSON"></a>
-## func [SetMultiJSON](<https://github.com/image357/password/blob/main/log/log.go#L101>)
+## func [SetMultiJSON](<https://github.com/image357/password/blob/main/log/log.go#L106>)
 
 ```go
 func SetMultiJSON(filePath string) error
@@ -116,7 +143,7 @@ func SetMultiJSON(filePath string) error
 SetMultiJSON will set a custom logger with JSON format, that will write into a file and os.Stderr.
 
 <a name="SetMultiText"></a>
-## func [SetMultiText](<https://github.com/image357/password/blob/main/log/log.go#L85>)
+## func [SetMultiText](<https://github.com/image357/password/blob/main/log/log.go#L90>)
 
 ```go
 func SetMultiText(filePath string) error
@@ -125,7 +152,7 @@ func SetMultiText(filePath string) error
 SetMultiText will set a custom logger with text format, that will write into a file and os.Stderr.
 
 <a name="SetStderrJSON"></a>
-## func [SetStderrJSON](<https://github.com/image357/password/blob/main/log/log.go#L46>)
+## func [SetStderrJSON](<https://github.com/image357/password/blob/main/log/log.go#L51>)
 
 ```go
 func SetStderrJSON()
@@ -134,7 +161,7 @@ func SetStderrJSON()
 SetStderrJSON will set a custom os.Stderr logger with JSON format.
 
 <a name="SetStderrText"></a>
-## func [SetStderrText](<https://github.com/image357/password/blob/main/log/log.go#L37>)
+## func [SetStderrText](<https://github.com/image357/password/blob/main/log/log.go#L42>)
 
 ```go
 func SetStderrText()
@@ -143,7 +170,7 @@ func SetStderrText()
 SetStderrText will set a custom os.Stderr logger with text format.
 
 <a name="Warn"></a>
-## func [Warn](<https://github.com/image357/password/blob/main/log/log.go#L122>)
+## func [Warn](<https://github.com/image357/password/blob/main/log/log.go#L127>)
 
 ```go
 func Warn(msg string, args ...any)

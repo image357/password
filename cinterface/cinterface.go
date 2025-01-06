@@ -4,7 +4,6 @@ import (
 	pwd "github.com/image357/password"
 	"github.com/image357/password/log"
 	"github.com/image357/password/rest"
-	"log/slog"
 	"strings"
 	"unsafe"
 )
@@ -837,13 +836,13 @@ func CPWD__ReadFromDisk(path *C.cchar_t) int {
 func CPWD__LogLevel(level int) int {
 	switch level {
 	case C.CPWD__LevelError:
-		log.Level(slog.LevelError)
+		log.Level(log.LevelError)
 	case C.CPWD__LevelWarn:
-		log.Level(slog.LevelWarn)
+		log.Level(log.LevelWarn)
 	case C.CPWD__LevelInfo:
-		log.Level(slog.LevelInfo)
+		log.Level(log.LevelInfo)
 	case C.CPWD__LevelDebug:
-		log.Level(slog.LevelDebug)
+		log.Level(log.LevelDebug)
 	default:
 		log.Error("CPWD__LogLevel: unknown level")
 		return -1

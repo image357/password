@@ -5,7 +5,6 @@ import (
 	"github.com/image357/password"
 	"github.com/image357/password/log"
 	"io"
-	"log/slog"
 	"net/http"
 	"os"
 	"strings"
@@ -276,7 +275,7 @@ func TestSimpleRestCalls(t *testing.T) {
 		},
 	}
 	// init
-	oldLevel := log.Level(slog.LevelDebug)
+	oldLevel := log.Level(log.LevelDebug)
 	err := password.SetStorePath("tests/workdir/SimpleRestCalls")
 	if err != nil {
 		t.Fatal(err)

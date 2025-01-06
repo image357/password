@@ -5,7 +5,6 @@ import (
 	pwd "github.com/image357/password"
 	"github.com/image357/password/log"
 	"github.com/image357/password/rest"
-	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
@@ -18,7 +17,7 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	log.Level(slog.LevelDebug)
+	log.Level(log.LevelDebug)
 
 	// enable recovery
 	pwd.EnableRecovery("recovery_key")
