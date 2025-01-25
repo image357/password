@@ -567,6 +567,15 @@ func CPWD__mRewriteKey(manager *C.cchar_t, id *C.cchar_t, oldKey *C.cchar_t, new
 	return 0
 }
 
+// CPWD__EnableTLS calls rest.EnableTLS.
+//
+// For full documentation visit https://github.com/image357/password/blob/main/docs/rest.md
+//
+//export CPWD__EnableTLS
+func CPWD__EnableTLS(certFile *C.cchar_t, keyFile *C.cchar_t) {
+	rest.EnableTLS(C.GoString(certFile), C.GoString(keyFile))
+}
+
 // CPWD__StartSimpleService calls rest.StartSimpleService and returns 0 on success, -1 on error.
 //
 // For full documentation visit https://github.com/image357/password/blob/main/docs/rest.md

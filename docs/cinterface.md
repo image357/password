@@ -16,6 +16,7 @@ import "github.com/image357/password/cinterface"
 - [func CPWD\_\_DumpJSON\(buffer \*C.char, length int\) int](<#CPWD__DumpJSON>)
 - [func CPWD\_\_EnableHashing\(\)](<#CPWD__EnableHashing>)
 - [func CPWD\_\_EnableRecovery\(key \*C.cchar\_t\)](<#CPWD__EnableRecovery>)
+- [func CPWD\_\_EnableTLS\(certFile \*C.cchar\_t, keyFile \*C.cchar\_t\)](<#CPWD__EnableTLS>)
 - [func CPWD\_\_Exists\(id \*C.cchar\_t, result \*C.bool\) int](<#CPWD__Exists>)
 - [func CPWD\_\_FilePath\(id \*C.cchar\_t, buffer \*C.char, length int\) int](<#CPWD__FilePath>)
 - [func CPWD\_\_Get\(id \*C.cchar\_t, key \*C.cchar\_t, buffer \*C.char, length int\) int](<#CPWD__Get>)
@@ -112,7 +113,7 @@ CPWD\_\_DisableRecovery calls password.DisableRecovery.
 For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
 
 <a name="CPWD__DumpJSON"></a>
-## func [CPWD\\\_\\\_DumpJSON](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L766>)
+## func [CPWD\\\_\\\_DumpJSON](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L775>)
 
 ```go
 func CPWD__DumpJSON(buffer *C.char, length int) int
@@ -144,6 +145,17 @@ CPWD\_\_EnableRecovery calls password.EnableRecovery.
 
 For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
 
+<a name="CPWD__EnableTLS"></a>
+## func [CPWD\\\_\\\_EnableTLS](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L575>)
+
+```go
+func CPWD__EnableTLS(certFile *C.cchar_t, keyFile *C.cchar_t)
+```
+
+CPWD\_\_EnableTLS calls rest.EnableTLS.
+
+For full documentation visit https://github.com/image357/password/blob/main/docs/rest.md
+
 <a name="CPWD__Exists"></a>
 ## func [CPWD\\\_\\\_Exists](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L331>)
 
@@ -156,7 +168,7 @@ CPWD\_\_Exists calls password.Exists and returns 0 on success, \-1 on error.
 For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
 
 <a name="CPWD__FilePath"></a>
-## func [CPWD\\\_\\\_FilePath](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L728>)
+## func [CPWD\\\_\\\_FilePath](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L737>)
 
 ```go
 func CPWD__FilePath(id *C.cchar_t, buffer *C.char, length int) int
@@ -178,7 +190,7 @@ CPWD\_\_Get calls password.Get and returns 0 on success, \-1 on error. The resul
 For full documentation visit https://github.com/image357/password/docs/password.md
 
 <a name="CPWD__GetStorePath"></a>
-## func [CPWD\\\_\\\_GetStorePath](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L685>)
+## func [CPWD\\\_\\\_GetStorePath](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L694>)
 
 ```go
 func CPWD__GetStorePath(buffer *C.char, length int) int
@@ -200,7 +212,7 @@ CPWD\_\_List calls password.List and returns 0 on success, \-1 on error. The res
 For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
 
 <a name="CPWD__LoadJSON"></a>
-## func [CPWD\\\_\\\_LoadJSON](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L794>)
+## func [CPWD\\\_\\\_LoadJSON](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L803>)
 
 ```go
 func CPWD__LoadJSON(input *C.cchar_t) int
@@ -211,7 +223,7 @@ CPWD\_\_LoadJSON calls password.LoadJSON and returns 0 on success, \-1 on error.
 For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
 
 <a name="CPWD__LogLevel"></a>
-## func [CPWD\\\_\\\_LogLevel](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L836>)
+## func [CPWD\\\_\\\_LogLevel](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L845>)
 
 ```go
 func CPWD__LogLevel(level int) int
@@ -222,7 +234,7 @@ CPWD\_\_LogLevel calls log.Level and returns 0 on success, \-1 on error.
 For full documentation visit https://github.com/image357/password/blob/main/docs/log.md
 
 <a name="CPWD__LogSetDefault"></a>
-## func [CPWD\\\_\\\_LogSetDefault](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L858>)
+## func [CPWD\\\_\\\_LogSetDefault](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L867>)
 
 ```go
 func CPWD__LogSetDefault()
@@ -233,7 +245,7 @@ CPWD\_\_LogSetDefault calls log.SetDefault.
 For full documentation visit https://github.com/image357/password/blob/main/docs/log.md
 
 <a name="CPWD__LogSetFileJSON"></a>
-## func [CPWD\\\_\\\_LogSetFileJSON](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L896>)
+## func [CPWD\\\_\\\_LogSetFileJSON](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L905>)
 
 ```go
 func CPWD__LogSetFileJSON(filePath *C.cchar_t) int
@@ -244,7 +256,7 @@ CPWD\_\_LogSetFileJSON calls log.SetFileJSON and returns 0 on success, \-1 on er
 For full documentation visit https://github.com/image357/password/blob/main/docs/log.md
 
 <a name="CPWD__LogSetFileText"></a>
-## func [CPWD\\\_\\\_LogSetFileText](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L883>)
+## func [CPWD\\\_\\\_LogSetFileText](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L892>)
 
 ```go
 func CPWD__LogSetFileText(filePath *C.cchar_t) int
@@ -255,7 +267,7 @@ CPWD\_\_LogSetFileText calls log.SetFileText and returns 0 on success, \-1 on er
 For full documentation visit https://github.com/image357/password/blob/main/docs/log.md
 
 <a name="CPWD__LogSetMultiJSON"></a>
-## func [CPWD\\\_\\\_LogSetMultiJSON](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L922>)
+## func [CPWD\\\_\\\_LogSetMultiJSON](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L931>)
 
 ```go
 func CPWD__LogSetMultiJSON(filePath *C.cchar_t) int
@@ -266,7 +278,7 @@ CPWD\_\_LogSetMultiJSON calls log.SetMultiJSON and returns 0 on success, \-1 on 
 For full documentation visit https://github.com/image357/password/blob/main/docs/log.md
 
 <a name="CPWD__LogSetMultiText"></a>
-## func [CPWD\\\_\\\_LogSetMultiText](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L909>)
+## func [CPWD\\\_\\\_LogSetMultiText](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L918>)
 
 ```go
 func CPWD__LogSetMultiText(filePath *C.cchar_t) int
@@ -277,7 +289,7 @@ CPWD\_\_LogSetMultiText calls log.SetMultiText and returns 0 on success, \-1 on 
 For full documentation visit https://github.com/image357/password/blob/main/docs/log.md
 
 <a name="CPWD__LogSetStderrJSON"></a>
-## func [CPWD\\\_\\\_LogSetStderrJSON](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L874>)
+## func [CPWD\\\_\\\_LogSetStderrJSON](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L883>)
 
 ```go
 func CPWD__LogSetStderrJSON()
@@ -288,7 +300,7 @@ CPWD\_\_LogSetStderrJSON calls log.SetStderrJSON.
 For full documentation visit https://github.com/image357/password/blob/main/docs/log.md
 
 <a name="CPWD__LogSetStderrText"></a>
-## func [CPWD\\\_\\\_LogSetStderrText](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L865>)
+## func [CPWD\\\_\\\_LogSetStderrText](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L874>)
 
 ```go
 func CPWD__LogSetStderrText()
@@ -297,7 +309,7 @@ func CPWD__LogSetStderrText()
 CPWD\_\_LogSetStderrText calls log.SetStderrText.
 
 <a name="CPWD__NormalizeId"></a>
-## func [CPWD\\\_\\\_NormalizeId](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L660>)
+## func [CPWD\\\_\\\_NormalizeId](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L669>)
 
 ```go
 func CPWD__NormalizeId(id *C.cchar_t, buffer *C.char, length int) int
@@ -319,7 +331,7 @@ CPWD\_\_Overwrite calls password.Overwrite and returns 0 on success, \-1 on erro
 For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
 
 <a name="CPWD__ReadFromDisk"></a>
-## func [CPWD\\\_\\\_ReadFromDisk](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L822>)
+## func [CPWD\\\_\\\_ReadFromDisk](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L831>)
 
 ```go
 func CPWD__ReadFromDisk(path *C.cchar_t) int
@@ -374,7 +386,7 @@ CPWD\_\_SetDefaultManager calls password.SetDefaultManager. Returns 0 if the ide
 For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
 
 <a name="CPWD__SetStorePath"></a>
-## func [CPWD\\\_\\\_SetStorePath](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L713>)
+## func [CPWD\\\_\\\_SetStorePath](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L722>)
 
 ```go
 func CPWD__SetStorePath(path *C.cchar_t) int
@@ -385,7 +397,7 @@ CPWD\_\_SetStorePath calls password.SetStorePath and returns 0 on success, \-1 o
 For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
 
 <a name="CPWD__SetTemporaryStorage"></a>
-## func [CPWD\\\_\\\_SetTemporaryStorage](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L756>)
+## func [CPWD\\\_\\\_SetTemporaryStorage](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L765>)
 
 ```go
 func CPWD__SetTemporaryStorage()
@@ -396,7 +408,7 @@ CPWD\_\_SetTemporaryStorage calls password.SetTemporaryStorage.
 For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
 
 <a name="CPWD__StartMultiService"></a>
-## func [CPWD\\\_\\\_StartMultiService](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L610>)
+## func [CPWD\\\_\\\_StartMultiService](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L619>)
 
 ```go
 func CPWD__StartMultiService(bindAddress *C.cchar_t, prefix *C.cchar_t, key *C.cchar_t, callback C.CPWD__TestAccessFunc) int
@@ -407,7 +419,7 @@ CPWD\_\_StartMultiService calls rest.StartMultiService and returns 0 on success,
 For full documentation visit https://github.com/image357/password/blob/main/docs/rest.md
 
 <a name="CPWD__StartSimpleService"></a>
-## func [CPWD\\\_\\\_StartSimpleService](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L575>)
+## func [CPWD\\\_\\\_StartSimpleService](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L584>)
 
 ```go
 func CPWD__StartSimpleService(bindAddress *C.cchar_t, prefix *C.cchar_t, key *C.cchar_t, callback C.CPWD__TestAccessFunc) int
@@ -418,7 +430,7 @@ CPWD\_\_StartSimpleService calls rest.StartSimpleService and returns 0 on succes
 For full documentation visit https://github.com/image357/password/blob/main/docs/rest.md
 
 <a name="CPWD__StopService"></a>
-## func [CPWD\\\_\\\_StopService](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L645>)
+## func [CPWD\\\_\\\_StopService](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L654>)
 
 ```go
 func CPWD__StopService(timeout int, bindAddress *C.cchar_t, prefix *C.cchar_t) int
@@ -440,7 +452,7 @@ CPWD\_\_Unset calls password.Unset and returns 0 on success, \-1 on error.
 For full documentation visit https://github.com/image357/password/blob/main/docs/password.md
 
 <a name="CPWD__WriteToDisk"></a>
-## func [CPWD\\\_\\\_WriteToDisk](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L808>)
+## func [CPWD\\\_\\\_WriteToDisk](<https://github.com/image357/password/blob/main/cinterface/cinterface.go#L817>)
 
 ```go
 func CPWD__WriteToDisk(path *C.cchar_t) int

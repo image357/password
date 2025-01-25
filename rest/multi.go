@@ -103,10 +103,31 @@ func StartMultiService(bindAddress string, prefix string, key string, callback T
 	engine.DELETE(pathlib.Join("/", prefix, "/clean"), localCleanCallback)
 
 	go func() {
-		log.Info(restStartedLogMsg, "addr", bindAddress, "prefix", prefix, "type", "multi")
-		err := service.server.ListenAndServe()
+		log.Info(
+			restStartedLogMsg,
+			"addr", bindAddress,
+			"prefix", prefix,
+			"type", "multi",
+			"TLS", useTLS,
+		)
+
+		var err error = nil
+		if useTLS {
+			err = service.server.ListenAndServeTLS(certFileTLS, keyFileTLS)
+
+		} else {
+			err = service.server.ListenAndServe()
+		}
+
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Error(restStoppedLogMsg, "error", err)
+			log.Error(
+				restStoppedLogMsg,
+				"error", err,
+				"addr", bindAddress,
+				"prefix", prefix,
+				"type", "multi",
+				"TLS", useTLS,
+			)
 		}
 		delete(services, service.name)
 	}()

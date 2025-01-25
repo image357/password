@@ -9,6 +9,7 @@ import "github.com/image357/password/rest"
 ## Index
 
 - [func DebugAccessCallback\(token string, ip string, resource string, id string\) bool](<#DebugAccessCallback>)
+- [func EnableTLS\(certFile string, keyFile string\)](<#EnableTLS>)
 - [func FullAccessCallback\(\_ string, \_ string, \_ string, \_ string\) bool](<#FullAccessCallback>)
 - [func StartMultiService\(bindAddress string, prefix string, key string, callback TestAccessFunc\) error](<#StartMultiService>)
 - [func StartSimpleService\(bindAddress string, prefix string, key string, callback TestAccessFunc\) error](<#StartSimpleService>)
@@ -39,6 +40,15 @@ if err != nil {
 
 </p>
 </details>
+
+<a name="EnableTLS"></a>
+## func [EnableTLS](<https://github.com/image357/password/blob/main/rest/simple.go#L101>)
+
+```go
+func EnableTLS(certFile string, keyFile string)
+```
+
+EnableTLS will set the rest backend to https mode. Must be used before starting a rest sever with accessible paths to a public certificate file and private key file.
 
 <a name="FullAccessCallback"></a>
 ## func [FullAccessCallback](<https://github.com/image357/password/blob/main/rest/access.go#L17>)
@@ -90,7 +100,7 @@ if err != nil {
 </details>
 
 <a name="StartSimpleService"></a>
-## func [StartSimpleService](<https://github.com/image357/password/blob/main/rest/simple.go#L132>)
+## func [StartSimpleService](<https://github.com/image357/password/blob/main/rest/simple.go#L151>)
 
 ```go
 func StartSimpleService(bindAddress string, prefix string, key string, callback TestAccessFunc) error
@@ -115,7 +125,7 @@ if err != nil {
 </details>
 
 <a name="StopService"></a>
-## func [StopService](<https://github.com/image357/password/blob/main/rest/simple.go#L174>)
+## func [StopService](<https://github.com/image357/password/blob/main/rest/simple.go#L214>)
 
 ```go
 func StopService(timeout int, bindAddress string, prefix string) error
@@ -124,7 +134,7 @@ func StopService(timeout int, bindAddress string, prefix string) error
 StopService will block execution and try to gracefully shut down any rest service during the timeout period. The service is guaranteed to be closed at the end of the timeout.
 
 <a name="TestAccessFunc"></a>
-## type [TestAccessFunc](<https://github.com/image357/password/blob/main/rest/simple.go#L27>)
+## type [TestAccessFunc](<https://github.com/image357/password/blob/main/rest/simple.go#L38>)
 
 TestAccessFunc is a callback signature. The callback will be called by the rest service for every request to determine access based on the accessToken.
 

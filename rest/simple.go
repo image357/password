@@ -22,6 +22,17 @@ const restStoppedLogMsg = "rest: service stopped"
 var restRunningErr = errors.New("rest service already running")
 var restStoppedErr = errors.New("rest service already stopped")
 
+// useTLS will switch the rest backend from http mode to https if set to true.
+var useTLS bool = false
+
+// keyFileTLS must be set to the private key file if the rest backend runs on https via rest.useTLS.
+// Defaults to "server.key".
+var keyFileTLS string = "server.key"
+
+// certFileTLS must be set to the public certificate file if the rest backend runs on https via rest.useTLS.
+// Defaults to "server.crt".
+var certFileTLS string = "server.crt"
+
 // TestAccessFunc is a callback signature.
 // The callback will be called by the rest service for every request to determine access based on the accessToken.
 type TestAccessFunc func(token string, ip string, resource string, id string) bool
@@ -37,11 +48,6 @@ type restService struct {
 
 // services contains the global map of all started REST servers.
 var services = make(map[string]*restService)
-
-// getStorageKey decrypts the storage key that was set by StartSimpleService or StartMultiService.
-func getStorageKey(service *restService) string {
-	return pwd.DecryptOTP(service.storageKeyBytes, service.storageKeySecret)
-}
 
 type simpleOverwriteData struct {
 	AccessToken string `form:"accessToken" json:"accessToken" xml:"accessToken"  binding:"required"`
@@ -76,6 +82,11 @@ type simpleDeleteData struct {
 	AccessToken string `form:"accessToken" json:"accessToken" xml:"accessToken"  binding:"required"`
 }
 
+// getStorageKey decrypts the storage key that was set by StartSimpleService or StartMultiService.
+func getStorageKey(service *restService) string {
+	return pwd.DecryptOTP(service.storageKeyBytes, service.storageKeySecret)
+}
+
 // preparePrefix returns a normalized prefix.
 func preparePrefix(prefix string) string {
 	prefix = strings.ToLower(prefix)
@@ -83,6 +94,14 @@ func preparePrefix(prefix string) string {
 	prefix = pathlib.Join("/", prefix)
 	prefix = strings.TrimPrefix(prefix, "/")
 	return pathlib.Clean(prefix)
+}
+
+// EnableTLS will set the rest backend to https mode.
+// Must be used before starting a rest sever with accessible paths to a public certificate file and private key file.
+func EnableTLS(certFile string, keyFile string) {
+	certFileTLS = certFile
+	keyFileTLS = keyFile
+	useTLS = true
 }
 
 // setupService returns a basic gin.Engine without any endpoint configuration.
@@ -159,10 +178,31 @@ func StartSimpleService(bindAddress string, prefix string, key string, callback 
 	engine.DELETE(pathlib.Join("/", prefix, "/delete"), localDeleteCallback)
 
 	go func() {
-		log.Info(restStartedLogMsg, "addr", bindAddress, "prefix", prefix, "type", "simple")
-		err := service.server.ListenAndServe()
+		log.Info(
+			restStartedLogMsg,
+			"addr", bindAddress,
+			"prefix", prefix,
+			"type", "simple",
+			"TLS", useTLS,
+		)
+
+		var err error = nil
+		if useTLS {
+			err = service.server.ListenAndServeTLS(certFileTLS, keyFileTLS)
+
+		} else {
+			err = service.server.ListenAndServe()
+		}
+
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Error(restStoppedLogMsg, "error", err)
+			log.Error(
+				restStoppedLogMsg,
+				"error", err,
+				"addr", bindAddress,
+				"prefix", prefix,
+				"type", "simple",
+				"TLS", useTLS,
+			)
 		}
 		delete(services, service.name)
 	}()
@@ -205,7 +245,7 @@ func StopService(timeout int, bindAddress string, prefix string) error {
 	service.hasAccess = nil
 	delete(services, name)
 
-	log.Info(restStoppedLogMsg)
+	log.Info(restStoppedLogMsg, "addr", bindAddress, "prefix", prefix)
 	return nil
 }
 
