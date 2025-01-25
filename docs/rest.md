@@ -48,7 +48,7 @@ if err != nil {
 func EnableTLS(certFile string, keyFile string)
 ```
 
-EnableTLS will set the rest backend to https mode. Must be used before starting a rest sever with accessible paths to a public certificate file and private key file.
+EnableTLS will set the REST backend to https mode. Must be used before starting a REST sever with accessible paths to a public certificate file and private key file.
 
 <a name="FullAccessCallback"></a>
 ## func [FullAccessCallback](<https://github.com/image357/password/blob/main/rest/access.go#L17>)
@@ -57,7 +57,7 @@ EnableTLS will set the rest backend to https mode. Must be used before starting 
 func FullAccessCallback(_ string, _ string, _ string, _ string) bool
 ```
 
-FullAccessCallback will grant access to every rest request.
+FullAccessCallback will grant access to every REST request.
 
 <details><summary>Example</summary>
 <p>
@@ -81,7 +81,7 @@ if err != nil {
 func StartMultiService(bindAddress string, prefix string, key string, callback TestAccessFunc) error
 ```
 
-StartMultiService creates a multi password rest service. The service binds to "/prefix/overwrite" \(PUT\), "/prefix/get" \(GET\), "/prefix/check" \(GET\), "/prefix/set" \(PUT\), "/prefix/unset" \(DELETE\), "/prefix/exists" \(GET\), "/prefix/list" \(GET\), "/prefix/delete" \(DELETE\), "/prefix/clean" \(DELETE\). The callback of type TestAccessFunc will be called for every request to determine access.
+StartMultiService creates a multi password REST service. The service binds to "/prefix/overwrite" \(PUT\), "/prefix/get" \(GET\), "/prefix/check" \(GET\), "/prefix/set" \(PUT\), "/prefix/unset" \(DELETE\), "/prefix/exists" \(GET\), "/prefix/list" \(GET\), "/prefix/delete" \(DELETE\), "/prefix/clean" \(DELETE\). The callback of type TestAccessFunc will be called for every request to determine access.
 
 <details><summary>Example</summary>
 <p>
@@ -106,7 +106,7 @@ if err != nil {
 func StartSimpleService(bindAddress string, prefix string, key string, callback TestAccessFunc) error
 ```
 
-StartSimpleService creates a single password rest service. The service binds to "/prefix/overwrite" \(PUT\), "/prefix/get" \(GET\), "/prefix/check" \(GET\), "/prefix/set" \(PUT\), "/prefix/unset" \(DELETE\), "/prefix/exists" \(GET\), "/prefix/delete" \(DELETE\). The callback of type TestAccessFunc will be called for every request to determine access.
+StartSimpleService creates a single password REST service. The service binds to "/prefix/overwrite" \(PUT\), "/prefix/get" \(GET\), "/prefix/check" \(GET\), "/prefix/set" \(PUT\), "/prefix/unset" \(DELETE\), "/prefix/exists" \(GET\), "/prefix/delete" \(DELETE\). The callback of type TestAccessFunc will be called for every request to determine access.
 
 <details><summary>Example</summary>
 <p>
@@ -131,12 +131,12 @@ if err != nil {
 func StopService(timeout int, bindAddress string, prefix string) error
 ```
 
-StopService will block execution and try to gracefully shut down any rest service during the timeout period. The service is guaranteed to be closed at the end of the timeout.
+StopService will block execution and try to gracefully shut down any REST service during the timeout period. The service is guaranteed to be closed at the end of the timeout.
 
 <a name="TestAccessFunc"></a>
 ## type [TestAccessFunc](<https://github.com/image357/password/blob/main/rest/simple.go#L38>)
 
-TestAccessFunc is a callback signature. The callback will be called by the rest service for every request to determine access based on the accessToken.
+TestAccessFunc is a callback signature. The callback will be called by the REST service for every request to determine access based on the accessToken.
 
 ```go
 type TestAccessFunc func(token string, ip string, resource string, id string) bool

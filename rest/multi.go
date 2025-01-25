@@ -57,7 +57,7 @@ type multiCleanData struct {
 	AccessToken string `form:"accessToken" json:"accessToken" xml:"accessToken"  binding:"required"`
 }
 
-// StartMultiService creates a multi password rest service.
+// StartMultiService creates a multi password REST service.
 // The service binds to
 // "/prefix/overwrite" (PUT),
 // "/prefix/get" (GET),
@@ -91,7 +91,7 @@ func StartMultiService(bindAddress string, prefix string, key string, callback T
 	localDeleteCallback := func(c *gin.Context) { multiDeleteCallback(c, manager, service) }
 	localCleanCallback := func(c *gin.Context) { multiCleanCallback(c, manager, service) }
 
-	// setup rest endpoints
+	// setup REST endpoints
 	engine.PUT(pathlib.Join("/", prefix, "/overwrite"), localOverwriteCallback)
 	engine.GET(pathlib.Join("/", prefix, "/get"), localGetCallback)
 	engine.GET(pathlib.Join("/", prefix, "/check"), localCheckCallback)

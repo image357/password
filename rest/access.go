@@ -13,7 +13,7 @@ func DebugAccessCallback(token string, ip string, resource string, id string) bo
 	return debugAccessSuccess
 }
 
-// FullAccessCallback will grant access to every rest request.
+// FullAccessCallback will grant access to every REST request.
 func FullAccessCallback(_ string, _ string, _ string, _ string) bool {
 	return true
 }

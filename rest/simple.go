@@ -19,22 +19,22 @@ const processDataLogMsg = "rest: cannot process data"
 const restStartedLogMsg = "rest: service started"
 const restStoppedLogMsg = "rest: service stopped"
 
-var restRunningErr = errors.New("rest service already running")
-var restStoppedErr = errors.New("rest service already stopped")
+var restRunningErr = errors.New("REST service already running")
+var restStoppedErr = errors.New("REST service already stopped")
 
-// useTLS will switch the rest backend from http mode to https if set to true.
+// useTLS will switch the REST backend from http mode to https if set to true.
 var useTLS bool = false
 
-// keyFileTLS must be set to the private key file if the rest backend runs on https via rest.useTLS.
+// keyFileTLS must be set to the private key file if the REST backend runs on https via rest.useTLS.
 // Defaults to "server.key".
 var keyFileTLS string = "server.key"
 
-// certFileTLS must be set to the public certificate file if the rest backend runs on https via rest.useTLS.
+// certFileTLS must be set to the public certificate file if the REST backend runs on https via rest.useTLS.
 // Defaults to "server.crt".
 var certFileTLS string = "server.crt"
 
 // TestAccessFunc is a callback signature.
-// The callback will be called by the rest service for every request to determine access based on the accessToken.
+// The callback will be called by the REST service for every request to determine access based on the accessToken.
 type TestAccessFunc func(token string, ip string, resource string, id string) bool
 
 // restService contains all necessary information for external handling of a REST service.
@@ -96,8 +96,8 @@ func preparePrefix(prefix string) string {
 	return pathlib.Clean(prefix)
 }
 
-// EnableTLS will set the rest backend to https mode.
-// Must be used before starting a rest sever with accessible paths to a public certificate file and private key file.
+// EnableTLS will set the REST backend to https mode.
+// Must be used before starting a REST sever with accessible paths to a public certificate file and private key file.
 func EnableTLS(certFile string, keyFile string) {
 	certFileTLS = certFile
 	keyFileTLS = keyFile
@@ -129,7 +129,7 @@ func setupService(bindAddress string, prefix string, key string, callback TestAc
 	return e, s, nil
 }
 
-// logContext will be called by the rest service for every request.
+// logContext will be called by the REST service for every request.
 func logContext(c *gin.Context) {
 	log.Debug(
 		"rest: request",
@@ -138,7 +138,7 @@ func logContext(c *gin.Context) {
 	)
 }
 
-// StartSimpleService creates a single password rest service.
+// StartSimpleService creates a single password REST service.
 // The service binds to
 // "/prefix/overwrite" (PUT),
 // "/prefix/get" (GET),
@@ -168,7 +168,7 @@ func StartSimpleService(bindAddress string, prefix string, key string, callback 
 	localExistsCallback := func(c *gin.Context) { simpleExistsCallback(c, manager, service) }
 	localDeleteCallback := func(c *gin.Context) { simpleDeleteCallback(c, manager, service) }
 
-	// setup rest endpoints
+	// setup REST endpoints
 	engine.PUT(pathlib.Join("/", prefix, "/overwrite"), localOverwriteCallback)
 	engine.GET(pathlib.Join("/", prefix, "/get"), localGetCallback)
 	engine.GET(pathlib.Join("/", prefix, "/check"), localCheckCallback)
@@ -209,7 +209,7 @@ func StartSimpleService(bindAddress string, prefix string, key string, callback 
 	return nil
 }
 
-// StopService will block execution and try to gracefully shut down any rest service during the timeout period.
+// StopService will block execution and try to gracefully shut down any REST service during the timeout period.
 // The service is guaranteed to be closed at the end of the timeout.
 func StopService(timeout int, bindAddress string, prefix string) error {
 	// prepare arguments
