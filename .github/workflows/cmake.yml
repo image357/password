@@ -15,18 +15,18 @@ jobs:
       run: git config --global core.autocrlf input
       
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
       with:
         path: main
         
     - name: Checkout googletest
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
       with:
         repository: google/googletest
         path: googletest
         
     - name: Setup Go
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@v7
       with:
         go-version: 'stable'
         
@@ -72,12 +72,12 @@ jobs:
       run: git config --global core.autocrlf input
       
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
       with:
         path: main
         
     - name: Checkout googletest
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
       with:
         repository: google/googletest
         path: googletest
