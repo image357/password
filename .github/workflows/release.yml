@@ -6,7 +6,7 @@ on: workflow_dispatch
 
 jobs:
 
-  ubuntu-x64:
+  linux:
     runs-on: ubuntu-latest
     steps:
       - name: git config
