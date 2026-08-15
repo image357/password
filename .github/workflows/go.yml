@@ -61,17 +61,25 @@ jobs:
 
       - name: Build decrypt tool
         run: go build -v github.com/image357/password/cmd/decrypt
+        shell: msys2 {0}
       - name: Build encrypt tool
         run: go build -v github.com/image357/password/cmd/encrypt
+        shell: msys2 {0}
       - name: Build exampleservice
         run: go build -v github.com/image357/password/cmd/exampleservice
+        shell: msys2 {0}
       - name: Build patchheader tool
         run: go build -v github.com/image357/password/cmd/patchheader
+        shell: msys2 {0}
       - name: Build recovery tool
         run: go build -v github.com/image357/password/cmd/recovery
+        shell: msys2 {0}
       - name: Build cinterface library
         run: go build -buildmode=c-shared -o ./cinterface/ -v github.com/image357/password/cinterface
+        shell: msys2 {0}
       - name: Test password
         run: go test -v github.com/image357/password
+        shell: msys2 {0}
       - name: Test rest
         run: go test -v github.com/image357/password/rest
+        shell: msys2 {0}
