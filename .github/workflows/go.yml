@@ -49,37 +49,37 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v7
+      - uses: actions/checkout@v7
 
-    - name: Setup Go ${{matrix.go-version}}
-      uses: actions/setup-go@v7
-      with:
-        go-version: ${{matrix.go-version}}
+      - name: Setup Go ${{matrix.go-version}}
+        uses: actions/setup-go@v7
+        with:
+          go-version: ${{matrix.go-version}}
 
-    - name: Setup MSYS2
-      uses: msys2/setup-msys2@v2
-      with:
-        update: true
-        install: >-
-          mingw-w64-x86_64-binutils
-          mingw-w64-x86_64-tools
-          mingw-w64-x86_64-gcc
-          mingw-w64-x86_64-cmake
-          mingw-w64-x86_64-ninja
+      - name: Setup MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: >-
+            mingw-w64-x86_64-binutils
+            mingw-w64-x86_64-tools
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ninja
 
-    - name: Build decrypt tool
-      run: go build -v github.com/image357/password/cmd/decrypt
-    - name: Build encrypt tool
-      run: go build -v github.com/image357/password/cmd/encrypt
-    - name: Build exampleservice
-      run: go build -v github.com/image357/password/cmd/exampleservice
-    - name: Build patchheader tool
-      run: go build -v github.com/image357/password/cmd/patchheader
-    - name: Build recovery tool
-      run: go build -v github.com/image357/password/cmd/recovery
-    - name: Build cinterface library
-      run: go build -buildmode=c-shared -o ./cinterface/ -v github.com/image357/password/cinterface
-    - name: Test password
-      run: go test -v github.com/image357/password
-    - name: Test rest
-      run: go test -v github.com/image357/password/rest
+      - name: Build decrypt tool
+        run: go build -v github.com/image357/password/cmd/decrypt
+      - name: Build encrypt tool
+        run: go build -v github.com/image357/password/cmd/encrypt
+      - name: Build exampleservice
+        run: go build -v github.com/image357/password/cmd/exampleservice
+      - name: Build patchheader tool
+        run: go build -v github.com/image357/password/cmd/patchheader
+      - name: Build recovery tool
+        run: go build -v github.com/image357/password/cmd/recovery
+      - name: Build cinterface library
+        run: go build -buildmode=c-shared -o ./cinterface/ -v github.com/image357/password/cinterface
+      - name: Test password
+        run: go test -v github.com/image357/password
+      - name: Test rest
+        run: go test -v github.com/image357/password/rest
